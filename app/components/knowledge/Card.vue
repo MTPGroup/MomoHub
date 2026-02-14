@@ -1,0 +1,71 @@
+<script setup lang="ts">
+import type { KnowledgeBaseResponse } from '~/types'
+
+interface Props {
+  knowledgeBase: KnowledgeBaseResponse
+}
+
+defineProps<Props>()
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+</script>
+
+<template>
+  <UCard class="h-full hover:shadow-lg transition-shadow duration-200">
+    <div class="flex items-start gap-4">
+      <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-primary-50 dark:bg-primary-950">
+        <UIcon
+          name="i-lucide-book-open"
+          class="text-xl text-primary"
+        />
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="font-semibold text-gray-900 dark:text-white truncate">
+          {{ knowledgeBase.name }}
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
+          {{ knowledgeBase.description || '暂无描述' }}
+        </p>
+        <div class="flex items-center gap-2 mt-2">
+          <UBadge
+            v-if="knowledgeBase.isPublic"
+            size="xs"
+            color="success"
+            variant="subtle"
+          >
+            公开
+          </UBadge>
+          <UBadge
+            v-else
+            size="xs"
+            color="neutral"
+            variant="subtle"
+          >
+            私密
+          </UBadge>
+        </div>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="flex justify-between items-center">
+        <span class="text-xs text-gray-400 dark:text-gray-500">
+          {{ formatDate(knowledgeBase.createdAt) }}
+        </span>
+        <UButton
+          :to="`/knowledge/${knowledgeBase.id}`"
+          size="xs"
+          variant="ghost"
+          icon="i-lucide-eye"
+          label="查看"
+        />
+      </div>
+    </template>
+  </UCard>
+</template>

@@ -10,6 +10,7 @@
     "javascriptreact",
     "typescript",
     "typescriptreact",
-    "vue",
+    "vue"
   ],
+  "eslint.workingDirectories": ["."]
 }

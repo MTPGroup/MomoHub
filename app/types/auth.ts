@@ -1,58 +1,58 @@
 export interface SignUpRequest {
-  email: string;
-  name: string;
-  password: string;
+  email: string
+  name: string
+  password: string
 }
 
 export interface SignInWithPasswordRequest {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 export interface UserProfile {
-  userId: string;
-  email: string;
-  username: string;
-  avatar: string | null;
-  isEmailVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
+  userId: string
+  email: string
+  username: string
+  avatar: string | null
+  isEmailVerified: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface TokenResponse {
-  accessToken: string;
-  refreshToken: string;
-  accessTokenExpiredIn: number;
-  refreshTokenExpiredIn: number;
-  tokenType?: string;
+  accessToken: string
+  refreshToken: string
+  accessTokenExpiredIn: number
+  refreshTokenExpiredIn: number
+  tokenType?: string
 }
 
 export interface LoginResponse {
-  user: UserProfile;
-  tokens: TokenResponse;
+  user: UserProfile
+  tokens: TokenResponse
 }
 
 export interface SendOtpRequest {
-  email: string;
-  type: string;
+  email: string
+  type: string
 }
 
 export interface VerifyOTPRequest {
-  email: string;
-  otp: string;
+  email: string
+  otp: string
 }
 
 export interface ResetPasswordRequest {
-  email: string;
-  otp: string;
-  password: string;
+  email: string
+  otp: string
+  password: string
 }
 
 export interface RefreshTokenRequest {
-  refreshToken: string;
+  refreshToken: string
 }
 
 export interface ChangePasswordRequest {
-  oldPassword: string;
-  newPassword: string;
+  oldPassword: string
+  newPassword: string
 }
