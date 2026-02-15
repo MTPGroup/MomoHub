@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type {
   ApiResponse,
+  ChangePasswordRequest,
   LoginResponse,
   ResetPasswordRequest,
   SendOtpRequest,
@@ -8,6 +9,7 @@ import type {
   SignUpRequest,
   SuccessResponse,
   TokenResponse,
+  UpdateProfileRequest,
   UserProfile,
   VerifyOTPRequest
 } from '~/types'
@@ -136,6 +138,40 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
+  const updateProfile = async (data: UpdateProfileRequest) => {
+    const response = await $fetch<ApiResponse<UserProfile>>(`${baseURL}/auth/me`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${accessToken.value}` },
+      body: data
+    })
+    if (response.success && response.data) {
+      user.value = response.data
+    }
+    return response
+  }
+
+  const uploadAvatar = async (file: File) => {
+    const formData = new FormData()
+    formData.append('avatar', file)
+    const response = await $fetch<ApiResponse<UserProfile>>(`${baseURL}/auth/me/avatar`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${accessToken.value}` },
+      body: formData
+    })
+    if (response.success && response.data) {
+      user.value = response.data
+    }
+    return response
+  }
+
+  const changePassword = async (data: ChangePasswordRequest) => {
+    return await $fetch<ApiResponse<SuccessResponse>>(`${baseURL}/auth/password/change`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken.value}` },
+      body: data
+    })
+  }
+
   const logout = () => {
     clearTokens()
     navigateTo('/')
@@ -177,6 +213,9 @@ export const useAuthStore = defineStore('auth', () => {
     sendOtp,
     verifyEmail,
     resetPassword,
+    updateProfile,
+    uploadAvatar,
+    changePassword,
     logout,
     fetchUser,
     refreshAccessToken,

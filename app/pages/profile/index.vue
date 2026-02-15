@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CharacterResponse, KnowledgeBaseResponse, PagedResponse } from '~/types'
+import { getApiErrorMessage } from '~/types'
 
 definePageMeta({
   middleware: ['auth']
@@ -14,6 +15,117 @@ const myCharacters = ref<CharacterResponse[]>([])
 const myKnowledgeBases = ref<KnowledgeBaseResponse[]>([])
 const loadingCharacters = ref(true)
 const loadingKnowledge = ref(true)
+
+// 编辑资料
+const showEditProfile = ref(false)
+const editProfileLoading = ref(false)
+const editProfileError = ref('')
+const editProfileSuccess = ref('')
+const editForm = reactive({
+  username: ''
+})
+const avatarFile = ref<File | null>(null)
+const avatarPreview = ref('')
+const avatarUploading = ref(false)
+
+const openEditProfile = () => {
+  editForm.username = authStore.user?.username || ''
+  avatarFile.value = null
+  avatarPreview.value = authStore.user?.avatar || ''
+  editProfileError.value = ''
+  editProfileSuccess.value = ''
+  showEditProfile.value = true
+}
+
+const onAvatarChange = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (file) {
+    avatarFile.value = file
+    avatarPreview.value = URL.createObjectURL(file)
+  }
+}
+
+const handleUpdateProfile = async () => {
+  editProfileError.value = ''
+  editProfileSuccess.value = ''
+  editProfileLoading.value = true
+  try {
+    // 如果选择了新头像，先上传
+    if (avatarFile.value) {
+      avatarUploading.value = true
+      const avatarResponse = await authStore.uploadAvatar(avatarFile.value)
+      avatarUploading.value = false
+      if (!avatarResponse.success) {
+        editProfileError.value = avatarResponse.message || '头像上传失败'
+        return
+      }
+    }
+
+    const response = await authStore.updateProfile({
+      username: editForm.username
+    })
+    if (response.success) {
+      editProfileSuccess.value = '个人信息已更新'
+      setTimeout(() => { showEditProfile.value = false }, 1000)
+    } else {
+      editProfileError.value = response.message || '更新失败'
+    }
+  } catch (e) {
+    editProfileError.value = getApiErrorMessage(e, '更新失败')
+  } finally {
+    editProfileLoading.value = false
+    avatarUploading.value = false
+  }
+}
+
+// 修改密码
+const showChangePassword = ref(false)
+const changePasswordLoading = ref(false)
+const changePasswordError = ref('')
+const changePasswordSuccess = ref('')
+const passwordForm = reactive({
+  oldPassword: '',
+  newPassword: '',
+  confirmNewPassword: ''
+})
+
+const openChangePassword = () => {
+  passwordForm.oldPassword = ''
+  passwordForm.newPassword = ''
+  passwordForm.confirmNewPassword = ''
+  changePasswordError.value = ''
+  changePasswordSuccess.value = ''
+  showChangePassword.value = true
+}
+
+const handleChangePassword = async () => {
+  changePasswordError.value = ''
+  changePasswordSuccess.value = ''
+
+  if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
+    changePasswordError.value = '两次输入的密码不一致'
+    return
+  }
+
+  changePasswordLoading.value = true
+  try {
+    const response = await authStore.changePassword({
+      oldPassword: passwordForm.oldPassword,
+      newPassword: passwordForm.newPassword
+    })
+    if (response.success) {
+      changePasswordSuccess.value = '密码修改成功'
+      setTimeout(() => { showChangePassword.value = false }, 1000)
+    } else {
+      changePasswordError.value = response.message || '修改失败'
+    }
+  } catch (e) {
+    changePasswordError.value = getApiErrorMessage(e, '修改密码失败')
+  } finally {
+    changePasswordLoading.value = false
+  }
+}
 
 onMounted(async () => {
   try {
@@ -83,7 +195,21 @@ const tabs = [
             </UBadge>
           </div>
         </div>
-        <div class="ml-auto">
+        <div class="ml-auto flex gap-2">
+          <UButton
+            variant="soft"
+            icon="i-lucide-pencil"
+            @click="openEditProfile"
+          >
+            编辑资料
+          </UButton>
+          <UButton
+            variant="soft"
+            icon="i-lucide-key-round"
+            @click="openChangePassword"
+          >
+            修改密码
+          </UButton>
           <UButton
             variant="ghost"
             color="error"
@@ -199,5 +325,144 @@ const tabs = [
         </div>
       </template>
     </UTabs>
+    <!-- 编辑资料弹窗 -->
+    <UModal v-model:open="showEditProfile">
+      <template #content>
+        <div class="p-6">
+          <h2 class="text-xl font-bold text-center mb-4">
+            编辑个人资料
+          </h2>
+
+          <!-- 头像上传 -->
+          <label class="group relative mx-auto mb-6 block h-20 w-20 cursor-pointer rounded-full">
+            <UAvatar
+              :src="avatarPreview || undefined"
+              size="3xl"
+              icon="i-lucide-user"
+              class="h-20 w-20"
+            />
+            <div class="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/40">
+              <UIcon
+                name="i-lucide-camera"
+                class="text-2xl text-white opacity-0 transition-opacity group-hover:opacity-100"
+              />
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              class="hidden"
+              @change="onAvatarChange"
+            >
+          </label>
+
+          <form
+            class="space-y-4"
+            @submit.prevent="handleUpdateProfile"
+          >
+            <UAlert
+              v-if="editProfileError"
+              color="error"
+              :title="editProfileError"
+              icon="i-lucide-alert-circle"
+            />
+            <UAlert
+              v-if="editProfileSuccess"
+              color="success"
+              :title="editProfileSuccess"
+              icon="i-lucide-check-circle"
+            />
+
+            <UFormField label="用户名">
+              <UInput
+                v-model="editForm.username"
+                placeholder="输入用户名"
+                icon="i-lucide-user"
+                required
+                class="w-full"
+              />
+            </UFormField>
+
+            <UButton
+              type="submit"
+              block
+              size="lg"
+              :loading="editProfileLoading"
+            >
+              保存
+            </UButton>
+          </form>
+        </div>
+      </template>
+    </UModal>
+
+    <!-- 修改密码弹窗 -->
+    <UModal v-model:open="showChangePassword">
+      <template #content>
+        <div class="p-6">
+          <h2 class="text-xl font-bold text-center mb-6">
+            修改密码
+          </h2>
+          <form
+            class="space-y-4"
+            @submit.prevent="handleChangePassword"
+          >
+            <UAlert
+              v-if="changePasswordError"
+              color="error"
+              :title="changePasswordError"
+              icon="i-lucide-alert-circle"
+            />
+            <UAlert
+              v-if="changePasswordSuccess"
+              color="success"
+              :title="changePasswordSuccess"
+              icon="i-lucide-check-circle"
+            />
+
+            <UFormField label="当前密码">
+              <UInput
+                v-model="passwordForm.oldPassword"
+                type="password"
+                placeholder="输入当前密码"
+                icon="i-lucide-lock"
+                required
+                class="w-full"
+              />
+            </UFormField>
+
+            <UFormField label="新密码">
+              <UInput
+                v-model="passwordForm.newPassword"
+                type="password"
+                placeholder="输入新密码"
+                icon="i-lucide-lock"
+                required
+                class="w-full"
+              />
+            </UFormField>
+
+            <UFormField label="确认新密码">
+              <UInput
+                v-model="passwordForm.confirmNewPassword"
+                type="password"
+                placeholder="再次输入新密码"
+                icon="i-lucide-lock"
+                required
+                class="w-full"
+              />
+            </UFormField>
+
+            <UButton
+              type="submit"
+              block
+              size="lg"
+              :loading="changePasswordLoading"
+            >
+              修改密码
+            </UButton>
+          </form>
+        </div>
+      </template>
+    </UModal>
   </UContainer>
 </template>

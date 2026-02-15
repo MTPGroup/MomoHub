@@ -57,6 +57,10 @@ export interface ChangePasswordRequest {
   newPassword: string
 }
 
+export interface UpdateProfileRequest {
+  username?: string
+}
+
 export enum OtpType {
   RESET_PASSWORD = 'reset_password',
   VERIFY_EMAIL = 'verify_email',
