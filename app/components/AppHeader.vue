@@ -35,7 +35,7 @@ const userMenuItems = computed(() => [
   [{
     label: '退出登录',
     icon: 'i-lucide-log-out',
-    click: () => authStore.logout()
+    onSelect: () => authStore.logout()
   }]
 ])
 </script>
