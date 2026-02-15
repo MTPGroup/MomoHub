@@ -1,14 +1,17 @@
-<script setup lang="ts">
-// Nuxt UI 组件自动导入，无需显式 import
-</script>
-
 <template>
-  <USeparator icon="i-simple-icons-nuxtdotjs" />
+  <USeparator />
 
   <UFooter>
     <template #left>
       <p class="text-sm text-muted">
-        Built with Nuxt UI • MTPGroup © {{ new Date().getFullYear() }}
+        Copyright © {{ new Date().getFullYear() }} MTP Group -
+        <ULink
+          to="https://github.com/MTPGroup/MomoHub/blob/master/LICENSE"
+          target="_blank"
+          class="hover:underline"
+        >
+          MIT License
+        </ULink>
       </p>
     </template>
 

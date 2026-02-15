@@ -19,136 +19,91 @@ onMounted(async () => {
     loadingCharacters.value = false
   }
 })
+
+const features = [
+  {
+    icon: 'i-lucide-users',
+    title: '发现角色',
+    description: '探索社区中由创作者分享的 AI 角色，找到你感兴趣的智能体。'
+  },
+  {
+    icon: 'i-lucide-sparkles',
+    title: '创建角色',
+    description: '使用直观的工具创建你自己的 AI 角色，定义个性、知识和行为。'
+  },
+  {
+    icon: 'i-lucide-book-open',
+    title: '知识库',
+    description: '为你的角色附加知识库，让它们拥有专业的领域知识。'
+  },
+  {
+    icon: 'i-lucide-puzzle',
+    title: '插件扩展',
+    description: '通过插件系统扩展角色能力，连接外部服务和 API。'
+  }
+]
 </script>
 
 <template>
-  <div>
-    <!-- Hero 区域 -->
-    <UPageHero
-      title="发现无限可能的 AI 角色"
-      description="创建、分享、探索由社区驱动的智能体"
-      :links="[
-        {
-          label: '开始探索',
-          to: '/characters',
-          trailingIcon: 'i-lucide-arrow-right',
-          size: 'xl',
-          color: 'primary'
-        },
-        {
-          label: '创建角色',
-          to: '/characters/create',
-          color: 'neutral',
-          variant: 'subtle',
-          size: 'xl'
-        }
-      ]"
-    />
+  <UPageSection class="overflow-hidden">
+    <!-- 背景装饰光斑 -->
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute top-[-20%] left-[-10%] h-125 w-125 rounded-full bg-(--ui-color-primary)/10 blur-3xl" />
+      <div class="absolute bottom-[-20%] right-[-10%] h-100 w-100 rounded-full bg-(--ui-color-primary)/5 blur-3xl" />
+    </div>
 
-    <!-- 热门角色区域 -->
-    <UPageSection
-      title="热门角色"
-      description="发现社区最受欢迎的 AI 角色"
-    >
-      <UContainer>
-        <!-- 加载骨架屏 -->
-        <div
-          v-if="loadingCharacters"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+    <UContainer class="py-24 lg:py-32 text-center">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+        发现无限可能的
+        <span class="bg-linear-to-r from-(--ui-color-primary) to-emerald-400 bg-clip-text text-transparent">
+          AI 角色
+        </span>
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        创建、分享、探索由社区驱动的智能体，释放 AI 的无限创造力
+      </p>
+
+      <!-- 操作按钮 -->
+      <div class="mt-10 flex flex-wrap justify-center gap-4">
+        <UButton
+          to="/characters"
+          size="xl"
+          color="primary"
+          trailing-icon="i-lucide-arrow-right"
         >
-          <UCard
-            v-for="i in 4"
-            :key="i"
-          >
-            <div class="flex items-start gap-4">
-              <USkeleton class="h-12 w-12 rounded-full" />
-              <div class="flex-1 space-y-2">
-                <USkeleton class="h-4 w-3/4" />
-                <USkeleton class="h-3 w-full" />
-                <USkeleton class="h-3 w-2/3" />
-              </div>
+          开始探索
+        </UButton>
+        <UButton
+          to="/characters/create"
+          size="xl"
+          color="neutral"
+          variant="subtle"
+        >
+          创建角色
+        </UButton>
+      </div>
+      <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <UCard
+          v-for="feature in features"
+          :key="feature.title"
+          class="text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+        >
+          <div class="flex flex-col items-center gap-4 py-2">
+            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-(--ui-color-primary)/10">
+              <UIcon
+                :name="feature.icon"
+                class="text-2xl bg-primary"
+              />
             </div>
-          </UCard>
-        </div>
-
-        <!-- 真实数据 -->
-        <div v-else-if="hotCharacters.length > 0">
-          <CharactersList :characters="hotCharacters" />
-        </div>
-
-        <!-- 空状态 -->
-        <div
-          v-else
-          class="text-center py-8 text-gray-500"
-        >
-          还没有角色，快来创建第一个吧！
-        </div>
-
-        <div class="flex justify-center mt-8">
-          <UButton
-            to="/characters"
-            variant="outline"
-            size="lg"
-            trailing-icon="i-lucide-arrow-right"
-          >
-            查看更多角色
-          </UButton>
-        </div>
-      </UContainer>
-    </UPageSection>
-
-    <!-- 功能特性区域 -->
-    <UPageSection
-      title="为什么选择 MomoHub"
-      description="我们提供的功能让 AI 角色创作变得简单有趣"
-    >
-      <UPageGrid>
-        <UPageCard
-          icon="i-lucide-users"
-          title="发现角色"
-          description="探索社区中由创作者分享的 AI 角色，找到你感兴趣的智能体。"
-        />
-        <UPageCard
-          icon="i-lucide-sparkles"
-          title="创建角色"
-          description="使用直观的工具创建你自己的 AI 角色，定义个性、知识和行为。"
-        />
-        <UPageCard
-          icon="i-lucide-book-open"
-          title="知识库"
-          description="为你的角色附加知识库，让它们拥有专业的领域知识。"
-        />
-        <UPageCard
-          icon="i-lucide-puzzle"
-          title="插件扩展"
-          description="通过插件系统扩展角色能力，连接外部服务和 API。"
-        />
-      </UPageGrid>
-    </UPageSection>
-
-    <!-- CTA 区域 -->
-    <UPageSection>
-      <UPageCTA
-        title="准备好开始了吗？"
-        description="加入 MomoHub 社区，开始你的 AI 角色创作之旅。"
-        variant="subtle"
-        :links="[
-          {
-            label: '立即开始',
-            to: '/characters',
-            trailingIcon: 'i-lucide-arrow-right',
-            color: 'primary',
-            size: 'xl'
-          },
-          {
-            label: '了解更多',
-            to: '/docs',
-            color: 'neutral',
-            variant: 'outline',
-            size: 'xl'
-          }
-        ]"
-      />
-    </UPageSection>
-  </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ feature.title }}
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              {{ feature.description }}
+            </p>
+          </div>
+        </UCard>
+      </div>
+    </UContainer>
+  </UPageSection>
 </template>

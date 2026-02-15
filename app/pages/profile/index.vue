@@ -67,7 +67,9 @@ const handleUpdateProfile = async () => {
     })
     if (response.success) {
       editProfileSuccess.value = '个人信息已更新'
-      setTimeout(() => { showEditProfile.value = false }, 1000)
+      setTimeout(() => {
+        showEditProfile.value = false
+      }, 1000)
     } else {
       editProfileError.value = response.message || '更新失败'
     }
@@ -116,7 +118,9 @@ const handleChangePassword = async () => {
     })
     if (response.success) {
       changePasswordSuccess.value = '密码修改成功'
-      setTimeout(() => { showChangePassword.value = false }, 1000)
+      setTimeout(() => {
+        showChangePassword.value = false
+      }, 1000)
     } else {
       changePasswordError.value = response.message || '修改失败'
     }
