@@ -28,3 +28,11 @@ export function getApiErrorMessage(error: unknown, fallback: string): string {
   }
   return fallback
 }
+
+export function getApiErrorCode(error: unknown): string | null {
+  if (error && typeof error === 'object' && 'data' in error) {
+    const data = (error as { data?: { code?: string } }).data
+    if (data?.code) return data.code
+  }
+  return null
+}

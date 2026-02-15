@@ -2,10 +2,14 @@ import { defineStore } from 'pinia'
 import type {
   ApiResponse,
   LoginResponse,
+  ResetPasswordRequest,
+  SendOtpRequest,
   SignInWithPasswordRequest,
   SignUpRequest,
+  SuccessResponse,
   TokenResponse,
-  UserProfile
+  UserProfile,
+  VerifyOTPRequest
 } from '~/types'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -104,17 +108,32 @@ export const useAuthStore = defineStore('auth', () => {
     return response
   }
 
-  // TODO: 注册后返回的是SuccessResponse，需要接着验证邮箱后才能登录
   const register = async (data: SignUpRequest) => {
-    const response = await $fetch<ApiResponse<LoginResponse>>(`${baseURL}/auth/sign-up/email`, {
+    return await $fetch<ApiResponse<SuccessResponse>>(`${baseURL}/auth/sign-up/email`, {
       method: 'POST',
       body: data
     })
-    if (response.success && response.data) {
-      setTokens(response.data.tokens)
-      user.value = response.data.user
-    }
-    return response
+  }
+
+  const sendOtp = async (data: SendOtpRequest) => {
+    return await $fetch<ApiResponse<SuccessResponse>>(`${baseURL}/auth/email-otp/send`, {
+      method: 'POST',
+      body: data
+    })
+  }
+
+  const verifyEmail = async (data: VerifyOTPRequest) => {
+    return await $fetch<ApiResponse<SuccessResponse>>(`${baseURL}/auth/email-otp/verify-email`, {
+      method: 'POST',
+      body: data
+    })
+  }
+
+  const resetPassword = async (data: ResetPasswordRequest) => {
+    return await $fetch<ApiResponse<SuccessResponse>>(`${baseURL}/auth/password/reset`, {
+      method: 'POST',
+      body: data
+    })
   }
 
   const logout = () => {
@@ -155,6 +174,9 @@ export const useAuthStore = defineStore('auth', () => {
     openAuthModal,
     login,
     register,
+    sendOtp,
+    verifyEmail,
+    resetPassword,
     logout,
     fetchUser,
     refreshAccessToken,
