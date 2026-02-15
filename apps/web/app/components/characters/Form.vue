@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CreateCharacterRequest } from '~/types'
+import type { CreateCharacterRequest } from '@momohub/types'
 
 interface Props {
   initialData?: CreateCharacterRequest

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { CharacterResponse, PagedResponse } from '~/types'
-import { getApiErrorMessage } from '~/types'
+import type { CharacterResponse, PagedResponse } from '@momohub/types'
+import { getApiErrorMessage } from '@momohub/types'
 
 const { listPublicCharacters } = useCharacters()
 

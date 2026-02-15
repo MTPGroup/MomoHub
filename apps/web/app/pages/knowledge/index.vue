@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { KnowledgeBaseResponse, PagedResponse } from '~/types'
-import { getApiErrorMessage } from '~/types'
+import type { KnowledgeBaseResponse, PagedResponse } from '@momohub/types'
+import { getApiErrorMessage } from '@momohub/types'
 
 const { listPublicKnowledgeBases } = useKnowledge()
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getApiErrorMessage } from '~/types'
+import { getApiErrorMessage } from '@momohub/types'
 
 interface Props {
   knowledgeBaseId: string

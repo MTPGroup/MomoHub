@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { CharacterResponse, KnowledgeBaseResponse, PagedResponse } from '~/types'
-import { getApiErrorMessage } from '~/types'
+import type { CharacterResponse, KnowledgeBaseResponse, PagedResponse } from '@momohub/types'
+import { getApiErrorMessage } from '@momohub/types'
 
 definePageMeta({
   middleware: ['auth']

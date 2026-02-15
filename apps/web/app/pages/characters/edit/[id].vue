@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { UpdateCharacterRequest } from '~/types'
-import { getApiErrorMessage } from '~/types'
+import type { UpdateCharacterRequest } from '@momohub/types'
+import { getApiErrorMessage } from '@momohub/types'
 
 definePageMeta({
   middleware: ['auth']

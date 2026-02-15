@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { KnowledgeBaseResponse, KnowledgeFileResponse } from '~/types'
-import { getApiErrorMessage } from '~/types'
+import type { KnowledgeBaseResponse, KnowledgeFileResponse } from '@momohub/types'
+import { getApiErrorMessage } from '@momohub/types'
 
 const route = useRoute()
 const knowledgeBaseId = route.params.id as string

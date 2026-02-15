@@ -5,7 +5,7 @@ import type {
   KnowledgeFileResponse,
   PagedResponse,
   UpdateKnowledgeBaseRequest
-} from '~/types'
+} from '@momohub/types'
 
 export const useKnowledge = () => {
   const { api } = useAzusaApi()

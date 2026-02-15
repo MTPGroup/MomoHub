@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PluginResponse } from '~/types'
+import type { PluginResponse } from '@momohub/types'
 
 interface Props {
   plugin: PluginResponse

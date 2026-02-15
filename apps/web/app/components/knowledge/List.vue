@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { KnowledgeBaseResponse } from '~/types'
+import type { KnowledgeBaseResponse } from '@momohub/types'
 
 interface Props {
   knowledgeBases: KnowledgeBaseResponse[]

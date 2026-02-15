@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getApiErrorCode, getApiErrorMessage, OtpType } from '~/types'
+import { getApiErrorCode, getApiErrorMessage, OtpType } from '@momohub/types'
 
 const EMAIL_NOT_VERIFIED_CODE = 'EMAIL_NOT_VERIFIED'
 

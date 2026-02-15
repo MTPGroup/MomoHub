@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { PluginResponse, PagedResponse } from '~/types'
-import { getApiErrorMessage } from '~/types'
+import type { PluginResponse, PagedResponse } from '@momohub/types'
+import { getApiErrorMessage } from '@momohub/types'
 
 const { listPlugins } = usePlugins()
 

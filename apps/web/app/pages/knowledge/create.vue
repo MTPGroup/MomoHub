@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { CreateKnowledgeBaseRequest } from '~/types'
-import { getApiErrorMessage } from '~/types'
+import type { CreateKnowledgeBaseRequest } from '@momohub/types'
+import { getApiErrorMessage } from '@momohub/types'
 
 definePageMeta({
   middleware: ['auth']

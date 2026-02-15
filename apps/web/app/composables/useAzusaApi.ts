@@ -1,4 +1,4 @@
-import type { ApiResponse } from '~/types'
+import type { ApiResponse } from '@momohub/types'
 
 type FetchOptionsType = Parameters<typeof $fetch>[1]
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { CharacterResponse } from '~/types'
-import { getApiErrorMessage } from '~/types'
+import type { CharacterResponse } from '@momohub/types'
+import { getApiErrorMessage } from '@momohub/types'
 
 const route = useRoute()
 const characterId = route.params.id as string

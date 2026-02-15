@@ -3,7 +3,7 @@ import type {
   CreateCharacterRequest,
   PagedResponse,
   UpdateCharacterRequest
-} from '~/types'
+} from '@momohub/types'
 
 export const useCharacters = () => {
   const { api } = useAzusaApi()

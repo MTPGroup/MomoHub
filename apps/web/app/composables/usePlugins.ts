@@ -2,7 +2,7 @@ import type {
   PluginResponse,
   PluginDetailResponse,
   PagedResponse
-} from '~/types'
+} from '@momohub/types'
 
 export const usePlugins = () => {
   const { api } = useAzusaApi()

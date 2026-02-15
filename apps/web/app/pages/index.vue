@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CharacterResponse, PagedResponse } from '~/types'
+import type { CharacterResponse, PagedResponse } from '@momohub/types'
 
 const { listPublicCharacters } = useCharacters()
 

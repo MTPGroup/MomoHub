@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CharacterResponse } from '~/types'
+import type { CharacterResponse } from '@momohub/types'
 
 interface Props {
   characters: CharacterResponse[]

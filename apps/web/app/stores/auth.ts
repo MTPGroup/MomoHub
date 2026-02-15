@@ -12,7 +12,7 @@ import type {
   UpdateProfileRequest,
   UserProfile,
   VerifyOTPRequest
-} from '~/types'
+} from '@momohub/types'
 
 export const useAuthStore = defineStore('auth', () => {
   const config = useRuntimeConfig()
