@@ -12,10 +12,10 @@ const props = withDefaults(defineProps<Props>(), {
     name: '',
     bio: '',
     originPrompt: '',
-    isPublic: true
+    isPublic: true,
   }),
   loading: false,
-  submitLabel: '创建'
+  submitLabel: '创建',
 })
 
 const emit = defineEmits<{
@@ -26,7 +26,7 @@ const form = reactive<CreateCharacterRequest>({
   name: props.initialData.name,
   bio: props.initialData.bio,
   originPrompt: props.initialData.originPrompt,
-  isPublic: props.initialData.isPublic ?? true
+  isPublic: props.initialData.isPublic ?? true,
 })
 
 const handleSubmit = () => {
@@ -35,14 +35,8 @@ const handleSubmit = () => {
 </script>
 
 <template>
-  <form
-    class="space-y-6"
-    @submit.prevent="handleSubmit"
-  >
-    <UFormField
-      label="角色名称"
-      required
-    >
+  <form class="space-y-6" @submit.prevent="handleSubmit">
+    <UFormField label="角色名称" required>
       <UInput
         v-model="form.name"
         placeholder="给你的角色取个名字"
@@ -70,27 +64,17 @@ const handleSubmit = () => {
     </UFormField>
 
     <UFormField label="可见性">
-      <USwitch
-        v-model="form.isPublic"
-        label="公开角色"
-      />
+      <USwitch v-model="form.isPublic" label="公开角色" />
       <p class="text-xs text-gray-500 mt-1">
         {{ form.isPublic ? '所有人都可以看到你的角色' : '仅自己可见' }}
       </p>
     </UFormField>
 
     <div class="flex gap-3 justify-end">
-      <UButton
-        variant="ghost"
-        color="neutral"
-        @click="$router.back()"
-      >
+      <UButton variant="ghost" color="neutral" @click="$router.back()">
         取消
       </UButton>
-      <UButton
-        type="submit"
-        :loading="loading"
-      >
+      <UButton type="submit" :loading="loading">
         {{ submitLabel }}
       </UButton>
     </div>

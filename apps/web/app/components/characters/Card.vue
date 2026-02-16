@@ -11,17 +11,16 @@ const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 </script>
 
 <template>
-  <NuxtLink
-    :to="`/characters/${character.id}`"
-    class="group block"
-  >
-    <UCard class="h-full transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:ring-2 group-hover:ring-(--ui-color-primary)">
+  <NuxtLink :to="`/characters/${character.id}`" class="group block">
+    <UCard
+      class="h-full transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:ring-2 group-hover:ring-(--ui-color-primary)"
+    >
       <div class="flex items-start gap-4">
         <UAvatar
           :src="character.avatar || undefined"
@@ -29,7 +28,9 @@ const formatDate = (date: string) => {
           size="xl"
         />
         <div class="flex-1 min-w-0">
-          <h3 class="font-semibold text-gray-900 dark:text-white truncate group-hover:text-(--ui-color-primary) transition-colors">
+          <h3
+            class="font-semibold text-gray-900 dark:text-white truncate group-hover:text-(--ui-color-primary) transition-colors"
+          >
             {{ character.name }}
           </h3>
           <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
@@ -44,12 +45,7 @@ const formatDate = (date: string) => {
             >
               公开
             </UBadge>
-            <UBadge
-              v-else
-              size="xs"
-              color="neutral"
-              variant="subtle"
-            >
+            <UBadge v-else size="xs" color="neutral" variant="subtle">
               私密
             </UBadge>
             <span class="text-xs text-gray-400 dark:text-gray-500">

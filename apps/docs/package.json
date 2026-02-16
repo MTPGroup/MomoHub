@@ -14,11 +14,13 @@
     "@nuxt/ui": "^4.4.0",
     "@nuxtjs/mdc": "^0.20.1",
     "nuxt": "^4.3.1",
-    "tailwindcss": "^4.1.18",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.90",
-    "typescript": "^5.9.3"
+    "@nuxt/eslint": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
   }
 }

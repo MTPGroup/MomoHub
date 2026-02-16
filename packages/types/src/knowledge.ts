@@ -36,11 +36,11 @@ export interface KnowledgeBaseStatsResponse {
   documentCount: number
 }
 
-export type KnowledgeFileStatus
-  = | 'PENDING'
-    | 'PROCESSING'
-    | 'COMPLETED'
-    | 'FAILED'
+export type KnowledgeFileStatus =
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'COMPLETED'
+  | 'FAILED'
 
 export interface KnowledgeFileResponse {
   id: string

@@ -5,38 +5,42 @@ const authStore = useAuthStore()
 const route = useRoute()
 
 const items = computed<NavigationMenuItem[]>(() => [
-  { label: '首页',
-    icon: 'i-lucide-home',
-    to: '/'
-  },
-  { label: '角色',
+  { label: '首页', icon: 'i-lucide-home', to: '/' },
+  {
+    label: '角色',
     icon: 'i-lucide-users',
     to: '/characters',
-    active: route.path.startsWith('/characters')
+    active: route.path.startsWith('/characters'),
   },
-  { label: '插件',
+  {
+    label: '插件',
     icon: 'i-lucide-puzzle',
     to: '/plugins',
-    active: route.path.startsWith('/plugins')
+    active: route.path.startsWith('/plugins'),
   },
-  { label: '知识库',
+  {
+    label: '知识库',
     icon: 'i-lucide-book-open',
     to: '/knowledge',
-    active: route.path.startsWith('/knowledge')
-  }
+    active: route.path.startsWith('/knowledge'),
+  },
 ])
 
 const userMenuItems = computed(() => [
-  [{
-    label: '个人中心',
-    icon: 'i-lucide-user',
-    to: '/profile'
-  }],
-  [{
-    label: '退出登录',
-    icon: 'i-lucide-log-out',
-    onSelect: () => authStore.logout()
-  }]
+  [
+    {
+      label: '个人中心',
+      icon: 'i-lucide-user',
+      to: '/profile',
+    },
+  ],
+  [
+    {
+      label: '退出登录',
+      icon: 'i-lucide-log-out',
+      onSelect: () => authStore.logout(),
+    },
+  ],
 ])
 </script>
 

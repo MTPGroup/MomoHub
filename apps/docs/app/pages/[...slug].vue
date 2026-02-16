@@ -8,7 +8,9 @@
         {{ page.description }}
       </p>
     </div>
-    <div class="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-h2:text-xl prose-h2:font-semibold prose-h2:border-b prose-h2:border-(--ui-border) prose-h2:pb-2 prose-h2:mt-10 prose-h3:text-lg prose-h3:mt-6 prose-pre:bg-(--ui-bg-elevated) prose-pre:border prose-pre:border-(--ui-border)">
+    <div
+      class="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-h2:text-xl prose-h2:font-semibold prose-h2:border-b prose-h2:border-(--ui-border) prose-h2:pb-2 prose-h2:mt-10 prose-h3:text-lg prose-h3:mt-6 prose-pre:bg-(--ui-bg-elevated) prose-pre:border prose-pre:border-(--ui-border)"
+    >
       <ContentRenderer :value="page" />
     </div>
   </div>
@@ -16,7 +18,9 @@
 
 <script setup lang="ts">
 const route = useRoute()
-const { data: page } = await useAsyncData(route.path, () => queryCollection('content').path(route.path).first())
+const { data: page } = await useAsyncData(route.path, () =>
+  queryCollection('content').path(route.path).first(),
+)
 
 if (page.value) {
   useHead({ title: `${page.value.title} - MomoHub API Docs` })

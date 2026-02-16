@@ -12,20 +12,20 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.89",
     "@momohub/types": "workspace:*",
-    "@iconify-json/simple-icons": "^1.2.70",
     "@nuxt/ui": "^4.4.0",
-    "@pinia/nuxt": "0.11.3",
     "nuxt": "^4.3.1",
-    "pinia": "^3.0.4",
-    "tailwindcss": "^4.1.18"
+    "pinia": "^3.0.4"
   },
   "devDependencies": {
-    "@nuxt/eslint": "^1.14.0",
+    "@iconify-json/lucide": "^1.2.89",
+    "@iconify-json/simple-icons": "^1.2.70",
+    "@nuxt/eslint": "catalog:",
+    "@pinia/nuxt": "0.11.3",
     "eslint": "^10.0.0",
-    "eslint-config-prettier": "^10.1.8",
-    "typescript": "^5.9.3",
+    "eslint-config-prettier": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
     "vue-tsc": "^3.2.4"
   }
 }

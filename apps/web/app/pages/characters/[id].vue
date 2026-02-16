@@ -29,7 +29,11 @@ const fetchData = async () => {
 onMounted(fetchData)
 
 const isOwner = computed(() => {
-  return authStore.user && character.value && authStore.user.userId === character.value.authorId
+  return (
+    authStore.user &&
+    character.value &&
+    authStore.user.userId === character.value.authorId
+  )
 })
 
 const formatDate = (date: string) => {
@@ -38,7 +42,7 @@ const formatDate = (date: string) => {
     month: 'long',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
@@ -66,10 +70,7 @@ const handleDelete = async () => {
     </UButton>
 
     <!-- 加载状态 -->
-    <div
-      v-if="loading"
-      class="grid grid-cols-1 lg:grid-cols-3 gap-8"
-    >
+    <div v-if="loading" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2 space-y-6">
         <UCard>
           <div class="flex items-start gap-6">
@@ -96,10 +97,7 @@ const handleDelete = async () => {
     />
 
     <!-- 角色详情 -->
-    <div
-      v-else-if="character"
-      class="grid grid-cols-1 lg:grid-cols-3 gap-8"
-    >
+    <div v-else-if="character" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <!-- 左侧：角色信息 -->
       <div class="lg:col-span-2 space-y-6">
         <UCard>
@@ -132,9 +130,7 @@ const handleDelete = async () => {
 
         <UCard>
           <template #header>
-            <h2 class="text-lg font-semibold">
-              关于
-            </h2>
+            <h2 class="text-lg font-semibold">关于</h2>
           </template>
           <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
             {{ character.bio || '暂无描述' }}
@@ -143,12 +139,12 @@ const handleDelete = async () => {
 
         <UCard v-if="character.originPrompt">
           <template #header>
-            <h2 class="text-lg font-semibold">
-              人设 / Prompt
-            </h2>
+            <h2 class="text-lg font-semibold">人设 / Prompt</h2>
           </template>
           <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-            <p class="text-sm text-gray-600 dark:text-gray-400 font-mono whitespace-pre-wrap">
+            <p
+              class="text-sm text-gray-600 dark:text-gray-400 font-mono whitespace-pre-wrap"
+            >
               {{ character.originPrompt }}
             </p>
           </div>
@@ -159,9 +155,7 @@ const handleDelete = async () => {
       <div class="space-y-6">
         <UCard>
           <template #header>
-            <h3 class="text-lg font-semibold">
-              操作
-            </h3>
+            <h3 class="text-lg font-semibold">操作</h3>
           </template>
           <div class="space-y-3">
             <UButton
@@ -196,9 +190,7 @@ const handleDelete = async () => {
 
         <UCard>
           <template #header>
-            <h3 class="text-lg font-semibold">
-              信息
-            </h3>
+            <h3 class="text-lg font-semibold">信息</h3>
           </template>
           <div class="space-y-3">
             <div class="flex justify-between">

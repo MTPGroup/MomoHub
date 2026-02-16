@@ -19,7 +19,10 @@ export const useAzusaApi = () => {
         const refreshed = await authStore.refreshAccessToken()
         if (refreshed) {
           // 刷新成功，用新 token 重试原请求
-          options.headers.set('Authorization', `Bearer ${authStore.accessToken}`)
+          options.headers.set(
+            'Authorization',
+            `Bearer ${authStore.accessToken}`,
+          )
           return $fetch(request, options as FetchOptionsType)
         }
         // 刷新失败，清除过期 token 后无认证重试（公开接口不需要权限）
@@ -27,10 +30,13 @@ export const useAzusaApi = () => {
         options.headers.delete('Authorization')
         return $fetch(request, options as FetchOptionsType)
       }
-    }
+    },
   })
 
-  const api = async <T>(url: string, options?: Parameters<typeof fetchApi>[1]) => {
+  const api = async <T>(
+    url: string,
+    options?: Parameters<typeof fetchApi>[1],
+  ) => {
     return fetchApi<ApiResponse<T>>(url, options)
   }
 

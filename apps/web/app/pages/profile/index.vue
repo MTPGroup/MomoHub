@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import type { CharacterResponse, KnowledgeBaseResponse, PagedResponse } from '@momohub/types'
+import type {
+  CharacterResponse,
+  KnowledgeBaseResponse,
+  PagedResponse,
+} from '@momohub/types'
 import { getApiErrorMessage } from '@momohub/types'
 
 definePageMeta({
-  middleware: ['auth']
+  middleware: ['auth'],
 })
 
 const authStore = useAuthStore()
@@ -22,7 +26,7 @@ const editProfileLoading = ref(false)
 const editProfileError = ref('')
 const editProfileSuccess = ref('')
 const editForm = reactive({
-  username: ''
+  username: '',
 })
 const avatarFile = ref<File | null>(null)
 const avatarPreview = ref('')
@@ -63,7 +67,7 @@ const handleUpdateProfile = async () => {
     }
 
     const response = await authStore.updateProfile({
-      username: editForm.username
+      username: editForm.username,
     })
     if (response.success) {
       editProfileSuccess.value = '个人信息已更新'
@@ -89,7 +93,7 @@ const changePasswordSuccess = ref('')
 const passwordForm = reactive({
   oldPassword: '',
   newPassword: '',
-  confirmNewPassword: ''
+  confirmNewPassword: '',
 })
 
 const openChangePassword = () => {
@@ -114,7 +118,7 @@ const handleChangePassword = async () => {
   try {
     const response = await authStore.changePassword({
       oldPassword: passwordForm.oldPassword,
-      newPassword: passwordForm.newPassword
+      newPassword: passwordForm.newPassword,
     })
     if (response.success) {
       changePasswordSuccess.value = '密码修改成功'
@@ -159,7 +163,7 @@ onMounted(async () => {
 
 const tabs = [
   { label: '我的角色', value: 'characters', icon: 'i-lucide-users' },
-  { label: '我的知识库', value: 'knowledge', icon: 'i-lucide-book-open' }
+  { label: '我的知识库', value: 'knowledge', icon: 'i-lucide-book-open' },
 ]
 </script>
 
@@ -189,12 +193,7 @@ const tabs = [
             >
               邮箱已验证
             </UBadge>
-            <UBadge
-              v-else
-              color="warning"
-              variant="subtle"
-              size="xs"
-            >
+            <UBadge v-else color="warning" variant="subtle" size="xs">
               邮箱未验证
             </UBadge>
           </div>
@@ -227,24 +226,15 @@ const tabs = [
     </UCard>
 
     <!-- 标签页 -->
-    <UTabs
-      v-model="activeTab"
-      :items="tabs"
-    >
+    <UTabs v-model="activeTab" :items="tabs">
       <template #content="{ item }">
         <!-- 我的角色 -->
-        <div
-          v-if="item.value === 'characters'"
-          class="pt-6"
-        >
+        <div v-if="item.value === 'characters'" class="pt-6">
           <div
             v-if="loadingCharacters"
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
           >
-            <UCard
-              v-for="i in 3"
-              :key="i"
-            >
+            <UCard v-for="i in 3" :key="i">
               <div class="flex items-start gap-4">
                 <USkeleton class="h-12 w-12 rounded-full" />
                 <div class="flex-1 space-y-2">
@@ -259,40 +249,25 @@ const tabs = [
             <CharactersList :characters="myCharacters" />
           </div>
 
-          <div
-            v-else
-            class="text-center py-12"
-          >
+          <div v-else class="text-center py-12">
             <UIcon
               name="i-lucide-users"
               class="text-4xl text-gray-300 mx-auto mb-3"
             />
-            <p class="text-gray-500">
-              还没有创建角色
-            </p>
-            <UButton
-              to="/characters/create"
-              class="mt-4"
-              icon="i-lucide-plus"
-            >
+            <p class="text-gray-500">还没有创建角色</p>
+            <UButton to="/characters/create" class="mt-4" icon="i-lucide-plus">
               创建角色
             </UButton>
           </div>
         </div>
 
         <!-- 我的知识库 -->
-        <div
-          v-if="item.value === 'knowledge'"
-          class="pt-6"
-        >
+        <div v-if="item.value === 'knowledge'" class="pt-6">
           <div
             v-if="loadingKnowledge"
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
           >
-            <UCard
-              v-for="i in 3"
-              :key="i"
-            >
+            <UCard v-for="i in 3" :key="i">
               <div class="flex items-start gap-4">
                 <USkeleton class="h-12 w-12 rounded-lg" />
                 <div class="flex-1 space-y-2">
@@ -307,22 +282,13 @@ const tabs = [
             <KnowledgeList :knowledge-bases="myKnowledgeBases" />
           </div>
 
-          <div
-            v-else
-            class="text-center py-12"
-          >
+          <div v-else class="text-center py-12">
             <UIcon
               name="i-lucide-book-open"
               class="text-4xl text-gray-300 mx-auto mb-3"
             />
-            <p class="text-gray-500">
-              还没有创建知识库
-            </p>
-            <UButton
-              to="/knowledge/create"
-              class="mt-4"
-              icon="i-lucide-plus"
-            >
+            <p class="text-gray-500">还没有创建知识库</p>
+            <UButton to="/knowledge/create" class="mt-4" icon="i-lucide-plus">
               创建知识库
             </UButton>
           </div>
@@ -333,19 +299,21 @@ const tabs = [
     <UModal v-model:open="showEditProfile">
       <template #content>
         <div class="p-6">
-          <h2 class="text-xl font-bold text-center mb-4">
-            编辑个人资料
-          </h2>
+          <h2 class="text-xl font-bold text-center mb-4">编辑个人资料</h2>
 
           <!-- 头像上传 -->
-          <label class="group relative mx-auto mb-6 block h-20 w-20 cursor-pointer rounded-full">
+          <label
+            class="group relative mx-auto mb-6 block h-20 w-20 cursor-pointer rounded-full"
+          >
             <UAvatar
               :src="avatarPreview || undefined"
               size="3xl"
               icon="i-lucide-user"
               class="h-20 w-20"
             />
-            <div class="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/40">
+            <div
+              class="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/40"
+            >
               <UIcon
                 name="i-lucide-camera"
                 class="text-2xl text-white opacity-0 transition-opacity group-hover:opacity-100"
@@ -356,13 +324,10 @@ const tabs = [
               accept="image/*"
               class="hidden"
               @change="onAvatarChange"
-            >
+            />
           </label>
 
-          <form
-            class="space-y-4"
-            @submit.prevent="handleUpdateProfile"
-          >
+          <form class="space-y-4" @submit.prevent="handleUpdateProfile">
             <UAlert
               v-if="editProfileError"
               color="error"
@@ -403,13 +368,8 @@ const tabs = [
     <UModal v-model:open="showChangePassword">
       <template #content>
         <div class="p-6">
-          <h2 class="text-xl font-bold text-center mb-6">
-            修改密码
-          </h2>
-          <form
-            class="space-y-4"
-            @submit.prevent="handleChangePassword"
-          >
+          <h2 class="text-xl font-bold text-center mb-6">修改密码</h2>
+          <form class="space-y-4" @submit.prevent="handleChangePassword">
             <UAlert
               v-if="changePasswordError"
               color="error"

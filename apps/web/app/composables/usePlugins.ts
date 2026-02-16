@@ -1,13 +1,13 @@
 import type {
   PluginResponse,
   PluginDetailResponse,
-  PagedResponse
+  PagedResponse,
 } from '@momohub/types'
 
 export const usePlugins = () => {
   const { api } = useAzusaApi()
 
-  const listPlugins = async (params?: { page?: number, limit?: number }) => {
+  const listPlugins = async (params?: { page?: number; limit?: number }) => {
     return api<PagedResponse<PluginResponse>>('/plugins', { params })
   }
 
@@ -17,6 +17,6 @@ export const usePlugins = () => {
 
   return {
     listPlugins,
-    getPlugin
+    getPlugin,
   }
 }

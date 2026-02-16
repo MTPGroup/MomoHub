@@ -53,7 +53,7 @@ const triggerFileSelect = () => {
       class="hidden"
       accept=".txt,.md,.pdf,.doc,.docx"
       @change="handleFileSelect"
-    >
+    />
     <div
       class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
       @click="triggerFileSelect"

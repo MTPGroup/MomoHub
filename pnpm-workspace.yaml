@@ -2,8 +2,15 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
+catalog:
+  '@nuxt/eslint': ^1.15.1
+  eslint-config-prettier: ^10.1.8
+  typescript: ^5.9.3
+  tailwindcss: ^4.1.18
+
 onlyBuiltDependencies:
   - better-sqlite3
+  - sqlite3
 
 ignoredBuiltDependencies:
   - '@parcel/watcher'

@@ -19,7 +19,7 @@ const fetchData = async () => {
   try {
     const response = await listPlugins({
       page: page.value,
-      limit
+      limit,
     })
     if (response.success && response.data) {
       const data = response.data as PagedResponse<PluginResponse>
@@ -44,9 +44,7 @@ onMounted(fetchData)
       <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
         插件市场
       </h1>
-      <p class="text-gray-600 dark:text-gray-400">
-        发现和安装扩展插件
-      </p>
+      <p class="text-gray-600 dark:text-gray-400">发现和安装扩展插件</p>
     </div>
 
     <UAlert
@@ -62,10 +60,7 @@ onMounted(fetchData)
       v-if="loading"
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
     >
-      <UCard
-        v-for="i in 8"
-        :key="i"
-      >
+      <UCard v-for="i in 8" :key="i">
         <div class="flex items-start gap-4">
           <USkeleton class="h-12 w-12 rounded-lg" />
           <div class="flex-1 space-y-2">
@@ -78,7 +73,9 @@ onMounted(fetchData)
 
     <!-- 插件列表 -->
     <div v-else-if="plugins.length > 0">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+      >
         <PluginsCard
           v-for="plugin in plugins"
           :key="plugin.id"
@@ -86,30 +83,18 @@ onMounted(fetchData)
         />
       </div>
 
-      <div
-        v-if="totalPages > 1"
-        class="flex justify-center mt-8"
-      >
-        <UPagination
-          v-model="page"
-          :total="total"
-          :items-per-page="limit"
-        />
+      <div v-if="totalPages > 1" class="flex justify-center mt-8">
+        <UPagination v-model="page" :total="total" :items-per-page="limit" />
       </div>
     </div>
 
     <!-- 空状态 -->
-    <div
-      v-else
-      class="text-center py-16"
-    >
+    <div v-else class="text-center py-16">
       <UIcon
         name="i-lucide-puzzle"
         class="text-6xl text-gray-300 mx-auto mb-4"
       />
-      <p class="text-gray-500 text-lg">
-        暂无插件
-      </p>
+      <p class="text-gray-500 text-lg">暂无插件</p>
     </div>
   </UContainer>
 </template>

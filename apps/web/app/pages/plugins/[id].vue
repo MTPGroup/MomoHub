@@ -29,7 +29,7 @@ const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 </script>
@@ -64,28 +64,21 @@ const formatDate = (date: string) => {
     />
 
     <!-- 插件详情 -->
-    <div
-      v-else-if="plugin"
-      class="grid grid-cols-1 lg:grid-cols-3 gap-8"
-    >
+    <div v-else-if="plugin" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2 space-y-6">
         <UCard>
           <div class="flex items-start gap-4">
-            <div class="flex items-center justify-center h-16 w-16 rounded-lg bg-blue-50 dark:bg-blue-950">
-              <UIcon
-                name="i-lucide-puzzle"
-                class="text-3xl text-blue-500"
-              />
+            <div
+              class="flex items-center justify-center h-16 w-16 rounded-lg bg-blue-50 dark:bg-blue-950"
+            >
+              <UIcon name="i-lucide-puzzle" class="text-3xl text-blue-500" />
             </div>
             <div>
               <div class="flex items-center gap-2">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                   {{ plugin.name }}
                 </h1>
-                <UBadge
-                  color="neutral"
-                  variant="subtle"
-                >
+                <UBadge color="neutral" variant="subtle">
                   v{{ plugin.version }}
                 </UBadge>
               </div>
@@ -99,12 +92,13 @@ const formatDate = (date: string) => {
         <!-- Schema 信息 -->
         <UCard v-if="plugin.schema">
           <template #header>
-            <h2 class="text-lg font-semibold">
-              接口定义
-            </h2>
+            <h2 class="text-lg font-semibold">接口定义</h2>
           </template>
           <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-            <pre class="text-sm text-gray-600 dark:text-gray-400 font-mono whitespace-pre-wrap">{{ JSON.stringify(plugin.schema, null, 2) }}</pre>
+            <pre
+              class="text-sm text-gray-600 dark:text-gray-400 font-mono whitespace-pre-wrap"
+              >{{ JSON.stringify(plugin.schema, null, 2) }}</pre
+            >
           </div>
         </UCard>
       </div>
@@ -113,9 +107,7 @@ const formatDate = (date: string) => {
       <div class="space-y-6">
         <UCard>
           <template #header>
-            <h3 class="text-lg font-semibold">
-              信息
-            </h3>
+            <h3 class="text-lg font-semibold">信息</h3>
           </template>
           <div class="space-y-3">
             <div class="flex justify-between">

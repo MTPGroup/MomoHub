@@ -11,7 +11,7 @@ const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 </script>
@@ -19,22 +19,17 @@ const formatDate = (date: string) => {
 <template>
   <UCard class="h-full hover:shadow-lg transition-shadow duration-200">
     <div class="flex items-start gap-4">
-      <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-blue-50 dark:bg-blue-950">
-        <UIcon
-          name="i-lucide-puzzle"
-          class="text-xl text-blue-500"
-        />
+      <div
+        class="flex items-center justify-center h-12 w-12 rounded-lg bg-blue-50 dark:bg-blue-950"
+      >
+        <UIcon name="i-lucide-puzzle" class="text-xl text-blue-500" />
       </div>
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2">
           <h3 class="font-semibold text-gray-900 dark:text-white truncate">
             {{ plugin.name }}
           </h3>
-          <UBadge
-            size="xs"
-            color="neutral"
-            variant="subtle"
-          >
+          <UBadge size="xs" color="neutral" variant="subtle">
             v{{ plugin.version }}
           </UBadge>
         </div>

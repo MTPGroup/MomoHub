@@ -3,7 +3,7 @@ import type { UpdateCharacterRequest } from '@momohub/types'
 import { getApiErrorMessage } from '@momohub/types'
 
 definePageMeta({
-  middleware: ['auth']
+  middleware: ['auth'],
 })
 
 const route = useRoute()
@@ -18,7 +18,7 @@ const initialData = ref<UpdateCharacterRequest>({
   name: '',
   bio: '',
   originPrompt: '',
-  isPublic: true
+  isPublic: true,
 })
 
 onMounted(async () => {
@@ -29,7 +29,7 @@ onMounted(async () => {
         name: response.data.name,
         bio: response.data.bio,
         originPrompt: response.data.originPrompt,
-        isPublic: response.data.isPublic
+        isPublic: response.data.isPublic,
       }
     } else {
       error.value = '加载角色失败'
@@ -70,9 +70,7 @@ const handleSubmit = async (data: UpdateCharacterRequest) => {
       返回详情
     </UButton>
 
-    <h1 class="text-3xl font-bold mb-8">
-      编辑角色
-    </h1>
+    <h1 class="text-3xl font-bold mb-8">编辑角色</h1>
 
     <UAlert
       v-if="error"
@@ -82,10 +80,7 @@ const handleSubmit = async (data: UpdateCharacterRequest) => {
       class="mb-6"
     />
 
-    <div
-      v-if="fetchLoading"
-      class="space-y-4"
-    >
+    <div v-if="fetchLoading" class="space-y-4">
       <USkeleton class="h-10 w-full" />
       <USkeleton class="h-24 w-full" />
       <USkeleton class="h-40 w-full" />

@@ -34,8 +34,11 @@ const methodColors: Record<string, string> = {
   POST: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
   PUT: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
   DELETE: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-  PATCH: 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
+  PATCH:
+    'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
 }
 
-const methodClass = computed(() => methodColors[props.method.toUpperCase()] || methodColors.GET)
+const methodClass = computed(
+  () => methodColors[props.method.toUpperCase()] || methodColors.GET,
+)
 </script>

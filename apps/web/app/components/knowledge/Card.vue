@@ -11,7 +11,7 @@ const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 </script>
@@ -19,11 +19,10 @@ const formatDate = (date: string) => {
 <template>
   <UCard class="h-full hover:shadow-lg transition-shadow duration-200">
     <div class="flex items-start gap-4">
-      <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-primary-50 dark:bg-primary-950">
-        <UIcon
-          name="i-lucide-book-open"
-          class="text-xl text-primary"
-        />
+      <div
+        class="flex items-center justify-center h-12 w-12 rounded-lg bg-primary-50 dark:bg-primary-950"
+      >
+        <UIcon name="i-lucide-book-open" class="text-xl text-primary" />
       </div>
       <div class="flex-1 min-w-0">
         <h3 class="font-semibold text-gray-900 dark:text-white truncate">
@@ -41,12 +40,7 @@ const formatDate = (date: string) => {
           >
             公开
           </UBadge>
-          <UBadge
-            v-else
-            size="xs"
-            color="neutral"
-            variant="subtle"
-          >
+          <UBadge v-else size="xs" color="neutral" variant="subtle">
             私密
           </UBadge>
         </div>

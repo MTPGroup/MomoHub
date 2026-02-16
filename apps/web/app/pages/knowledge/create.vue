@@ -3,7 +3,7 @@ import type { CreateKnowledgeBaseRequest } from '@momohub/types'
 import { getApiErrorMessage } from '@momohub/types'
 
 definePageMeta({
-  middleware: ['auth']
+  middleware: ['auth'],
 })
 
 const { createKnowledgeBase } = useKnowledge()
@@ -11,7 +11,7 @@ const { createKnowledgeBase } = useKnowledge()
 const form = reactive<CreateKnowledgeBaseRequest>({
   name: '',
   description: '',
-  isPublic: true
+  isPublic: true,
 })
 
 const loading = ref(false)
@@ -46,9 +46,7 @@ const handleSubmit = async () => {
       返回列表
     </UButton>
 
-    <h1 class="text-3xl font-bold mb-8">
-      创建知识库
-    </h1>
+    <h1 class="text-3xl font-bold mb-8">创建知识库</h1>
 
     <UAlert
       v-if="error"
@@ -59,14 +57,8 @@ const handleSubmit = async () => {
     />
 
     <UCard>
-      <form
-        class="space-y-6"
-        @submit.prevent="handleSubmit"
-      >
-        <UFormField
-          label="知识库名称"
-          required
-        >
+      <form class="space-y-6" @submit.prevent="handleSubmit">
+        <UFormField label="知识库名称" required>
           <UInput
             v-model="form.name"
             placeholder="给知识库取个名字"
@@ -85,29 +77,17 @@ const handleSubmit = async () => {
         </UFormField>
 
         <UFormField label="可见性">
-          <USwitch
-            v-model="form.isPublic"
-            label="公开知识库"
-          />
+          <USwitch v-model="form.isPublic" label="公开知识库" />
           <p class="text-xs text-gray-500 mt-1">
             {{ form.isPublic ? '所有人都可以访问' : '仅自己可见' }}
           </p>
         </UFormField>
 
         <div class="flex gap-3 justify-end">
-          <UButton
-            variant="ghost"
-            color="neutral"
-            @click="$router.back()"
-          >
+          <UButton variant="ghost" color="neutral" @click="$router.back()">
             取消
           </UButton>
-          <UButton
-            type="submit"
-            :loading="loading"
-          >
-            创建知识库
-          </UButton>
+          <UButton type="submit" :loading="loading"> 创建知识库 </UButton>
         </div>
       </form>
     </UCard>

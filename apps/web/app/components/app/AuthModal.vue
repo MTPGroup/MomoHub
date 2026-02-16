@@ -7,7 +7,9 @@ const authStore = useAuthStore()
 
 const open = defineModel<boolean>({ default: false })
 
-const mode = ref<'login' | 'register' | 'verify' | 'forgot' | 'reset-password'>('login')
+const mode = ref<'login' | 'register' | 'verify' | 'forgot' | 'reset-password'>(
+  'login',
+)
 
 const form = reactive({
   name: '',
@@ -16,7 +18,7 @@ const form = reactive({
   confirmPassword: '',
   otp: '',
   newPassword: '',
-  confirmNewPassword: ''
+  confirmNewPassword: '',
 })
 
 const loading = ref(false)
@@ -66,9 +68,15 @@ const handleResendOtp = async () => {
   resending.value = true
   error.value = ''
   successMsg.value = ''
-  const otpType = mode.value === 'reset-password' ? OtpType.RESET_PASSWORD : OtpType.VERIFY_EMAIL
+  const otpType =
+    mode.value === 'reset-password'
+      ? OtpType.RESET_PASSWORD
+      : OtpType.VERIFY_EMAIL
   try {
-    const response = await authStore.sendOtp({ email: form.email, type: otpType })
+    const response = await authStore.sendOtp({
+      email: form.email,
+      type: otpType,
+    })
     if (response.success) {
       successMsg.value = '验证码已重新发送，请查看邮箱'
     } else {
@@ -90,7 +98,10 @@ const handleSubmit = async () => {
     return
   }
 
-  if (mode.value === 'reset-password' && form.newPassword !== form.confirmNewPassword) {
+  if (
+    mode.value === 'reset-password' &&
+    form.newPassword !== form.confirmNewPassword
+  ) {
     error.value = '两次输入的密码不一致'
     return
   }
@@ -100,7 +111,7 @@ const handleSubmit = async () => {
     if (mode.value === 'login') {
       const response = await authStore.login({
         email: form.email,
-        password: form.password
+        password: form.password,
       })
       if (response.success) {
         open.value = false
@@ -114,7 +125,7 @@ const handleSubmit = async () => {
       const response = await authStore.register({
         name: form.name,
         email: form.email,
-        password: form.password
+        password: form.password,
       })
       if (response.success) {
         mode.value = 'verify'
@@ -125,7 +136,7 @@ const handleSubmit = async () => {
     } else if (mode.value === 'verify') {
       const response = await authStore.verifyEmail({
         email: form.email,
-        otp: form.otp
+        otp: form.otp,
       })
       if (response.success) {
         mode.value = 'login'
@@ -135,7 +146,10 @@ const handleSubmit = async () => {
         error.value = response.message || '验证失败'
       }
     } else if (mode.value === 'forgot') {
-      const response = await authStore.sendOtp({ email: form.email, type: OtpType.RESET_PASSWORD })
+      const response = await authStore.sendOtp({
+        email: form.email,
+        type: OtpType.RESET_PASSWORD,
+      })
       if (response.success) {
         mode.value = 'reset-password'
         successMsg.value = '验证码已发送至你的邮箱'
@@ -146,7 +160,7 @@ const handleSubmit = async () => {
       const response = await authStore.resetPassword({
         email: form.email,
         otp: form.otp,
-        password: form.newPassword
+        password: form.newPassword,
       })
       if (response.success) {
         mode.value = 'login'
@@ -157,16 +171,19 @@ const handleSubmit = async () => {
       }
     }
   } catch (e) {
-    if (mode.value === 'login' && getApiErrorCode(e) === EMAIL_NOT_VERIFIED_CODE) {
+    if (
+      mode.value === 'login' &&
+      getApiErrorCode(e) === EMAIL_NOT_VERIFIED_CODE
+    ) {
       await enterVerifyMode(form.email)
       return
     }
     const fallbacks = {
-      'login': '登录失败',
-      'register': '注册失败',
-      'verify': '验证失败',
-      'forgot': '发送验证码失败',
-      'reset-password': '重置密码失败'
+      login: '登录失败',
+      register: '注册失败',
+      verify: '验证失败',
+      forgot: '发送验证码失败',
+      'reset-password': '重置密码失败',
     } satisfies Record<typeof mode.value, string>
     error.value = getApiErrorMessage(e, fallbacks[mode.value])
   } finally {
@@ -181,17 +198,30 @@ const handleSubmit = async () => {
       <div class="p-6">
         <div class="text-center mb-6">
           <h2 class="text-xl font-bold">
-            {{ { "login": '登录', "register": '注册', "verify": '验证邮箱', "forgot": '忘记密码', 'reset-password': '重置密码' }[mode] }}
+            {{
+              {
+                login: '登录',
+                register: '注册',
+                verify: '验证邮箱',
+                forgot: '忘记密码',
+                'reset-password': '重置密码',
+              }[mode]
+            }}
           </h2>
           <p class="text-sm text-gray-500 mt-1">
-            {{ { "login": '登录你的 MomoHub 账号', "register": '创建你的 MomoHub 账号', "verify": `验证码已发送至 ${form.email}`, "forgot": '输入注册邮箱以接收验证码', 'reset-password': `验证码已发送至 ${form.email}` }[mode] }}
+            {{
+              {
+                login: '登录你的 MomoHub 账号',
+                register: '创建你的 MomoHub 账号',
+                verify: `验证码已发送至 ${form.email}`,
+                forgot: '输入注册邮箱以接收验证码',
+                'reset-password': `验证码已发送至 ${form.email}`,
+              }[mode]
+            }}
           </p>
         </div>
 
-        <form
-          class="space-y-4"
-          @submit.prevent="handleSubmit"
-        >
+        <form class="space-y-4" @submit.prevent="handleSubmit">
           <UAlert
             v-if="error"
             color="error"
@@ -250,10 +280,7 @@ const handleSubmit = async () => {
           </UFormField>
 
           <!-- 注册确认密码 -->
-          <UFormField
-            v-if="mode === 'register'"
-            label="确认密码"
-          >
+          <UFormField v-if="mode === 'register'" label="确认密码">
             <UInput
               v-model="form.confirmPassword"
               type="password"
@@ -313,13 +340,16 @@ const handleSubmit = async () => {
             </UFormField>
           </template>
 
-          <UButton
-            type="submit"
-            block
-            size="lg"
-            :loading="loading"
-          >
-            {{ { "login": '登录', "register": '注册', "verify": '验证', "forgot": '发送验证码', 'reset-password': '重置密码' }[mode] }}
+          <UButton type="submit" block size="lg" :loading="loading">
+            {{
+              {
+                login: '登录',
+                register: '注册',
+                verify: '验证',
+                forgot: '发送验证码',
+                'reset-password': '重置密码',
+              }[mode]
+            }}
           </UButton>
         </form>
 
@@ -341,7 +371,11 @@ const handleSubmit = async () => {
                 variant="link"
                 size="xs"
                 class="p-0"
-                @click="mode = 'forgot'; error = ''; successMsg = ''"
+                @click="
+                  mode = 'forgot'
+                  error = ''
+                  successMsg = ''
+                "
               >
                 忘记密码？
               </UButton>
@@ -360,7 +394,13 @@ const handleSubmit = async () => {
               </UButton>
             </p>
           </template>
-          <template v-if="mode === 'verify' || mode === 'forgot' || mode === 'reset-password'">
+          <template
+            v-if="
+              mode === 'verify' ||
+              mode === 'forgot' ||
+              mode === 'reset-password'
+            "
+          >
             <p>
               <UButton
                 variant="link"

@@ -3,7 +3,7 @@ import type { CreateCharacterRequest } from '@momohub/types'
 import { getApiErrorMessage } from '@momohub/types'
 
 definePageMeta({
-  middleware: ['auth']
+  middleware: ['auth'],
 })
 
 const { createCharacter } = useCharacters()
@@ -39,9 +39,7 @@ const handleSubmit = async (data: CreateCharacterRequest) => {
       返回列表
     </UButton>
 
-    <h1 class="text-3xl font-bold mb-8">
-      创建角色
-    </h1>
+    <h1 class="text-3xl font-bold mb-8">创建角色</h1>
 
     <UAlert
       v-if="error"

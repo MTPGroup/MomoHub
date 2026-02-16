@@ -2,17 +2,27 @@ import type {
   CharacterResponse,
   CreateCharacterRequest,
   PagedResponse,
-  UpdateCharacterRequest
+  UpdateCharacterRequest,
 } from '@momohub/types'
 
 export const useCharacters = () => {
   const { api } = useAzusaApi()
 
-  const listPublicCharacters = async (params?: { page?: number, limit?: number, search?: string }) => {
-    return api<PagedResponse<CharacterResponse>>('/characters/public', { params })
+  const listPublicCharacters = async (params?: {
+    page?: number
+    limit?: number
+    search?: string
+  }) => {
+    return api<PagedResponse<CharacterResponse>>('/characters/public', {
+      params,
+    })
   }
 
-  const listCharacters = async (params?: { page?: number, limit?: number, search?: string }) => {
+  const listCharacters = async (params?: {
+    page?: number
+    limit?: number
+    search?: string
+  }) => {
     return api<PagedResponse<CharacterResponse>>('/characters', { params })
   }
 
@@ -23,20 +33,20 @@ export const useCharacters = () => {
   const createCharacter = async (data: CreateCharacterRequest) => {
     return api<CharacterResponse>('/characters', {
       method: 'POST',
-      body: data
+      body: data,
     })
   }
 
   const updateCharacter = async (id: string, data: UpdateCharacterRequest) => {
     return api<CharacterResponse>(`/characters/${id}`, {
       method: 'PUT',
-      body: data
+      body: data,
     })
   }
 
   const deleteCharacter = async (id: string) => {
     return api<undefined>(`/characters/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     })
   }
 
@@ -46,6 +56,6 @@ export const useCharacters = () => {
     getCharacter,
     createCharacter,
     updateCharacter,
-    deleteCharacter
+    deleteCharacter,
   }
 }

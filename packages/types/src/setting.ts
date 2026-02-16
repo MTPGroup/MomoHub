@@ -1,12 +1,12 @@
 export type Theme = 'SYSTEM' | 'LIGHT' | 'DARK'
 
-export type LLMProvider
-  = | 'OPENAI'
-    | 'ALIBABA'
-    | 'DEEPSEEK'
-    | 'GOOGLE'
-    | 'ANTHROPIC'
-    | 'OFFICIAL'
+export type LLMProvider =
+  | 'OPENAI'
+  | 'ALIBABA'
+  | 'DEEPSEEK'
+  | 'GOOGLE'
+  | 'ANTHROPIC'
+  | 'OFFICIAL'
 
 export interface LLMConfigResponse {
   id: unknown

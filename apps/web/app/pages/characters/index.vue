@@ -21,7 +21,7 @@ const fetchCharacters = async () => {
     const response = await listPublicCharacters({
       page: page.value,
       limit,
-      search: searchQuery.value || undefined
+      search: searchQuery.value || undefined,
     })
     if (response.success && response.data) {
       const data = response.data as PagedResponse<CharacterResponse>
@@ -70,11 +70,7 @@ onMounted(fetchCharacters)
         placeholder="搜索角色..."
         class="flex-1"
       />
-      <UButton
-        to="/characters/create"
-        color="primary"
-        icon="i-lucide-plus"
-      >
+      <UButton to="/characters/create" color="primary" icon="i-lucide-plus">
         创建角色
       </UButton>
     </div>
@@ -93,10 +89,7 @@ onMounted(fetchCharacters)
       v-if="loading"
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
     >
-      <UCard
-        v-for="i in limit"
-        :key="i"
-      >
+      <UCard v-for="i in limit" :key="i">
         <div class="flex items-start gap-4">
           <USkeleton class="h-12 w-12 rounded-full" />
           <div class="flex-1 space-y-2">
@@ -113,30 +106,18 @@ onMounted(fetchCharacters)
       <CharactersList :characters="characters" />
 
       <!-- 分页 -->
-      <div
-        v-if="totalPages > 1"
-        class="flex justify-center mt-8"
-      >
-        <UPagination
-          v-model="page"
-          :total="total"
-          :items-per-page="limit"
-        />
+      <div v-if="totalPages > 1" class="flex justify-center mt-8">
+        <UPagination v-model="page" :total="total" :items-per-page="limit" />
       </div>
     </div>
 
     <!-- 空状态 -->
-    <div
-      v-else
-      class="text-center py-16"
-    >
+    <div v-else class="text-center py-16">
       <UIcon
         name="i-lucide-search-x"
         class="text-6xl text-gray-300 mx-auto mb-4"
       />
-      <p class="text-gray-500 text-lg">
-        没有找到匹配的角色
-      </p>
+      <p class="text-gray-500 text-lg">没有找到匹配的角色</p>
       <UButton
         v-if="searchQuery"
         variant="ghost"

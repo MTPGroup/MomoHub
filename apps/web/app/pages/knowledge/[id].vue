@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import type { KnowledgeBaseResponse, KnowledgeFileResponse } from '@momohub/types'
+import type {
+  KnowledgeBaseResponse,
+  KnowledgeFileResponse,
+} from '@momohub/types'
 import { getApiErrorMessage } from '@momohub/types'
 
 const route = useRoute()
 const knowledgeBaseId = route.params.id as string
 
-const { getKnowledgeBase, listFiles, deleteFile, deleteKnowledgeBase } = useKnowledge()
+const { getKnowledgeBase, listFiles, deleteFile, deleteKnowledgeBase } =
+  useKnowledge()
 const authStore = useAuthStore()
 
 const knowledgeBase = ref<KnowledgeBaseResponse | null>(null)
@@ -17,7 +21,7 @@ const fetchData = async () => {
   try {
     const [kbResponse, filesResponse] = await Promise.all([
       getKnowledgeBase(knowledgeBaseId),
-      listFiles(knowledgeBaseId)
+      listFiles(knowledgeBaseId),
     ])
     if (kbResponse.success && kbResponse.data) {
       knowledgeBase.value = kbResponse.data
@@ -35,14 +39,18 @@ const fetchData = async () => {
 onMounted(fetchData)
 
 const isOwner = computed(() => {
-  return authStore.user && knowledgeBase.value && authStore.user.userId === knowledgeBase.value.authorId
+  return (
+    authStore.user &&
+    knowledgeBase.value &&
+    authStore.user.userId === knowledgeBase.value.authorId
+  )
 })
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   })
 }
 
@@ -55,21 +63,31 @@ const formatFileSize = (bytes: number | null) => {
 
 const statusColor = (status: string) => {
   switch (status) {
-    case 'COMPLETED': return 'success'
-    case 'PROCESSING': return 'warning'
-    case 'PENDING': return 'info'
-    case 'FAILED': return 'error'
-    default: return 'neutral'
+    case 'COMPLETED':
+      return 'success'
+    case 'PROCESSING':
+      return 'warning'
+    case 'PENDING':
+      return 'info'
+    case 'FAILED':
+      return 'error'
+    default:
+      return 'neutral'
   }
 }
 
 const statusLabel = (status: string) => {
   switch (status) {
-    case 'COMPLETED': return '已完成'
-    case 'PROCESSING': return '处理中'
-    case 'PENDING': return '等待中'
-    case 'FAILED': return '失败'
-    default: return status
+    case 'COMPLETED':
+      return '已完成'
+    case 'PROCESSING':
+      return '处理中'
+    case 'PENDING':
+      return '等待中'
+    case 'FAILED':
+      return '失败'
+    default:
+      return status
   }
 }
 
@@ -77,7 +95,7 @@ const handleDeleteFile = async (fileId: string) => {
   if (!confirm('确定要删除这个文件吗？')) return
   try {
     await deleteFile(knowledgeBaseId, fileId)
-    files.value = files.value.filter(f => f.id !== fileId)
+    files.value = files.value.filter((f) => f.id !== fileId)
   } catch (e) {
     error.value = getApiErrorMessage(e, '删除文件失败')
   }
@@ -132,10 +150,7 @@ const handleFileUploaded = () => {
     />
 
     <!-- 知识库详情 -->
-    <div
-      v-else-if="knowledgeBase"
-      class="space-y-6"
-    >
+    <div v-else-if="knowledgeBase" class="space-y-6">
       <!-- 基本信息 -->
       <UCard>
         <div class="flex items-start justify-between">
@@ -158,10 +173,7 @@ const handleFileUploaded = () => {
               </span>
             </div>
           </div>
-          <div
-            v-if="isOwner"
-            class="flex gap-2"
-          >
+          <div v-if="isOwner" class="flex gap-2">
             <UButton
               variant="ghost"
               color="error"
@@ -178,9 +190,7 @@ const handleFileUploaded = () => {
       <!-- 文件上传 -->
       <UCard v-if="isOwner">
         <template #header>
-          <h2 class="text-lg font-semibold">
-            上传文件
-          </h2>
+          <h2 class="text-lg font-semibold">上传文件</h2>
         </template>
         <KnowledgeFileUploader
           :knowledge-base-id="knowledgeBaseId"
@@ -199,28 +209,18 @@ const handleFileUploaded = () => {
       <!-- 文件列表 -->
       <UCard>
         <template #header>
-          <h2 class="text-lg font-semibold">
-            文件列表 ({{ files.length }})
-          </h2>
+          <h2 class="text-lg font-semibold">文件列表 ({{ files.length }})</h2>
         </template>
 
-        <div
-          v-if="files.length === 0"
-          class="text-center py-8"
-        >
+        <div v-if="files.length === 0" class="text-center py-8">
           <UIcon
             name="i-lucide-file-x"
             class="text-4xl text-gray-300 mx-auto mb-3"
           />
-          <p class="text-gray-500">
-            还没有文件
-          </p>
+          <p class="text-gray-500">还没有文件</p>
         </div>
 
-        <div
-          v-else
-          class="divide-y divide-gray-200 dark:divide-gray-700"
-        >
+        <div v-else class="divide-y divide-gray-200 dark:divide-gray-700">
           <div
             v-for="file in files"
             :key="file.id"

@@ -11,7 +11,7 @@ import type {
   TokenResponse,
   UpdateProfileRequest,
   UserProfile,
-  VerifyOTPRequest
+  VerifyOTPRequest,
 } from '@momohub/types'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -19,7 +19,9 @@ export const useAuthStore = defineStore('auth', () => {
   const baseURL = config.public.apiBaseUrl as string
 
   const accessToken = useCookie('auth_access_token', { maxAge: 60 * 60 })
-  const refreshTokenCookie = useCookie('auth_refresh_token', { maxAge: 60 * 60 * 24 * 30 })
+  const refreshTokenCookie = useCookie('auth_refresh_token', {
+    maxAge: 60 * 60 * 24 * 30,
+  })
   const user = ref<UserProfile | null>(null)
   const showAuthModal = ref(false)
 
@@ -75,10 +77,13 @@ export const useAuthStore = defineStore('auth', () => {
     isRefreshing = true
     refreshPromise = (async () => {
       try {
-        const response = await $fetch<ApiResponse<LoginResponse>>(`${baseURL}/auth/refresh`, {
-          method: 'POST',
-          body: { refreshToken: refreshTokenCookie.value }
-        })
+        const response = await $fetch<ApiResponse<LoginResponse>>(
+          `${baseURL}/auth/refresh`,
+          {
+            method: 'POST',
+            body: { refreshToken: refreshTokenCookie.value },
+          },
+        )
         if (response.success && response.data) {
           setTokens(response.data.tokens)
           user.value = response.data.user
@@ -99,10 +104,13 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const login = async (credentials: SignInWithPasswordRequest) => {
-    const response = await $fetch<ApiResponse<LoginResponse>>(`${baseURL}/auth/sign-in/email`, {
-      method: 'POST',
-      body: credentials
-    })
+    const response = await $fetch<ApiResponse<LoginResponse>>(
+      `${baseURL}/auth/sign-in/email`,
+      {
+        method: 'POST',
+        body: credentials,
+      },
+    )
     if (response.success && response.data) {
       setTokens(response.data.tokens)
       user.value = response.data.user
@@ -111,39 +119,54 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const register = async (data: SignUpRequest) => {
-    return await $fetch<ApiResponse<SuccessResponse>>(`${baseURL}/auth/sign-up/email`, {
-      method: 'POST',
-      body: data
-    })
+    return await $fetch<ApiResponse<SuccessResponse>>(
+      `${baseURL}/auth/sign-up/email`,
+      {
+        method: 'POST',
+        body: data,
+      },
+    )
   }
 
   const sendOtp = async (data: SendOtpRequest) => {
-    return await $fetch<ApiResponse<SuccessResponse>>(`${baseURL}/auth/email-otp/send`, {
-      method: 'POST',
-      body: data
-    })
+    return await $fetch<ApiResponse<SuccessResponse>>(
+      `${baseURL}/auth/email-otp/send`,
+      {
+        method: 'POST',
+        body: data,
+      },
+    )
   }
 
   const verifyEmail = async (data: VerifyOTPRequest) => {
-    return await $fetch<ApiResponse<SuccessResponse>>(`${baseURL}/auth/email-otp/verify-email`, {
-      method: 'POST',
-      body: data
-    })
+    return await $fetch<ApiResponse<SuccessResponse>>(
+      `${baseURL}/auth/email-otp/verify-email`,
+      {
+        method: 'POST',
+        body: data,
+      },
+    )
   }
 
   const resetPassword = async (data: ResetPasswordRequest) => {
-    return await $fetch<ApiResponse<SuccessResponse>>(`${baseURL}/auth/password/reset`, {
-      method: 'POST',
-      body: data
-    })
+    return await $fetch<ApiResponse<SuccessResponse>>(
+      `${baseURL}/auth/password/reset`,
+      {
+        method: 'POST',
+        body: data,
+      },
+    )
   }
 
   const updateProfile = async (data: UpdateProfileRequest) => {
-    const response = await $fetch<ApiResponse<UserProfile>>(`${baseURL}/auth/me`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${accessToken.value}` },
-      body: data
-    })
+    const response = await $fetch<ApiResponse<UserProfile>>(
+      `${baseURL}/auth/me`,
+      {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${accessToken.value}` },
+        body: data,
+      },
+    )
     if (response.success && response.data) {
       user.value = response.data
     }
@@ -153,11 +176,14 @@ export const useAuthStore = defineStore('auth', () => {
   const uploadAvatar = async (file: File) => {
     const formData = new FormData()
     formData.append('avatar', file)
-    const response = await $fetch<ApiResponse<UserProfile>>(`${baseURL}/auth/me/avatar`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${accessToken.value}` },
-      body: formData
-    })
+    const response = await $fetch<ApiResponse<UserProfile>>(
+      `${baseURL}/auth/me/avatar`,
+      {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${accessToken.value}` },
+        body: formData,
+      },
+    )
     if (response.success && response.data) {
       user.value = response.data
     }
@@ -165,11 +191,14 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const changePassword = async (data: ChangePasswordRequest) => {
-    return await $fetch<ApiResponse<SuccessResponse>>(`${baseURL}/auth/password/change`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${accessToken.value}` },
-      body: data
-    })
+    return await $fetch<ApiResponse<SuccessResponse>>(
+      `${baseURL}/auth/password/change`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken.value}` },
+        body: data,
+      },
+    )
   }
 
   const logout = () => {
@@ -180,9 +209,12 @@ export const useAuthStore = defineStore('auth', () => {
   const fetchUser = async () => {
     if (!accessToken.value) return
     try {
-      const response = await $fetch<ApiResponse<UserProfile>>(`${baseURL}/auth/me`, {
-        headers: { Authorization: `Bearer ${accessToken.value}` }
-      })
+      const response = await $fetch<ApiResponse<UserProfile>>(
+        `${baseURL}/auth/me`,
+        {
+          headers: { Authorization: `Bearer ${accessToken.value}` },
+        },
+      )
       if (response.success && response.data) {
         user.value = response.data
       }
@@ -219,6 +251,6 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     fetchUser,
     refreshAccessToken,
-    init
+    init,
   }
 })
