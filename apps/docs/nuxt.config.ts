@@ -1,13 +1,10 @@
 export default defineNuxtConfig({
   modules: [
     '@nuxt/content',
+    '@nuxt/ui',
   ],
 
-  content: {
-    preview: {
-      api: 'https://api.nuxt.studio',
-    },
-  },
+  css: ['~/assets/css/main.css'],
 
   devtools: { enabled: true },
 
