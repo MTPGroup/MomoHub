@@ -6,21 +6,35 @@
     "build": "nuxt build",
     "dev": "nuxt dev --port 3001",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
-    "@momohub/types": "workspace:*",
-    "@nuxt/content": "^3.5.1",
+    "@iconify-json/lucide": "^1.2.90",
+    "@iconify-json/simple-icons": "^1.2.70",
+    "@iconify-json/vscode-icons": "^1.2.42",
+    "@nuxt/content": "^3.11.2",
+    "@nuxt/image": "^2.0.0",
     "@nuxt/ui": "^4.4.0",
     "@nuxtjs/mdc": "^0.20.1",
+    "@vueuse/core": "^14.2.1",
+    "better-sqlite3": "^12.6.2",
+    "minimark": "^1.0.0",
     "nuxt": "^4.3.1",
+    "nuxt-llms": "0.2.0",
+    "nuxt-og-image": "^5.1.13",
+    "tailwindcss": "^4.1.18",
+    "ufo": "^1.6.3",
+    "unist-util-visit": "^5.1.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.90",
     "@nuxt/eslint": "catalog:",
+    "@nuxtjs/mcp-toolkit": "^0.7.0",
+    "eslint": "^10.0.0",
     "eslint-config-prettier": "catalog:",
-    "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vue-tsc": "^3.2.4"
   }
 }

@@ -1,51 +1,229 @@
 ---
-title: MomoHub API 文档
-description: MomoHub 平台 API 参考文档
+seo:
+  title: MomoHub API 文档
+  description: MomoHub AI 角色平台 API 参考文档，支持角色管理、知识库、插件和多轮对话。
 ---
 
-欢迎使用 MomoHub API 文档。MomoHub 是一个 AI 角色平台，支持创建自定义 AI 角色、管理知识库和插件系统。
+::u-page-hero{class="dark:bg-gradient-to-b from-neutral-900 to-neutral-950"}
+---
+orientation: horizontal
+---
+#top
+:hero-background
 
-## 功能特性
+#title
+MomoHub [API 文档]{.text-primary}
 
-- **AI 角色管理** — 创建和管理 AI 角色，设置人设提示词
-- **知识库系统** — 上传文件构建知识库，支持语义搜索
-- **插件系统** — 扩展 AI 角色的能力
-- **多轮对话** — 与 AI 角色进行实时对话
-- **多 LLM 支持** — 支持 OpenAI、Anthropic、DeepSeek 等模型
+#description
+MomoHub 是一个 AI 角色平台，支持创建自定义 AI 角色、管理知识库和插件系统。通过 RESTful API 快速集成多轮对话、语义搜索等 AI 能力。
 
-## 快速开始
+#links
+  :::u-button
+  ---
+  to: /guide/getting-started
+  size: xl
+  trailing-icon: i-lucide-arrow-right
+  ---
+  快速开始
+  :::
 
-所有 API 请求需要发送到以下 Base URL：
+  :::u-button
+  ---
+  icon: i-lucide-book-open
+  color: neutral
+  variant: outline
+  size: xl
+  to: /api/auth
+  ---
+  API 参考
+  :::
 
-```
-https://api.momohub.com/v1
-```
+#default
+  :::prose-pre
+  ---
+  code: |
+    curl -X POST https://azusa.hanasaki.tech/v1/chats \
+      -H "Authorization: Bearer <token>" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "characterId": "char_abc123",
+        "name": "与助手的对话"
+      }'
+  filename: Terminal
+  ---
 
-API 使用 JSON 格式进行请求和响应，所有请求需要设置：
+  ```bash [Terminal]
+  curl -X POST https://azusa.hanasaki.tech/v1/chats \
+    -H "Authorization: Bearer <token>" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "characterId": "char_abc123",
+      "name": "与助手的对话"
+    }'
+  ```
+  :::
+::
 
-```
-Content-Type: application/json
-```
+::u-page-section{class="dark:bg-neutral-950"}
+#title
+平台核心能力
 
-需要认证的接口需要在请求头中携带 Bearer Token：
+#features
+  :::u-page-feature
+  ---
+  icon: i-lucide-bot
+  ---
+  #title
+  AI 角色管理
 
-```
-Authorization: Bearer <access_token>
-```
+  #description
+  创建和管理 AI 角色，自定义人设提示词，支持公开分享和私有角色。
+  :::
 
-## 通用响应格式
+  :::u-page-feature
+  ---
+  icon: i-lucide-book-open
+  ---
+  #title
+  知识库系统
 
-所有 API 响应遵循统一格式：
+  #description
+  上传文件构建知识库，支持语义搜索，让 AI 角色基于你的数据进行回答。
+  :::
 
-```json
-{
-  "success": true,
-  "code": null,
-  "message": "OK",
-  "data": { ... },
-  "errors": null,
-  "timestamp": "2025-01-15T08:30:00Z"
-}
-```
+  :::u-page-feature
+  ---
+  icon: i-lucide-puzzle
+  ---
+  #title
+  插件系统
 
-查看 [快速入门](/guide/getting-started) 了解更多细节。
+  #description
+  通过插件扩展 AI 角色能力，支持自定义 Function Call，如联网搜索等。
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-message-circle
+  ---
+  #title
+  多轮对话
+
+  #description
+  与 AI 角色进行实时多轮对话，支持文本、图片、代码等多种消息类型。
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-cpu
+  ---
+  #title
+  多 LLM 支持
+
+  #description
+  支持 OpenAI、Anthropic、DeepSeek 等主流大语言模型，灵活切换和配置。
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-lock
+  ---
+  #title
+  JWT 认证
+
+  #description
+  基于 JWT Bearer Token 的安全认证体系，支持 Token 自动刷新机制。
+  :::
+::
+
+::u-page-section{class="dark:bg-neutral-950"}
+#title
+统一的 API 设计
+
+#features
+  :::u-page-feature
+  ---
+  icon: i-lucide-braces
+  ---
+  #title
+  JSON 请求与响应
+
+  #description
+  所有 API 使用 JSON 格式，统一的 `ApiResponse<T>` 响应结构，开发体验一致。
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-list
+  ---
+  #title
+  分页查询
+
+  #description
+  列表接口支持分页、搜索，返回 `total`、`hasNext` 等元数据，轻松处理大数据集。
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-alert-triangle
+  ---
+  #title
+  结构化错误
+
+  #description
+  统一的错误码和字段级验证错误，配合 TypeScript 辅助函数快速处理异常。
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-upload
+  ---
+  #title
+  文件上传
+
+  #description
+  支持头像上传和知识库文件上传，使用 `multipart/form-data` 格式。
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-shield
+  ---
+  #title
+  权限控制
+
+  #description
+  公开与私有资源分离，用户只能管理自己创建的角色、知识库等资源。
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-code
+  ---
+  #title
+  TypeScript 支持
+
+  #description
+  `@momohub/types` 包提供完整类型定义和辅助函数，获得最佳开发体验。
+  :::
+::
+
+::u-page-section{class="dark:bg-gradient-to-b from-neutral-950 to-neutral-900"}
+  :::u-page-c-t-a
+  ---
+  links:
+    - label: 快速开始
+      to: '/guide/getting-started'
+      trailingIcon: i-lucide-arrow-right
+    - label: API 参考
+      to: '/api/auth'
+      variant: subtle
+      icon: i-lucide-book-open
+  title: 开始构建你的 AI 应用
+  description: 通过 MomoHub API 快速集成 AI 角色对话、知识库和插件能力，打造专属 AI 体验。
+  class: dark:bg-neutral-950
+  ---
+
+  :stars-bg
+  :::
+::

@@ -1,15 +1,25 @@
-import { defineCollection, defineContentConfig } from '@nuxt/content'
-import { z } from 'zod'
+import { defineContentConfig, defineCollection, z } from '@nuxt/content'
 
 export default defineContentConfig({
   collections: {
-    content: defineCollection({
+    landing: defineCollection({
       type: 'page',
-      source: '**/*.md',
-      schema: z.object({
-        title: z.string(),
-        description: z.string().optional(),
-      }),
+      source: 'index.md'
     }),
-  },
+    docs: defineCollection({
+      type: 'page',
+      source: {
+        include: '**',
+        exclude: ['index.md']
+      },
+      schema: z.object({
+        links: z.array(z.object({
+          label: z.string(),
+          icon: z.string(),
+          to: z.string(),
+          target: z.string().optional()
+        })).optional()
+      })
+    })
+  }
 })

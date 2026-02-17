@@ -1,32 +1,94 @@
-<template>
-  <div v-if="page">
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold tracking-tight text-default">
-        {{ page.title }}
-      </h1>
-      <p v-if="page.description" class="mt-2 text-lg text-muted">
-        {{ page.description }}
-      </p>
-    </div>
-    <div
-      class="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-h2:text-xl prose-h2:font-semibold prose-h2:border-b prose-h2:border-(--ui-border) prose-h2:pb-2 prose-h2:mt-10 prose-h3:text-lg prose-h3:mt-6 prose-pre:bg-(--ui-bg-elevated) prose-pre:border prose-pre:border-(--ui-border)"
-    >
-      <ContentRenderer :value="page" />
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-const route = useRoute()
-const { data: page } = await useAsyncData(route.path, () =>
-  queryCollection('content').path(route.path).first(),
-)
+import type { ContentNavigationItem } from '@nuxt/content'
+import { findPageHeadline } from '@nuxt/content/utils'
 
-if (page.value) {
-  useHead({ title: `${page.value.title} - MomoHub API Docs` })
-  useSeoMeta({
-    title: page.value.title,
-    description: page.value.description,
+definePageMeta({
+  layout: 'docs',
+})
+
+const route = useRoute()
+const { toc } = useAppConfig()
+const navigation = inject<Ref<ContentNavigationItem[]>>('navigation')
+
+const { data: page } = await useAsyncData(route.path, () =>
+  queryCollection('docs').path(route.path).first(),
+)
+if (!page.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Page not found',
+    fatal: true,
   })
 }
+
+const { data: surround } = await useAsyncData(`${route.path}-surround`, () => {
+  return queryCollectionItemSurroundings('docs', route.path, {
+    fields: ['description'],
+  })
+})
+
+const title = page.value.seo?.title || page.value.title
+const description = page.value.seo?.description || page.value.description
+
+useSeoMeta({
+  title,
+  ogTitle: title,
+  description,
+  ogDescription: description,
+})
+
+const headline = computed(() =>
+  findPageHeadline(navigation?.value, page.value?.path),
+)
+
+defineOgImageComponent('Docs', {
+  headline: headline.value,
+})
+
+const links = computed(() => {
+  return [...(toc?.bottom?.links || [])].filter(Boolean)
+})
 </script>
+
+<template>
+  <UPage v-if="page">
+    <UPageHeader
+      :title="page.title"
+      :description="page.description"
+      :headline="headline"
+    >
+      <template #links>
+        <UButton
+          v-for="(link, index) in page.links"
+          :key="index"
+          v-bind="link"
+        />
+
+        <PageHeaderLinks />
+      </template>
+    </UPageHeader>
+
+    <UPageBody>
+      <ContentRenderer v-if="page" :value="page" />
+
+      <USeparator v-if="surround?.length" />
+
+      <UContentSurround :surround="surround" />
+    </UPageBody>
+
+    <template v-if="page?.body?.toc?.links?.length" #right>
+      <UContentToc :title="toc?.title" :links="page.body?.toc?.links">
+        <template v-if="toc?.bottom" #bottom>
+          <div
+            class="hidden lg:block space-y-6"
+            :class="{ 'mt-6!': page.body?.toc?.links?.length }"
+          >
+            <USeparator v-if="page.body?.toc?.links?.length" type="dashed" />
+
+            <UPageLinks :title="toc.bottom.title" :links="links" />
+          </div>
+        </template>
+      </UContentToc>
+    </template>
+  </UPage>
+</template>
