@@ -187,34 +187,61 @@ const tabs = [
   <UContainer class="py-8">
     <!-- 用户信息 -->
     <UCard class="mb-8">
-      <div class="flex items-center gap-6">
-        <UAvatar
-          :src="authStore.user?.avatar || undefined"
-          size="2xl"
-          icon="i-lucide-user"
-        />
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+      <div class="flex flex-col md:flex-row items-center gap-6">
+        <!-- 头像 -->
+        <div class="relative group">
+          <UAvatar
+            :src="authStore.user?.avatar || undefined"
+            size="3xl"
+            :text="authStore.user?.username[0]"
+            class="ring-4 ring-gray-100 dark:ring-gray-800 w-28! h-28! text-3xl md:w-24! md:h-24!"
+          />
+          <div
+            class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
+            :class="
+              authStore.user?.isEmailVerified ? 'bg-green-500' : 'bg-amber-500'
+            "
+          >
+            <UIcon
+              :name="
+                authStore.user?.isEmailVerified
+                  ? 'i-lucide-badge-check'
+                  : 'i-lucide-alert-circle'
+              "
+              class="text-white text-xs"
+            />
+          </div>
+        </div>
+
+        <!-- 用户信息 -->
+        <div class="flex-1 text-center md:text-left">
+          <h1
+            class="text-2xl font-bold text-gray-900 dark:text-white flex items-center justify-center md:justify-start gap-2"
+          >
             {{ authStore.user?.username }}
           </h1>
           <p class="text-gray-500 mt-1">
             {{ authStore.user?.email }}
           </p>
-          <div class="flex gap-2 mt-3">
+          <div class="flex gap-2 mt-3 justify-center md:justify-start">
             <UBadge
               v-if="authStore.user?.isEmailVerified"
               color="success"
               variant="subtle"
-              size="xs"
+              size="sm"
             >
+              <UIcon name="i-lucide-shield-check" class="mr-1" />
               邮箱已验证
             </UBadge>
-            <UBadge v-else color="warning" variant="subtle" size="xs">
+            <UBadge v-else color="warning" variant="subtle" size="sm">
+              <UIcon name="i-lucide-shield-alert" class="mr-1" />
               邮箱未验证
             </UBadge>
           </div>
         </div>
-        <div class="ml-auto flex gap-2">
+
+        <!-- 操作按钮 -->
+        <div class="flex flex-wrap gap-2 justify-center">
           <UButton
             variant="soft"
             icon="i-lucide-pencil"
@@ -229,22 +256,23 @@ const tabs = [
           >
             修改密码
           </UButton>
-          <UButton
-            variant="ghost"
-            color="error"
-            icon="i-lucide-log-out"
-            @click="authStore.logout"
+          <UDropdownMenu
+            :items="[
+              {
+                label: '退出登录',
+                icon: 'i-lucide-log-out',
+                onSelect: authStore.logout,
+              },
+              {
+                label: '注销账号',
+                icon: 'i-lucide-trash-2',
+                color: 'error' as const,
+                onSelect: () => (showDeleteAccount = true),
+              },
+            ]"
           >
-            退出登录
-          </UButton>
-          <UButton
-            variant="ghost"
-            color="error"
-            icon="i-lucide-trash-2"
-            @click="showDeleteAccount = true"
-          >
-            注销账号
-          </UButton>
+            <UButton variant="ghost" icon="i-lucide-more-vertical" />
+          </UDropdownMenu>
         </div>
       </div>
     </UCard>

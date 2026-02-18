@@ -70,13 +70,20 @@ const userMenuItems = computed(() => [
 
       <template v-if="authStore.isLoggedIn">
         <UDropdownMenu :items="userMenuItems">
-          <UAvatar
-            :src="authStore.user?.avatar || undefined"
-            :alt="authStore.user?.username"
-            :text="authStore.user?.username[0]"
-            size="sm"
-            class="hover:border-primary hover:border"
-          />
+          <UButton
+            variant="ghost"
+            color="neutral"
+            class="p-0.5 rounded-full"
+            :ui="{ base: 'hover:bg-transparent focus-visible:ring-0' }"
+          >
+            <UAvatar
+              :src="authStore.user?.avatar || undefined"
+              :alt="authStore.user?.username"
+              :text="authStore.user?.username[0]"
+              size="md"
+              class="ring-2 ring-transparent hover:ring-primary transition-all"
+            />
+          </UButton>
           <!-- <UButton
             color="neutral"
             variant="ghost"

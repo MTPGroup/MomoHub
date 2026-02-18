@@ -5,12 +5,16 @@ type FetchOptionsType = Parameters<typeof $fetch>[1]
 export const useAzusaApi = () => {
   const config = useRuntimeConfig()
   const authStore = useAuthStore()
+  // 直接使用 cookie，确保 SSR 和 CSR 都能正确读取 token
+  const accessToken = useCookie('auth_access_token')
 
   const fetchApi = $fetch.create({
     baseURL: config.public.apiBaseUrl as string,
     onRequest({ options }) {
-      if (authStore.accessToken) {
-        options.headers.set('Authorization', `Bearer ${authStore.accessToken}`)
+      // 优先使用 cookie 中的 token，这样 SSR 也能正常工作
+      const token = accessToken.value || authStore.accessToken
+      if (token) {
+        options.headers.set('Authorization', `Bearer ${token}`)
       }
     },
     async onResponseError({ request, options, response }) {
