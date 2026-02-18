@@ -14,9 +14,27 @@ const totalPages = ref(0)
 const loading = ref(true)
 const error = ref('')
 
+let loadingTimer: ReturnType<typeof setTimeout> | null = null
+
+const showLoadingWithDelay = () => {
+  // 延迟显示骨架屏，避免快速加载时闪烁
+  loadingTimer = setTimeout(() => {
+    loading.value = true
+  }, 200)
+}
+
+const hideLoading = () => {
+  if (loadingTimer) {
+    clearTimeout(loadingTimer)
+    loadingTimer = null
+  }
+  loading.value = false
+}
+
 const fetchCharacters = async () => {
-  loading.value = true
+  showLoadingWithDelay()
   error.value = ''
+
   try {
     const response = searchQuery.value
       ? await searchCharacters({
@@ -37,15 +55,24 @@ const fetchCharacters = async () => {
   } catch (e) {
     error.value = getApiErrorMessage(e, '加载角色列表失败')
   } finally {
-    loading.value = false
+    hideLoading()
   }
 }
 
 watch(page, fetchCharacters)
 
 let searchTimeout: ReturnType<typeof setTimeout>
-watch(searchQuery, () => {
+watch(searchQuery, (newQuery, oldQuery) => {
   clearTimeout(searchTimeout)
+
+  // 如果是清除搜索（从有到无），立即加载，不要延迟
+  if (oldQuery && !newQuery) {
+    page.value = 1
+    fetchCharacters()
+    return
+  }
+
+  // 其他情况（输入搜索词）使用防抖
   searchTimeout = setTimeout(() => {
     page.value = 1
     fetchCharacters()
@@ -89,7 +116,7 @@ onMounted(fetchCharacters)
       class="mb-6"
     />
 
-    <!-- 加载状态 -->
+    <!-- 初始加载状态 - 骨架屏 -->
     <div
       v-if="loading"
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
