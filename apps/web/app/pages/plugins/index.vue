@@ -94,7 +94,7 @@ onMounted(fetchData)
         name="i-lucide-puzzle"
         class="text-6xl text-gray-300 mx-auto mb-4"
       />
-      <p class="text-gray-500 text-lg">暂无插件</p>
+      <p class="text-gray-500 text-lg">还没有插件</p>
     </div>
   </UContainer>
 </template>

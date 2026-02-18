@@ -372,9 +372,11 @@ const handleSubmit = async () => {
                 size="xs"
                 class="p-0"
                 @click="
-                  mode = 'forgot'
-                  error = ''
-                  successMsg = ''
+                  () => {
+                    mode = 'forgot'
+                    error = ''
+                    successMsg = ''
+                  }
                 "
               >
                 忘记密码？

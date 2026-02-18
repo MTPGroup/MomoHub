@@ -1,5 +1,5 @@
 {
-  "name": "momohub",
+  "name": "@momohub/web",
   "private": true,
   "type": "module",
   "scripts": {

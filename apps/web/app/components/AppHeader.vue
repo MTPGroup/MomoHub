@@ -48,7 +48,8 @@ const userMenuItems = computed(() => [
   <UHeader>
     <template #title>
       <NuxtLink to="/">
-        <AppLogo class="w-auto h-6 shrink-0" />
+        <span class="text-primary">Momo</span><span>Hub</span>
+        <!-- <AppLogo class="w-auto h-6 shrink-0" /> -->
       </NuxtLink>
     </template>
 

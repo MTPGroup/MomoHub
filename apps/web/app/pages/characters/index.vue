@@ -114,10 +114,12 @@ onMounted(fetchCharacters)
     <!-- 空状态 -->
     <div v-else class="text-center py-16">
       <UIcon
-        name="i-lucide-search-x"
+        :name="searchQuery ? 'i-lucide-search-x' : 'i-lucide-users'"
         class="text-6xl text-gray-300 mx-auto mb-4"
       />
-      <p class="text-gray-500 text-lg">没有找到匹配的角色</p>
+      <p class="text-gray-500 text-lg">
+        {{ searchQuery ? '没有找到匹配的角色' : '还没有角色' }}
+      </p>
       <UButton
         v-if="searchQuery"
         variant="ghost"
@@ -125,6 +127,15 @@ onMounted(fetchCharacters)
         @click="searchQuery = ''"
       >
         清除搜索
+      </UButton>
+      <UButton
+        v-else
+        to="/characters/create"
+        color="primary"
+        class="mt-4"
+        icon="i-lucide-plus"
+      >
+        创建第一个角色
       </UButton>
     </div>
   </UContainer>

@@ -1,4 +1,3 @@
-import { defineStore } from 'pinia'
 import type {
   ApiResponse,
   ChangePasswordRequest,
@@ -13,6 +12,7 @@ import type {
   UserProfile,
   VerifyOTPRequest,
 } from '@momohub/types'
+import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', () => {
   const config = useRuntimeConfig()
@@ -48,10 +48,11 @@ export const useAuthStore = defineStore('auth', () => {
     scheduleRefresh(tokens.accessTokenExpiredIn)
   }
 
-  const scheduleRefresh = (expiresInSeconds: number) => {
+  const scheduleRefresh = (expiresInTimestamp: number) => {
     stopRefreshTimer()
-    // 在过期前 30 秒刷新
-    const delay = Math.max((expiresInSeconds - 30) * 1000, 5000)
+    const nowInMs = Date.now()
+    const remainingMs = Math.max(0, expiresInTimestamp - nowInMs)
+    const delay = Math.max(remainingMs - 30 * 1000, 5000)
     refreshTimer = setTimeout(() => {
       refreshAccessToken()
     }, delay)
@@ -150,7 +151,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const resetPassword = async (data: ResetPasswordRequest) => {
     return await $fetch<ApiResponse<SuccessResponse>>(
-      `${baseURL}/auth/password/reset`,
+      `${baseURL}/auth/email-otp/reset-password`,
       {
         method: 'POST',
         body: data,
@@ -201,7 +202,27 @@ export const useAuthStore = defineStore('auth', () => {
     )
   }
 
-  const logout = () => {
+  const logout = async () => {
+    if (refreshTokenCookie.value) {
+      try {
+        await $fetch(`${baseURL}/auth/sign-out`, {
+          method: 'POST',
+          body: { refreshToken: refreshTokenCookie.value },
+          headers: { Authorization: `Bearer ${accessToken.value}` },
+        })
+      } catch {
+        // 忽略服务端错误，继续清除本地状态
+      }
+    }
+    clearTokens()
+    navigateTo('/')
+  }
+
+  const deleteAccount = async () => {
+    await $fetch(`${baseURL}/auth/account`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${accessToken.value}` },
+    })
     clearTokens()
     navigateTo('/')
   }
@@ -249,6 +270,7 @@ export const useAuthStore = defineStore('auth', () => {
     uploadAvatar,
     changePassword,
     logout,
+    deleteAccount,
     fetchUser,
     refreshAccessToken,
     init,

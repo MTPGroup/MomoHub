@@ -85,6 +85,22 @@ const handleUpdateProfile = async () => {
   }
 }
 
+// 注销账号
+const showDeleteAccount = ref(false)
+const deleteAccountLoading = ref(false)
+const deleteAccountError = ref('')
+
+const handleDeleteAccount = async () => {
+  deleteAccountError.value = ''
+  deleteAccountLoading.value = true
+  try {
+    await authStore.deleteAccount()
+  } catch (e) {
+    deleteAccountError.value = getApiErrorMessage(e, '注销失败，请稍后重试')
+    deleteAccountLoading.value = false
+  }
+}
+
 // 修改密码
 const showChangePassword = ref(false)
 const changePasswordLoading = ref(false)
@@ -220,6 +236,14 @@ const tabs = [
             @click="authStore.logout"
           >
             退出登录
+          </UButton>
+          <UButton
+            variant="ghost"
+            color="error"
+            icon="i-lucide-trash-2"
+            @click="showDeleteAccount = true"
+          >
+            注销账号
           </UButton>
         </div>
       </div>
@@ -425,6 +449,41 @@ const tabs = [
               修改密码
             </UButton>
           </form>
+        </div>
+      </template>
+    </UModal>
+
+    <!-- 注销账号确认弹窗 -->
+    <UModal v-model:open="showDeleteAccount">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <h2 class="text-xl font-bold text-center text-red-500">注销账号</h2>
+          <UAlert
+            v-if="deleteAccountError"
+            color="error"
+            :title="deleteAccountError"
+            icon="i-lucide-alert-circle"
+          />
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            此操作将<strong>永久删除</strong>您的账号及所有相关数据，包括角色、知识库和聊天记录。此操作不可撤销。
+          </p>
+          <div class="flex gap-3 justify-end">
+            <UButton
+              variant="ghost"
+              :disabled="deleteAccountLoading"
+              @click="showDeleteAccount = false"
+            >
+              取消
+            </UButton>
+            <UButton
+              color="error"
+              :loading="deleteAccountLoading"
+              icon="i-lucide-trash-2"
+              @click="handleDeleteAccount"
+            >
+              确认注销
+            </UButton>
+          </div>
         </div>
       </template>
     </UModal>
