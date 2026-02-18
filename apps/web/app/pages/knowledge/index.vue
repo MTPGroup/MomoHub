@@ -2,8 +2,9 @@
 import type { KnowledgeBaseResponse, PagedResponse } from '@momohub/types'
 import { getApiErrorMessage } from '@momohub/types'
 
-const { listPublicKnowledgeBases } = useKnowledge()
+const { listPublicKnowledgeBases, searchKnowledgeBases } = useKnowledge()
 
+const searchQuery = ref('')
 const page = ref(1)
 const limit = 12
 
@@ -17,10 +18,16 @@ const fetchData = async () => {
   loading.value = true
   error.value = ''
   try {
-    const response = await listPublicKnowledgeBases({
-      page: page.value,
-      limit,
-    })
+    const response = searchQuery.value
+      ? await searchKnowledgeBases({
+          q: searchQuery.value,
+          page: page.value,
+          limit,
+        })
+      : await listPublicKnowledgeBases({
+          page: page.value,
+          limit,
+        })
     if (response.success && response.data) {
       const data = response.data as PagedResponse<KnowledgeBaseResponse>
       knowledgeBases.value = data.items
@@ -35,6 +42,16 @@ const fetchData = async () => {
 }
 
 watch(page, fetchData)
+
+let searchTimeout: ReturnType<typeof setTimeout>
+watch(searchQuery, () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    page.value = 1
+    fetchData()
+  }, 300)
+})
+
 onMounted(fetchData)
 </script>
 
@@ -47,7 +64,14 @@ onMounted(fetchData)
       <p class="text-gray-600 dark:text-gray-400">探索和管理知识库资源</p>
     </div>
 
-    <div class="flex justify-end mb-8">
+    <!-- 搜索和操作栏 -->
+    <div class="flex flex-col md:flex-row gap-4 mb-8">
+      <UInput
+        v-model="searchQuery"
+        icon="i-lucide-search"
+        placeholder="搜索知识库..."
+        class="flex-1"
+      />
       <UButton to="/knowledge/create" color="primary" icon="i-lucide-plus">
         创建知识库
       </UButton>
@@ -89,11 +113,27 @@ onMounted(fetchData)
     <!-- 空状态 -->
     <div v-else class="text-center py-16">
       <UIcon
-        name="i-lucide-book-open"
+        :name="searchQuery ? 'i-lucide-search-x' : 'i-lucide-book-open'"
         class="text-6xl text-gray-300 mx-auto mb-4"
       />
-      <p class="text-gray-500 text-lg">还没有知识库</p>
-      <UButton to="/knowledge/create" class="mt-4" icon="i-lucide-plus">
+      <p class="text-gray-500 text-lg">
+        {{ searchQuery ? '没有找到匹配的知识库' : '还没有知识库' }}
+      </p>
+      <UButton
+        v-if="searchQuery"
+        variant="ghost"
+        class="mt-4"
+        @click="searchQuery = ''"
+      >
+        清除搜索
+      </UButton>
+      <UButton
+        v-else
+        to="/knowledge/create"
+        color="primary"
+        class="mt-4"
+        icon="i-lucide-plus"
+      >
         创建第一个知识库
       </UButton>
     </div>
