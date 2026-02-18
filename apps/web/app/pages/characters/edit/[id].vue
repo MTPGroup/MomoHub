@@ -9,17 +9,23 @@ definePageMeta({
 const route = useRoute()
 const characterId = route.params.id as string
 
-const { getCharacter, updateCharacter } = useCharacters()
+const { getCharacter, updateCharacter, uploadCharacterAvatar } = useCharacters()
 
 const loading = ref(false)
 const fetchLoading = ref(true)
 const error = ref('')
-const initialData = ref<UpdateCharacterRequest>({
+const initialData = ref<UpdateCharacterRequest & { avatar?: string | null }>({
   name: '',
   bio: '',
   originPrompt: '',
   isPublic: true,
+  avatar: null,
 })
+
+// 头像上传相关
+const avatarFile = ref<File | null>(null)
+const avatarPreview = ref('')
+const avatarUploading = ref(false)
 
 onMounted(async () => {
   try {
@@ -30,7 +36,9 @@ onMounted(async () => {
         bio: response.data.bio,
         originPrompt: response.data.originPrompt,
         isPublic: response.data.isPublic,
+        avatar: response.data.avatar,
       }
+      avatarPreview.value = response.data.avatar || ''
     } else {
       error.value = '加载角色失败'
     }
@@ -41,10 +49,27 @@ onMounted(async () => {
   }
 })
 
+const onAvatarChange = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (file) {
+    avatarFile.value = file
+    avatarPreview.value = URL.createObjectURL(file)
+  }
+}
+
 const handleSubmit = async (data: UpdateCharacterRequest) => {
   error.value = ''
   loading.value = true
+
   try {
+    // 如果选择了新头像，先上传
+    if (avatarFile.value) {
+      avatarUploading.value = true
+      await uploadCharacterAvatar(characterId, avatarFile.value)
+      avatarUploading.value = false
+    }
+
     const response = await updateCharacter(characterId, data)
     if (response.success) {
       navigateTo(`/characters/${characterId}`)
@@ -55,6 +80,7 @@ const handleSubmit = async (data: UpdateCharacterRequest) => {
     error.value = getApiErrorMessage(e, '更新失败，请检查网络连接')
   } finally {
     loading.value = false
+    avatarUploading.value = false
   }
 }
 </script>
@@ -81,15 +107,42 @@ const handleSubmit = async (data: UpdateCharacterRequest) => {
     />
 
     <div v-if="fetchLoading" class="space-y-4">
+      <USkeleton class="h-24 w-24 rounded-full mx-auto" />
       <USkeleton class="h-10 w-full" />
       <USkeleton class="h-24 w-full" />
       <USkeleton class="h-40 w-full" />
     </div>
 
-    <UCard v-else>
+    <UCard v-else class="space-y-6">
+      <!-- 头像上传 -->
+      <div class="flex flex-col items-center gap-4">
+        <div class="relative group cursor-pointer">
+          <UAvatar
+            :src="avatarPreview || undefined"
+            :text="initialData.name[0]"
+            size="3xl"
+            class="w-24 h-24 text-2xl"
+          />
+          <!-- Hover时的遮罩层 -->
+          <div
+            class="absolute inset-0 bg-black/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+          >
+            <UIcon name="i-lucide-camera" class="w-8 h-8 text-white" />
+          </div>
+          <label class="absolute inset-0 cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              class="hidden"
+              @change="onAvatarChange"
+            />
+          </label>
+        </div>
+      </div>
+
       <CharactersForm
         :initial-data="initialData"
-        :loading="loading"
+        :loading="loading || avatarUploading"
         submit-label="保存修改"
         @submit="handleSubmit"
       />
