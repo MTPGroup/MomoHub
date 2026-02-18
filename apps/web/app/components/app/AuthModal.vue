@@ -114,6 +114,7 @@ const handleSubmit = async () => {
         password: form.password,
       })
       if (response.success) {
+        resetForm()
         open.value = false
       } else if (response.code === EMAIL_NOT_VERIFIED_CODE) {
         await enterVerifyMode(form.email)
@@ -129,6 +130,8 @@ const handleSubmit = async () => {
       })
       if (response.success) {
         mode.value = 'verify'
+        form.password = ''
+        form.confirmPassword = ''
         successMsg.value = '注册成功！验证码已发送至你的邮箱'
       } else {
         error.value = response.message || '注册失败'
@@ -152,6 +155,9 @@ const handleSubmit = async () => {
       })
       if (response.success) {
         mode.value = 'reset-password'
+        form.otp = ''
+        form.newPassword = ''
+        form.confirmNewPassword = ''
         successMsg.value = '验证码已发送至你的邮箱'
       } else {
         error.value = response.message || '发送失败'
