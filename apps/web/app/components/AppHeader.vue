@@ -38,6 +38,7 @@ const userMenuItems = computed(() => [
     {
       label: '退出登录',
       icon: 'i-lucide-log-out',
+      color: 'error',
       onSelect: () => authStore.logout(),
     },
   ],
@@ -69,23 +70,39 @@ const userMenuItems = computed(() => [
 
       <template v-if="authStore.isLoggedIn">
         <UDropdownMenu :items="userMenuItems">
-          <UButton
+          <UAvatar
+            :src="authStore.user?.avatar || undefined"
+            :alt="authStore.user?.username"
+            :text="authStore.user?.username[0]"
+            size="sm"
+            class="hover:border-primary hover:border"
+          />
+          <!-- <UButton
             color="neutral"
             variant="ghost"
             :label="authStore.user?.username"
-            icon="i-lucide-user"
-          />
+          /> -->
         </UDropdownMenu>
       </template>
       <template v-else>
-        <UButton
+        <UAvatar
+          text="登录"
+          size="sm"
+          class="hover:border-primary hover:border"
+          @click="authStore.openAuthModal"
+        />
+        <!-- <UButton
           variant="ghost"
           color="neutral"
           @click="authStore.openAuthModal"
         >
           登录
-        </UButton>
+        </UButton> -->
       </template>
+    </template>
+
+    <template #body>
+      <UNavigationMenu :items="items" orientation="vertical" class="-mx-2.5" />
     </template>
   </UHeader>
 </template>
