@@ -11,6 +11,17 @@ const mode = ref<'login' | 'register' | 'verify' | 'forgot' | 'reset-password'>(
   'login',
 )
 
+// 监听登录状态变化，退出登录后自动清空表单
+watch(
+  () => authStore.isLoggedIn,
+  (isLoggedIn, wasLoggedIn) => {
+    // 从登录状态变为未登录状态时，清空表单
+    if (wasLoggedIn && !isLoggedIn) {
+      resetForm()
+    }
+  },
+)
+
 const form = reactive({
   name: '',
   email: '',
