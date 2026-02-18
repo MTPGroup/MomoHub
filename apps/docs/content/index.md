@@ -42,7 +42,7 @@ MomoHub 是一个 AI 角色平台，支持创建自定义 AI 角色、管理知�
   :::prose-pre
   ---
   code: |
-    curl -X POST https://azusa.hanasaki.tech/v1/6b5f99ce-f3fe-4c43-9b2b-bad0a48e0861/messages \
+    curl -X POST https://momohub-api.hanasaki.tech/v1/6b5f99ce-f3fe-4c43-9b2b-bad0a48e0861/messages \
       -H "Authorization: Bearer <token>" \
       -H accept: */* \
       -H "Content-Type: application/json" \
@@ -58,7 +58,7 @@ MomoHub 是一个 AI 角色平台，支持创建自定义 AI 角色、管理知�
   ---
 
   ```bash [Terminal]
-  curl -X POST https://azusa.hanasaki.tech/v1/6b5f99ce-f3fe-4c43-9b2b-bad0a48e0861/messages \
+  curl -X POST https://momohub-api.hanasaki.tech/v1/6b5f99ce-f3fe-4c43-9b2b-bad0a48e0861/messages \
     -H "Authorization: Bearer <token>" \
     -H accept: */* \
     -H "Content-Type: application/json" \
