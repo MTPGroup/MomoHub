@@ -2,7 +2,7 @@
 import type { CharacterResponse, PagedResponse } from '@momohub/types'
 import { getApiErrorMessage } from '@momohub/types'
 
-const { listPublicCharacters } = useCharacters()
+const { listPublicCharacters, searchCharacters } = useCharacters()
 
 const searchQuery = ref('')
 const page = ref(1)
@@ -18,11 +18,16 @@ const fetchCharacters = async () => {
   loading.value = true
   error.value = ''
   try {
-    const response = await listPublicCharacters({
-      page: page.value,
-      limit,
-      search: searchQuery.value || undefined,
-    })
+    const response = searchQuery.value
+      ? await searchCharacters({
+          q: searchQuery.value,
+          page: page.value,
+          limit,
+        })
+      : await listPublicCharacters({
+          page: page.value,
+          limit,
+        })
     if (response.success && response.data) {
       const data = response.data as PagedResponse<CharacterResponse>
       characters.value = data.items
