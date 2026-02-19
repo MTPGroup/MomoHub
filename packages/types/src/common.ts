@@ -11,6 +11,10 @@ export interface SuccessResponse {
   success: boolean
 }
 
+export interface UploadAvatarResponse {
+  avatar: string
+}
+
 export interface PagedResponse<T = unknown> {
   items: T[]
   total: number
