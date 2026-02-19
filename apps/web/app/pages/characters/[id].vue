@@ -179,13 +179,10 @@ const openEditModal = () => {
           <template #header>
             <h2 class="text-lg font-semibold">人设 / Prompt</h2>
           </template>
-          <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-            <p
-              class="text-sm text-gray-600 dark:text-gray-400 font-mono whitespace-pre-wrap"
-            >
-              {{ character.originPrompt }}
-            </p>
-          </div>
+          <MDC
+            :value="character.originPrompt"
+            class="rounded-md font-mono px-4 -mt-12"
+          />
         </UCard>
       </div>
 

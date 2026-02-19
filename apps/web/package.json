@@ -14,6 +14,7 @@
   "dependencies": {
     "@momohub/types": "workspace:*",
     "@nuxt/ui": "^4.4.0",
+    "@nuxtjs/mdc": "0.20.1",
     "nuxt": "^4.3.1",
     "pinia": "^3.0.4"
   },
