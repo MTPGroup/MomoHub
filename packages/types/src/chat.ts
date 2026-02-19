@@ -1,6 +1,7 @@
 export interface CreateChatRequest {
   characterId: string
   name?: string | null
+  temporary?: boolean | null
 }
 
 export interface ChatResponse {
@@ -8,6 +9,7 @@ export interface ChatResponse {
   name: string | null
   lastMessage: string | null
   characterId: string | null
+  temporary: boolean
   createdAt: string
   updatedAt: string
 }
