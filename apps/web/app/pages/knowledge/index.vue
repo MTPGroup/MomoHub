@@ -2,7 +2,8 @@
 import type { KnowledgeBaseResponse, PagedResponse } from '@momohub/types'
 import { getApiErrorMessage } from '@momohub/types'
 
-const { listPublicKnowledgeBases, listKnowledgeBases, searchKnowledgeBases } = useKnowledge()
+const { listPublicKnowledgeBases, listKnowledgeBases, searchKnowledgeBases } =
+  useKnowledge()
 const authStore = useAuthStore()
 
 const searchQuery = ref('')
@@ -29,7 +30,7 @@ const fetchOwnPrivateKnowledgeBases = async () => {
     return
   }
   try {
-    const response = await listKnowledgeBases({ limit: 200 })
+    const response = await listKnowledgeBases({ limit: 100 })
     if (response.success && response.data) {
       const data = response.data as PagedResponse<KnowledgeBaseResponse>
       ownPrivateKnowledgeBases.value = data.items.filter((kb) => !kb.isPublic)
@@ -153,7 +154,10 @@ onMounted(() => {
           {{ filteredPrivateKnowledgeBases.length }}
         </UBadge>
       </div>
-      <KnowledgeList :knowledge-bases="filteredPrivateKnowledgeBases" class="mb-8" />
+      <KnowledgeList
+        :knowledge-bases="filteredPrivateKnowledgeBases"
+        class="mb-8"
+      />
       <UDivider
         v-if="!loading && knowledgeBases.length > 0"
         label="公开知识库"

@@ -2,13 +2,14 @@
 import type {
   KnowledgeBaseResponse,
   KnowledgeFileResponse,
+  UpdateKnowledgeBaseRequest,
 } from '@momohub/types'
 import { getApiErrorMessage } from '@momohub/types'
 
 const route = useRoute()
 const knowledgeBaseId = route.params.id as string
 
-const { getKnowledgeBase, listFiles, deleteFile, deleteKnowledgeBase } =
+const { getKnowledgeBase, listFiles, deleteFile, retryFile, deleteKnowledgeBase, updateKnowledgeBase } =
   useKnowledge()
 const authStore = useAuthStore()
 const toast = useToast()
@@ -92,6 +93,33 @@ const statusLabel = (status: string) => {
   }
 }
 
+const retryingFileIds = ref<Set<string>>(new Set())
+
+const handleRetryFile = async (fileId: string) => {
+  retryingFileIds.value = new Set([...retryingFileIds.value, fileId])
+  try {
+    await retryFile(knowledgeBaseId, fileId)
+    files.value = files.value.map((f) =>
+      f.id === fileId ? { ...f, status: 'PENDING' } : f,
+    )
+    toast.add({
+      title: '已重新提交嵌入任务',
+      color: 'info',
+      icon: 'i-lucide-refresh-cw',
+    })
+  } catch (e) {
+    toast.add({
+      title: getApiErrorMessage(e, '重试失败'),
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
+  } finally {
+    const next = new Set(retryingFileIds.value)
+    next.delete(fileId)
+    retryingFileIds.value = next
+  }
+}
+
 const handleDeleteFile = async (fileId: string) => {
   if (!confirm('确定要删除这个文件吗？')) return
   try {
@@ -131,6 +159,52 @@ const handleFileUploaded = () => {
       files.value = response.data
     }
   })
+}
+
+// 编辑知识库信息
+const showEditModal = ref(false)
+const editLoading = ref(false)
+const editForm = reactive<UpdateKnowledgeBaseRequest>({
+  name: '',
+  description: '',
+  isPublic: true,
+})
+
+const openEditModal = () => {
+  editForm.name = knowledgeBase.value?.name || ''
+  editForm.description = knowledgeBase.value?.description || ''
+  editForm.isPublic = knowledgeBase.value?.isPublic ?? true
+  showEditModal.value = true
+}
+
+const handleUpdate = async () => {
+  editLoading.value = true
+  try {
+    const response = await updateKnowledgeBase(knowledgeBaseId, editForm)
+    if (response.success && response.data) {
+      knowledgeBase.value = response.data
+      showEditModal.value = false
+      toast.add({
+        title: '知识库信息已更新',
+        color: 'success',
+        icon: 'i-lucide-check-circle',
+      })
+    } else {
+      toast.add({
+        title: response.message || '更新失败',
+        color: 'error',
+        icon: 'i-lucide-alert-circle',
+      })
+    }
+  } catch (e) {
+    toast.add({
+      title: getApiErrorMessage(e, '更新失败'),
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
+  } finally {
+    editLoading.value = false
+  }
 }
 </script>
 
@@ -188,6 +262,14 @@ const handleFileUploaded = () => {
             </div>
           </div>
           <div v-if="isOwner" class="flex gap-2">
+            <UButton
+              variant="ghost"
+              icon="i-lucide-pencil"
+              size="sm"
+              @click="openEditModal"
+            >
+              编辑
+            </UButton>
             <UButton
               variant="ghost"
               color="error"
@@ -253,17 +335,77 @@ const handleFileUploaded = () => {
                 </div>
               </div>
             </div>
-            <UButton
-              v-if="isOwner"
-              variant="ghost"
-              color="error"
-              icon="i-lucide-trash-2"
-              size="xs"
-              @click="handleDeleteFile(file.id)"
-            />
+            <div v-if="isOwner" class="flex items-center gap-1 shrink-0">
+              <UButton
+                v-if="file.status === 'FAILED'"
+                variant="ghost"
+                color="warning"
+                icon="i-lucide-refresh-cw"
+                size="xs"
+                :loading="retryingFileIds.has(file.id)"
+                @click="handleRetryFile(file.id)"
+              />
+              <UButton
+                variant="ghost"
+                color="error"
+                icon="i-lucide-trash-2"
+                size="xs"
+                @click="handleDeleteFile(file.id)"
+              />
+            </div>
           </div>
         </div>
       </UCard>
     </div>
+
+    <!-- 编辑知识库弹窗 -->
+    <UModal v-model:open="showEditModal">
+      <template #content>
+        <div class="p-6">
+          <h2 class="text-xl font-bold text-center mb-6">编辑知识库</h2>
+          <form class="space-y-4" @submit.prevent="handleUpdate">
+            <UFormField label="知识库名称" required>
+              <UInput
+                v-model="editForm.name"
+                placeholder="给知识库取个名字"
+                icon="i-lucide-book-open"
+                required
+                class="w-full"
+              />
+            </UFormField>
+
+            <UFormField label="描述">
+              <UTextarea
+                v-model="editForm.description"
+                placeholder="描述这个知识库的内容..."
+                :rows="3"
+                class="w-full"
+              />
+            </UFormField>
+
+            <UFormField label="可见性">
+              <USwitch v-model="editForm.isPublic" label="公开知识库" />
+              <p class="text-xs text-gray-500 mt-1">
+                {{ editForm.isPublic ? '所有人都可以访问' : '仅自己可见' }}
+              </p>
+            </UFormField>
+
+            <div class="flex gap-3 justify-end pt-2">
+              <UButton
+                variant="ghost"
+                color="neutral"
+                :disabled="editLoading"
+                @click="showEditModal = false"
+              >
+                取消
+              </UButton>
+              <UButton type="submit" :loading="editLoading">
+                保存
+              </UButton>
+            </div>
+          </form>
+        </div>
+      </template>
+    </UModal>
   </UContainer>
 </template>
