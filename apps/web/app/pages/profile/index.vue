@@ -241,7 +241,7 @@ const tabs = [
           <UAvatar
             :src="authStore.user?.avatar || undefined"
             size="3xl"
-            :text="authStore.user?.username[0]"
+            :text="authStore.user?.username?.[0] ?? 'U'"
             class="ring-4 ring-gray-100 dark:ring-gray-800 w-28! h-28! text-3xl md:w-24! md:h-24!"
           />
           <div
@@ -396,7 +396,11 @@ const tabs = [
       </template>
     </UTabs>
     <!-- 编辑资料弹窗 -->
-    <UModal v-model:open="showEditProfile">
+    <UModal
+      v-model:open="showEditProfile"
+      title="编辑个人资料"
+      description="修改您的用户名和头像"
+    >
       <template #content>
         <div class="p-6">
           <h2 class="text-xl font-bold text-center mb-4">编辑个人资料</h2>
@@ -452,8 +456,12 @@ const tabs = [
     </UModal>
 
     <!-- 修改密码弹窗 -->
-    <UModal :modal="showChangePassword">
-      <template #body>
+    <UModal
+      v-model:open="showChangePassword"
+      title="修改密码"
+      description="更改您的账户密码"
+    >
+      <template #content>
         <div class="p-6">
           <h2 class="text-xl font-bold text-center mb-6">修改密码</h2>
           <form class="space-y-4" @submit.prevent="handleChangePassword">
@@ -504,7 +512,11 @@ const tabs = [
     </UModal>
 
     <!-- 注销账号确认弹窗 -->
-    <UModal v-model:open="showDeleteAccount">
+    <UModal
+      v-model:open="showDeleteAccount"
+      title="注销账号"
+      description="此操作将永久删除您的账号及所有相关数据"
+    >
       <template #content>
         <div class="p-6 space-y-4">
           <h2 class="text-xl font-bold text-center text-red-500">注销账号</h2>

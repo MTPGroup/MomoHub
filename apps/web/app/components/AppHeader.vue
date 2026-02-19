@@ -48,9 +48,8 @@ const userMenuItems = computed(() => [
 <template>
   <UHeader>
     <template #title>
-      <NuxtLink to="/">
+      <NuxtLink to="/" aria-label="MomoHub">
         <span class="text-primary">Momo</span><span>Hub</span>
-        <!-- <AppLogo class="w-auto h-6 shrink-0" /> -->
       </NuxtLink>
     </template>
 
@@ -76,19 +75,19 @@ const userMenuItems = computed(() => [
             class="p-0.5 rounded-full"
             :ui="{ base: 'hover:bg-transparent focus-visible:ring-0' }"
           >
-            <UAvatar
-              :src="authStore.user?.avatar || undefined"
-              :alt="authStore.user?.username"
-              :text="authStore.user?.username[0]"
-              size="md"
-              class="ring-2 ring-transparent hover:ring-primary transition-all"
-            />
+            <ClientOnly>
+              <UAvatar
+                :src="authStore.user?.avatar || undefined"
+                :alt="authStore.user?.username"
+                :text="authStore.user?.username?.[0] ?? 'U'"
+                size="md"
+                class="ring-2 ring-transparent hover:ring-primary transition-all"
+              />
+              <template #fallback>
+                <USkeleton class="h-10 w-10 rounded-full" />
+              </template>
+            </ClientOnly>
           </UButton>
-          <!-- <UButton
-            color="neutral"
-            variant="ghost"
-            :label="authStore.user?.username"
-          /> -->
         </UDropdownMenu>
       </template>
       <template v-else>
@@ -98,13 +97,6 @@ const userMenuItems = computed(() => [
           class="hover:border-primary hover:border"
           @click="authStore.openAuthModal"
         />
-        <!-- <UButton
-          variant="ghost"
-          color="neutral"
-          @click="authStore.openAuthModal"
-        >
-          登录
-        </UButton> -->
       </template>
     </template>
 
