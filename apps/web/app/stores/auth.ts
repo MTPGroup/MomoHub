@@ -170,7 +170,7 @@ export const useAuthStore = defineStore('auth', () => {
       },
     )
     if (response.success && response.data) {
-      user.value = response.data
+      user.value = { ...user.value, ...response.data }
     }
     return response
   }

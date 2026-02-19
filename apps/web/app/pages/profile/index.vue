@@ -48,14 +48,25 @@ const onAvatarChange = (e: Event) => {
 }
 
 const handleUpdateProfile = async () => {
+  console.log('[Profile] 开始更新资料', {
+    username: editForm.username,
+    hasAvatar: !!avatarFile.value,
+  })
   editProfileLoading.value = true
+
   try {
     let avatarUrl = authStore.user?.avatar
+    console.log('[Profile] 当前头像URL:', avatarUrl)
+
     if (avatarFile.value) {
+      console.log('[Profile] 开始上传头像:', avatarFile.value.name)
       avatarUploading.value = true
       const avatarResponse = await authStore.uploadAvatar(avatarFile.value)
+      console.log('[Profile] 头像上传响应:', avatarResponse)
       avatarUploading.value = false
+
       if (!avatarResponse.success) {
+        console.error('[Profile] 头像上传失败:', avatarResponse.message)
         toast.add({
           title: avatarResponse.message || '头像上传失败',
           color: 'error',
@@ -63,19 +74,28 @@ const handleUpdateProfile = async () => {
         })
         return
       }
+
       if (avatarResponse.data) {
         avatarUrl = avatarResponse.data.avatar
         if (authStore.user) {
           authStore.user.avatar = avatarResponse.data.avatar
         }
+        console.log('[Profile] 头像上传成功，新URL:', avatarUrl)
       }
     }
 
+    console.log('[Profile] 开始更新资料，请求数据:', {
+      username: editForm.username,
+      avatar: avatarUrl,
+    })
     const response = await authStore.updateProfile({
       username: editForm.username,
       avatar: avatarUrl,
     })
+    console.log('[Profile] 更新资料响应:', response)
+
     if (response.success) {
+      console.log('[Profile] 更新成功，关闭Modal')
       showEditProfile.value = false
       toast.add({
         title: '资料更新成功',
@@ -83,6 +103,7 @@ const handleUpdateProfile = async () => {
         icon: 'i-lucide-check-circle',
       })
     } else {
+      console.error('[Profile] 更新失败:', response.message)
       toast.add({
         title: response.message || '更新失败',
         color: 'error',
@@ -90,12 +111,14 @@ const handleUpdateProfile = async () => {
       })
     }
   } catch (e) {
+    console.error('[Profile] 更新资料异常:', e)
     toast.add({
       title: getApiErrorMessage(e, '更新失败'),
       color: 'error',
       icon: 'i-lucide-alert-circle',
     })
   } finally {
+    console.log('[Profile] 更新资料结束，重置loading状态')
     editProfileLoading.value = false
     avatarUploading.value = false
   }
@@ -404,7 +427,7 @@ const tabs = [
             />
           </label>
 
-          <form class="space-y-4" @submit="handleUpdateProfile">
+          <form class="space-y-4" @submit.prevent="handleUpdateProfile">
             <UFormField label="用户名">
               <UInput
                 v-model="editForm.username"
