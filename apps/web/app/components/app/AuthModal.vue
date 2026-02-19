@@ -4,6 +4,7 @@ import { getApiErrorCode, getApiErrorMessage, OtpType } from '@momohub/types'
 const EMAIL_NOT_VERIFIED_CODE = 'EMAIL_NOT_VERIFIED'
 
 const authStore = useAuthStore()
+const toast = useToast()
 
 const open = defineModel<boolean>({ default: false })
 
@@ -35,7 +36,6 @@ const form = reactive({
 const loading = ref(false)
 const resending = ref(false)
 const error = ref('')
-const successMsg = ref('')
 
 const resetForm = () => {
   form.name = ''
@@ -46,7 +46,6 @@ const resetForm = () => {
   form.newPassword = ''
   form.confirmNewPassword = ''
   error.value = ''
-  successMsg.value = ''
 }
 
 const switchMode = (newMode: 'login' | 'register') => {
@@ -66,10 +65,13 @@ const enterVerifyMode = async (email: string) => {
   form.email = email
   form.otp = ''
   error.value = ''
-  successMsg.value = ''
   try {
     await authStore.sendOtp({ email, type: OtpType.VERIFY_EMAIL })
-    successMsg.value = '验证码已发送至你的邮箱，请查收'
+    toast.add({
+      title: '验证码已发送至你的邮箱，请查收',
+      color: 'info',
+      icon: 'i-lucide-mail',
+    })
   } catch (e) {
     error.value = getApiErrorMessage(e, '发送验证码失败')
   }
@@ -78,7 +80,6 @@ const enterVerifyMode = async (email: string) => {
 const handleResendOtp = async () => {
   resending.value = true
   error.value = ''
-  successMsg.value = ''
   const otpType =
     mode.value === 'reset-password'
       ? OtpType.RESET_PASSWORD
@@ -89,7 +90,11 @@ const handleResendOtp = async () => {
       type: otpType,
     })
     if (response.success) {
-      successMsg.value = '验证码已重新发送，请查看邮箱'
+      toast.add({
+        title: '验证码已重新发送，请查看邮箱',
+        color: 'info',
+        icon: 'i-lucide-mail',
+      })
     } else {
       error.value = response.message || '发送失败'
     }
@@ -102,7 +107,6 @@ const handleResendOtp = async () => {
 
 const handleSubmit = async () => {
   error.value = ''
-  successMsg.value = ''
 
   if (mode.value === 'register' && form.password !== form.confirmPassword) {
     error.value = '两次输入的密码不一致'
@@ -143,7 +147,11 @@ const handleSubmit = async () => {
         mode.value = 'verify'
         form.password = ''
         form.confirmPassword = ''
-        successMsg.value = '注册成功！验证码已发送至你的邮箱'
+        toast.add({
+          title: '注册成功！验证码已发送至你的邮箱',
+          color: 'success',
+          icon: 'i-lucide-mail',
+        })
       } else {
         error.value = response.message || '注册失败'
       }
@@ -155,7 +163,11 @@ const handleSubmit = async () => {
       if (response.success) {
         mode.value = 'login'
         resetForm()
-        successMsg.value = '邮箱验证成功，请登录'
+        toast.add({
+          title: '邮箱验证成功，请登录',
+          color: 'success',
+          icon: 'i-lucide-check-circle',
+        })
       } else {
         error.value = response.message || '验证失败'
       }
@@ -169,7 +181,11 @@ const handleSubmit = async () => {
         form.otp = ''
         form.newPassword = ''
         form.confirmNewPassword = ''
-        successMsg.value = '验证码已发送至你的邮箱'
+        toast.add({
+          title: '验证码已发送至你的邮箱',
+          color: 'info',
+          icon: 'i-lucide-mail',
+        })
       } else {
         error.value = response.message || '发送失败'
       }
@@ -182,7 +198,11 @@ const handleSubmit = async () => {
       if (response.success) {
         mode.value = 'login'
         resetForm()
-        successMsg.value = '密码重置成功，请登录'
+        toast.add({
+          title: '密码重置成功，请登录',
+          color: 'success',
+          icon: 'i-lucide-check-circle',
+        })
       } else {
         error.value = response.message || '重置失败'
       }
@@ -244,13 +264,6 @@ const handleSubmit = async () => {
             color="error"
             :title="error"
             icon="i-lucide-alert-circle"
-          />
-
-          <UAlert
-            v-if="successMsg"
-            color="success"
-            :title="successMsg"
-            icon="i-lucide-check-circle"
           />
 
           <!-- 注册表单 -->
@@ -388,13 +401,7 @@ const handleSubmit = async () => {
                 variant="link"
                 size="xs"
                 class="p-0"
-                @click="
-                  () => {
-                    mode = 'forgot'
-                    error = ''
-                    successMsg = ''
-                  }
-                "
+                @click="() => { mode = 'forgot'; error = '' }"
               >
                 忘记密码？
               </UButton>

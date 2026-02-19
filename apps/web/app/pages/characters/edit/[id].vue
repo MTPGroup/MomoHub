@@ -10,10 +10,11 @@ const route = useRoute()
 const characterId = route.params.id as string
 
 const { getCharacter, updateCharacter, uploadCharacterAvatar } = useCharacters()
+const toast = useToast()
 
 const loading = ref(false)
 const fetchLoading = ref(true)
-const error = ref('')
+const fetchError = ref('')
 const initialData = ref<UpdateCharacterRequest & { avatar?: string | null }>({
   name: '',
   bio: '',
@@ -40,10 +41,10 @@ onMounted(async () => {
       }
       avatarPreview.value = response.data.avatar || ''
     } else {
-      error.value = '加载角色失败'
+      fetchError.value = '加载角色失败'
     }
   } catch (e) {
-    error.value = getApiErrorMessage(e, '加载角色失败')
+    fetchError.value = getApiErrorMessage(e, '加载角色失败')
   } finally {
     fetchLoading.value = false
   }
@@ -59,7 +60,6 @@ const onAvatarChange = (e: Event) => {
 }
 
 const handleSubmit = async (data: UpdateCharacterRequest) => {
-  error.value = ''
   loading.value = true
 
   try {
@@ -70,7 +70,11 @@ const handleSubmit = async (data: UpdateCharacterRequest) => {
       const avatarResponse = await uploadCharacterAvatar(characterId, avatarFile.value)
       avatarUploading.value = false
       if (!avatarResponse.success) {
-        error.value = avatarResponse.message || '头像上传失败'
+        toast.add({
+          title: avatarResponse.message || '头像上传失败',
+          color: 'error',
+          icon: 'i-lucide-alert-circle',
+        })
         return
       }
       if (avatarResponse.data) {
@@ -82,10 +86,18 @@ const handleSubmit = async (data: UpdateCharacterRequest) => {
     if (response.success) {
       navigateTo(`/characters/${characterId}`)
     } else {
-      error.value = response.message || '更新失败'
+      toast.add({
+        title: response.message || '更新失败',
+        color: 'error',
+        icon: 'i-lucide-alert-circle',
+      })
     }
   } catch (e) {
-    error.value = getApiErrorMessage(e, '更新失败，请检查网络连接')
+    toast.add({
+      title: getApiErrorMessage(e, '更新失败，请检查网络连接'),
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
   } finally {
     loading.value = false
     avatarUploading.value = false
@@ -107,9 +119,9 @@ const handleSubmit = async (data: UpdateCharacterRequest) => {
     <h1 class="text-3xl font-bold mb-8">编辑角色</h1>
 
     <UAlert
-      v-if="error"
+      v-if="fetchError"
       color="error"
-      :title="error"
+      :title="fetchError"
       icon="i-lucide-alert-circle"
       class="mb-6"
     />

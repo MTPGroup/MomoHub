@@ -7,21 +7,28 @@ definePageMeta({
 })
 
 const { createCharacter } = useCharacters()
+const toast = useToast()
 const loading = ref(false)
-const error = ref('')
 
 const handleSubmit = async (data: CreateCharacterRequest) => {
-  error.value = ''
   loading.value = true
   try {
     const response = await createCharacter(data)
     if (response.success && response.data) {
       navigateTo(`/characters/${response.data.id}`)
     } else {
-      error.value = response.message || '创建失败'
+      toast.add({
+        title: response.message || '创建失败',
+        color: 'error',
+        icon: 'i-lucide-alert-circle',
+      })
     }
   } catch (e) {
-    error.value = getApiErrorMessage(e, '创建失败，请检查网络连接')
+    toast.add({
+      title: getApiErrorMessage(e, '创建失败，请检查网络连接'),
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
   } finally {
     loading.value = false
   }
@@ -40,14 +47,6 @@ const handleSubmit = async (data: CreateCharacterRequest) => {
     </UButton>
 
     <h1 class="text-3xl font-bold mb-8">创建角色</h1>
-
-    <UAlert
-      v-if="error"
-      color="error"
-      :title="error"
-      icon="i-lucide-alert-circle"
-      class="mb-6"
-    />
 
     <UCard>
       <CharactersForm

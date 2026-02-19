@@ -11,11 +11,12 @@ const knowledgeBaseId = route.params.id as string
 const { getKnowledgeBase, listFiles, deleteFile, deleteKnowledgeBase } =
   useKnowledge()
 const authStore = useAuthStore()
+const toast = useToast()
 
 const knowledgeBase = ref<KnowledgeBaseResponse | null>(null)
 const files = ref<KnowledgeFileResponse[]>([])
 const loading = ref(true)
-const error = ref('')
+const fetchError = ref('')
 
 const fetchData = async () => {
   try {
@@ -30,7 +31,7 @@ const fetchData = async () => {
       files.value = filesResponse.data
     }
   } catch (e) {
-    error.value = getApiErrorMessage(e, '加载知识库失败')
+    fetchError.value = getApiErrorMessage(e, '加载知识库失败')
   } finally {
     loading.value = false
   }
@@ -96,8 +97,17 @@ const handleDeleteFile = async (fileId: string) => {
   try {
     await deleteFile(knowledgeBaseId, fileId)
     files.value = files.value.filter((f) => f.id !== fileId)
+    toast.add({
+      title: '文件已删除',
+      color: 'success',
+      icon: 'i-lucide-check-circle',
+    })
   } catch (e) {
-    error.value = getApiErrorMessage(e, '删除文件失败')
+    toast.add({
+      title: getApiErrorMessage(e, '删除文件失败'),
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
   }
 }
 
@@ -107,7 +117,11 @@ const handleDelete = async () => {
     await deleteKnowledgeBase(knowledgeBaseId)
     navigateTo('/knowledge')
   } catch (e) {
-    error.value = getApiErrorMessage(e, '删除失败')
+    toast.add({
+      title: getApiErrorMessage(e, '删除失败'),
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
   }
 }
 
@@ -143,9 +157,9 @@ const handleFileUploaded = () => {
 
     <!-- 错误状态 -->
     <UAlert
-      v-else-if="error && !knowledgeBase"
+      v-else-if="fetchError && !knowledgeBase"
       color="error"
-      :title="error"
+      :title="fetchError"
       icon="i-lucide-alert-circle"
     />
 
@@ -197,14 +211,6 @@ const handleFileUploaded = () => {
           @uploaded="handleFileUploaded"
         />
       </UCard>
-
-      <!-- 错误提示 -->
-      <UAlert
-        v-if="error"
-        color="error"
-        :title="error"
-        icon="i-lucide-alert-circle"
-      />
 
       <!-- 文件列表 -->
       <UCard>

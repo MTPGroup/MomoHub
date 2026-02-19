@@ -11,9 +11,9 @@ const emit = defineEmits<{
 }>()
 
 const { uploadFile } = useKnowledge()
+const toast = useToast()
 
 const uploading = ref(false)
-const error = ref('')
 const fileInput = ref<HTMLInputElement>()
 
 const handleFileSelect = async (event: Event) => {
@@ -22,15 +22,23 @@ const handleFileSelect = async (event: Event) => {
   if (!files?.length) return
 
   uploading.value = true
-  error.value = ''
 
   try {
     for (const file of files) {
       await uploadFile(props.knowledgeBaseId, file)
     }
+    toast.add({
+      title: '文件上传成功',
+      color: 'success',
+      icon: 'i-lucide-check-circle',
+    })
     emit('uploaded')
   } catch (e) {
-    error.value = getApiErrorMessage(e, '上传失败')
+    toast.add({
+      title: getApiErrorMessage(e, '上传失败'),
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
   } finally {
     uploading.value = false
     if (fileInput.value) {
@@ -70,12 +78,5 @@ const triggerFileSelect = () => {
       </p>
     </div>
 
-    <UAlert
-      v-if="error"
-      color="error"
-      :title="error"
-      icon="i-lucide-alert-circle"
-      class="mt-4"
-    />
   </div>
 </template>

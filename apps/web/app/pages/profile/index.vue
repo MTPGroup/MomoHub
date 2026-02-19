@@ -13,6 +13,7 @@ definePageMeta({
 const authStore = useAuthStore()
 const { listCharacters } = useCharacters()
 const { listKnowledgeBases } = useKnowledge()
+const toast = useToast()
 
 const activeTab = ref('characters')
 const myCharacters = ref<CharacterResponse[]>([])
@@ -23,7 +24,6 @@ const loadingKnowledge = ref(true)
 // 编辑资料
 const showEditProfile = ref(false)
 const editProfileLoading = ref(false)
-const editProfileError = ref('')
 const editForm = reactive({
   username: '',
 })
@@ -35,7 +35,6 @@ const openEditProfile = () => {
   editForm.username = authStore.user?.username || ''
   avatarFile.value = null
   avatarPreview.value = authStore.user?.avatar || ''
-  editProfileError.value = ''
   showEditProfile.value = true
 }
 
@@ -49,7 +48,6 @@ const onAvatarChange = (e: Event) => {
 }
 
 const handleUpdateProfile = async () => {
-  editProfileError.value = ''
   editProfileLoading.value = true
   try {
     let avatarUrl = authStore.user?.avatar
@@ -58,7 +56,11 @@ const handleUpdateProfile = async () => {
       const avatarResponse = await authStore.uploadAvatar(avatarFile.value)
       avatarUploading.value = false
       if (!avatarResponse.success) {
-        editProfileError.value = avatarResponse.message || '头像上传失败'
+        toast.add({
+          title: avatarResponse.message || '头像上传失败',
+          color: 'error',
+          icon: 'i-lucide-alert-circle',
+        })
         return
       }
       if (avatarResponse.data) {
@@ -75,11 +77,24 @@ const handleUpdateProfile = async () => {
     })
     if (response.success) {
       showEditProfile.value = false
+      toast.add({
+        title: '资料更新成功',
+        color: 'success',
+        icon: 'i-lucide-check-circle',
+      })
     } else {
-      editProfileError.value = response.message || '更新失败'
+      toast.add({
+        title: response.message || '更新失败',
+        color: 'error',
+        icon: 'i-lucide-alert-circle',
+      })
     }
   } catch (e) {
-    editProfileError.value = getApiErrorMessage(e, '更新失败')
+    toast.add({
+      title: getApiErrorMessage(e, '更新失败'),
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
   } finally {
     editProfileLoading.value = false
     avatarUploading.value = false
@@ -89,15 +104,17 @@ const handleUpdateProfile = async () => {
 // 注销账号
 const showDeleteAccount = ref(false)
 const deleteAccountLoading = ref(false)
-const deleteAccountError = ref('')
 
 const handleDeleteAccount = async () => {
-  deleteAccountError.value = ''
   deleteAccountLoading.value = true
   try {
     await authStore.deleteAccount()
   } catch (e) {
-    deleteAccountError.value = getApiErrorMessage(e, '注销失败，请稍后重试')
+    toast.add({
+      title: getApiErrorMessage(e, '注销失败，请稍后重试'),
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
     deleteAccountLoading.value = false
   }
 }
@@ -105,8 +122,6 @@ const handleDeleteAccount = async () => {
 // 修改密码
 const showChangePassword = ref(false)
 const changePasswordLoading = ref(false)
-const changePasswordError = ref('')
-const changePasswordSuccess = ref('')
 const passwordForm = reactive({
   oldPassword: '',
   newPassword: '',
@@ -117,17 +132,16 @@ const openChangePassword = () => {
   passwordForm.oldPassword = ''
   passwordForm.newPassword = ''
   passwordForm.confirmNewPassword = ''
-  changePasswordError.value = ''
-  changePasswordSuccess.value = ''
   showChangePassword.value = true
 }
 
 const handleChangePassword = async () => {
-  changePasswordError.value = ''
-  changePasswordSuccess.value = ''
-
   if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
-    changePasswordError.value = '两次输入的密码不一致'
+    toast.add({
+      title: '两次输入的密码不一致',
+      color: 'warning',
+      icon: 'i-lucide-alert-triangle',
+    })
     return
   }
 
@@ -138,15 +152,25 @@ const handleChangePassword = async () => {
       newPassword: passwordForm.newPassword,
     })
     if (response.success) {
-      changePasswordSuccess.value = '密码修改成功'
-      setTimeout(() => {
-        showChangePassword.value = false
-      }, 1000)
+      showChangePassword.value = false
+      toast.add({
+        title: '密码修改成功',
+        color: 'success',
+        icon: 'i-lucide-check-circle',
+      })
     } else {
-      changePasswordError.value = response.message || '修改失败'
+      toast.add({
+        title: response.message || '修改失败',
+        color: 'error',
+        icon: 'i-lucide-alert-circle',
+      })
     }
   } catch (e) {
-    changePasswordError.value = getApiErrorMessage(e, '修改密码失败')
+    toast.add({
+      title: getApiErrorMessage(e, '修改密码失败'),
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
   } finally {
     changePasswordLoading.value = false
   }
@@ -381,12 +405,6 @@ const tabs = [
           </label>
 
           <form class="space-y-4" @submit="handleUpdateProfile">
-            <UAlert
-              v-if="editProfileError"
-              color="error"
-              :title="editProfileError"
-              icon="i-lucide-alert-circle"
-            />
             <UFormField label="用户名">
               <UInput
                 v-model="editForm.username"
@@ -416,19 +434,6 @@ const tabs = [
         <div class="p-6">
           <h2 class="text-xl font-bold text-center mb-6">修改密码</h2>
           <form class="space-y-4" @submit.prevent="handleChangePassword">
-            <UAlert
-              v-if="changePasswordError"
-              color="error"
-              :title="changePasswordError"
-              icon="i-lucide-alert-circle"
-            />
-            <UAlert
-              v-if="changePasswordSuccess"
-              color="success"
-              :title="changePasswordSuccess"
-              icon="i-lucide-check-circle"
-            />
-
             <UFormField label="当前密码">
               <UInput
                 v-model="passwordForm.oldPassword"
@@ -480,12 +485,6 @@ const tabs = [
       <template #content>
         <div class="p-6 space-y-4">
           <h2 class="text-xl font-bold text-center text-red-500">注销账号</h2>
-          <UAlert
-            v-if="deleteAccountError"
-            color="error"
-            :title="deleteAccountError"
-            icon="i-lucide-alert-circle"
-          />
           <p class="text-sm text-gray-600 dark:text-gray-400">
             此操作将<strong>永久删除</strong>您的账号及所有相关数据，包括角色、知识库和聊天记录。此操作不可撤销。
           </p>
