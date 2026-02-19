@@ -29,6 +29,20 @@ const form = reactive<CreateCharacterRequest>({
   isPublic: props.initialData.isPublic ?? true,
 })
 
+// 监听 initialData 变化，更新表单
+watch(
+  () => props.initialData,
+  (newData) => {
+    if (newData) {
+      form.name = newData.name
+      form.bio = newData.bio
+      form.originPrompt = newData.originPrompt
+      form.isPublic = newData.isPublic ?? true
+    }
+  },
+  { deep: true },
+)
+
 const handleSubmit = () => {
   emit('submit', { ...form })
 }
@@ -71,9 +85,9 @@ const handleSubmit = () => {
     </UFormField>
 
     <div class="flex gap-3 justify-end">
-      <UButton variant="ghost" color="neutral" @click="$router.back()">
+      <!-- <UButton variant="ghost" color="neutral" @click="$router.back()">
         取消
-      </UButton>
+      </UButton> -->
       <UButton type="submit" :loading="loading">
         {{ submitLabel }}
       </UButton>
