@@ -24,7 +24,6 @@ const loadingKnowledge = ref(true)
 const showEditProfile = ref(false)
 const editProfileLoading = ref(false)
 const editProfileError = ref('')
-const editProfileSuccess = ref('')
 const editForm = reactive({
   username: '',
 })
@@ -37,7 +36,6 @@ const openEditProfile = () => {
   avatarFile.value = null
   avatarPreview.value = authStore.user?.avatar || ''
   editProfileError.value = ''
-  editProfileSuccess.value = ''
   showEditProfile.value = true
 }
 
@@ -52,7 +50,6 @@ const onAvatarChange = (e: Event) => {
 
 const handleUpdateProfile = async () => {
   editProfileError.value = ''
-  editProfileSuccess.value = ''
   editProfileLoading.value = true
   try {
     let avatarUrl = authStore.user?.avatar
@@ -77,10 +74,7 @@ const handleUpdateProfile = async () => {
       avatar: avatarUrl,
     })
     if (response.success) {
-      editProfileSuccess.value = '个人信息已更新'
-      setTimeout(() => {
-        showEditProfile.value = false
-      }, 1000)
+      showEditProfile.value = false
     } else {
       editProfileError.value = response.message || '更新失败'
     }
@@ -386,20 +380,13 @@ const tabs = [
             />
           </label>
 
-          <form class="space-y-4" @submit.prevent="handleUpdateProfile">
+          <form class="space-y-4" @submit="handleUpdateProfile">
             <UAlert
               v-if="editProfileError"
               color="error"
               :title="editProfileError"
               icon="i-lucide-alert-circle"
             />
-            <UAlert
-              v-if="editProfileSuccess"
-              color="success"
-              :title="editProfileSuccess"
-              icon="i-lucide-check-circle"
-            />
-
             <UFormField label="用户名">
               <UInput
                 v-model="editForm.username"
@@ -424,8 +411,8 @@ const tabs = [
     </UModal>
 
     <!-- 修改密码弹窗 -->
-    <UModal v-model:open="showChangePassword">
-      <template #content>
+    <UModal :modal="showChangePassword">
+      <template #body>
         <div class="p-6">
           <h2 class="text-xl font-bold text-center mb-6">修改密码</h2>
           <form class="space-y-4" @submit.prevent="handleChangePassword">
