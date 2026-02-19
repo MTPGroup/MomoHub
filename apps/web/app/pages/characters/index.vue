@@ -2,7 +2,9 @@
 import type { CharacterResponse, PagedResponse } from '@momohub/types'
 import { getApiErrorMessage } from '@momohub/types'
 
-const { listPublicCharacters, searchCharacters } = useCharacters()
+const { listPublicCharacters, listCharacters, searchCharacters } =
+  useCharacters()
+const authStore = useAuthStore()
 
 const searchQuery = ref('')
 const page = ref(1)
@@ -13,6 +15,30 @@ const total = ref(0)
 const totalPages = ref(0)
 const loading = ref(true)
 const error = ref('')
+
+// 已登录时，用户自己的私有角色（单独抓取，不影响分页）
+const ownPrivateCharacters = ref<CharacterResponse[]>([])
+
+// 搜索时后端已合并私有结果，浏览模式才需单独展示私有区块
+const filteredPrivateCharacters = computed(() =>
+  searchQuery.value ? [] : ownPrivateCharacters.value,
+)
+
+const fetchOwnPrivateCharacters = async () => {
+  if (!authStore.isLoggedIn) {
+    ownPrivateCharacters.value = []
+    return
+  }
+  try {
+    const response = await listCharacters({ limit: 100 })
+    if (response.success && response.data) {
+      const data = response.data as PagedResponse<CharacterResponse>
+      ownPrivateCharacters.value = data.items.filter((c) => !c.isPublic)
+    }
+  } catch {
+    // 静默失败，不影响主列表
+  }
+}
 
 let loadingTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -79,7 +105,12 @@ watch(searchQuery, (newQuery, oldQuery) => {
   }, 300)
 })
 
-onMounted(fetchCharacters)
+// 登录状态变化时重新获取私有角色
+watch(() => authStore.isLoggedIn, fetchOwnPrivateCharacters)
+
+onMounted(() => {
+  Promise.all([fetchOwnPrivateCharacters(), fetchCharacters()])
+})
 </script>
 
 <template>
@@ -116,6 +147,25 @@ onMounted(fetchCharacters)
       class="mb-6"
     />
 
+    <!-- 我的私有角色（登录后才显示） -->
+    <template v-if="filteredPrivateCharacters.length > 0">
+      <div class="flex items-center gap-2 mb-4">
+        <UIcon name="i-lucide-lock" class="text-amber-500" />
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+          我的私有角色
+        </span>
+        <UBadge color="warning" variant="subtle" size="xs">
+          {{ filteredPrivateCharacters.length }}
+        </UBadge>
+      </div>
+      <CharactersList :characters="filteredPrivateCharacters" class="mb-8" />
+      <UDivider
+        v-if="!loading && characters.length > 0"
+        label="公开角色"
+        class="mb-6"
+      />
+    </template>
+
     <!-- 初始加载状态 - 骨架屏 -->
     <div
       v-if="loading"
@@ -143,8 +193,11 @@ onMounted(fetchCharacters)
       </div>
     </div>
 
-    <!-- 空状态 -->
-    <div v-else class="text-center py-16">
+    <!-- 空状态（公开列表为空且无私有角色） -->
+    <div
+      v-else-if="!loading && filteredPrivateCharacters.length === 0"
+      class="text-center py-16"
+    >
       <UIcon
         :name="searchQuery ? 'i-lucide-search-x' : 'i-lucide-users'"
         class="text-6xl text-gray-300 mx-auto mb-4"

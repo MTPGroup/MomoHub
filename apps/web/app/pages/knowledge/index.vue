@@ -2,7 +2,8 @@
 import type { KnowledgeBaseResponse, PagedResponse } from '@momohub/types'
 import { getApiErrorMessage } from '@momohub/types'
 
-const { listPublicKnowledgeBases, searchKnowledgeBases } = useKnowledge()
+const { listPublicKnowledgeBases, listKnowledgeBases, searchKnowledgeBases } = useKnowledge()
+const authStore = useAuthStore()
 
 const searchQuery = ref('')
 const page = ref(1)
@@ -13,6 +14,30 @@ const total = ref(0)
 const totalPages = ref(0)
 const loading = ref(true)
 const error = ref('')
+
+// 已登录时，用户自己的私有知识库（单独抓取，不影响分页）
+const ownPrivateKnowledgeBases = ref<KnowledgeBaseResponse[]>([])
+
+// 搜索时后端已合并私有结果，浏览模式才需单独展示私有区块
+const filteredPrivateKnowledgeBases = computed(() =>
+  searchQuery.value ? [] : ownPrivateKnowledgeBases.value,
+)
+
+const fetchOwnPrivateKnowledgeBases = async () => {
+  if (!authStore.isLoggedIn) {
+    ownPrivateKnowledgeBases.value = []
+    return
+  }
+  try {
+    const response = await listKnowledgeBases({ limit: 200 })
+    if (response.success && response.data) {
+      const data = response.data as PagedResponse<KnowledgeBaseResponse>
+      ownPrivateKnowledgeBases.value = data.items.filter((kb) => !kb.isPublic)
+    }
+  } catch {
+    // 静默失败，不影响主列表
+  }
+}
 
 let loadingTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -79,7 +104,12 @@ watch(searchQuery, (newQuery, oldQuery) => {
   }, 300)
 })
 
-onMounted(fetchData)
+// 登录状态变化时重新获取私有知识库
+watch(() => authStore.isLoggedIn, fetchOwnPrivateKnowledgeBases)
+
+onMounted(() => {
+  Promise.all([fetchOwnPrivateKnowledgeBases(), fetchData()])
+})
 </script>
 
 <template>
@@ -112,6 +142,25 @@ onMounted(fetchData)
       class="mb-6"
     />
 
+    <!-- 我的私有知识库（登录后才显示） -->
+    <template v-if="filteredPrivateKnowledgeBases.length > 0">
+      <div class="flex items-center gap-2 mb-4">
+        <UIcon name="i-lucide-lock" class="text-amber-500" />
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+          我的私有知识库
+        </span>
+        <UBadge color="warning" variant="subtle" size="xs">
+          {{ filteredPrivateKnowledgeBases.length }}
+        </UBadge>
+      </div>
+      <KnowledgeList :knowledge-bases="filteredPrivateKnowledgeBases" class="mb-8" />
+      <UDivider
+        v-if="!loading && knowledgeBases.length > 0"
+        label="公开知识库"
+        class="mb-6"
+      />
+    </template>
+
     <!-- 初始加载状态 - 骨架屏 -->
     <div
       v-if="loading"
@@ -137,8 +186,11 @@ onMounted(fetchData)
       </div>
     </div>
 
-    <!-- 空状态 -->
-    <div v-else class="text-center py-16">
+    <!-- 空状态（公开列表为空且无私有知识库） -->
+    <div
+      v-else-if="!loading && filteredPrivateKnowledgeBases.length === 0"
+      class="text-center py-16"
+    >
       <UIcon
         :name="searchQuery ? 'i-lucide-search-x' : 'i-lucide-book-open'"
         class="text-6xl text-gray-300 mx-auto mb-4"
