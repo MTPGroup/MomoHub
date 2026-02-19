@@ -9,6 +9,7 @@ import type {
   SuccessResponse,
   TokenResponse,
   UpdateProfileRequest,
+  UploadAvatarResponse,
   UserProfile,
   VerifyOTPRequest,
 } from '@momohub/types'
@@ -177,7 +178,7 @@ export const useAuthStore = defineStore('auth', () => {
   const uploadAvatar = async (file: File) => {
     const formData = new FormData()
     formData.append('avatar', file)
-    const response = await $fetch<ApiResponse<UserProfile>>(
+    const response = await $fetch<ApiResponse<UploadAvatarResponse>>(
       `${baseURL}/auth/me/avatar`,
       {
         method: 'PUT',
@@ -185,9 +186,6 @@ export const useAuthStore = defineStore('auth', () => {
         body: formData,
       },
     )
-    if (response.success && response.data) {
-      user.value = response.data
-    }
     return response
   }
 

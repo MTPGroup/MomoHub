@@ -63,14 +63,22 @@ const handleSubmit = async (data: UpdateCharacterRequest) => {
   loading.value = true
 
   try {
-    // 如果选择了新头像，先上传
+    let avatarUrl: string | null | undefined = initialData.value.avatar
+
     if (avatarFile.value) {
       avatarUploading.value = true
-      await uploadCharacterAvatar(characterId, avatarFile.value)
+      const avatarResponse = await uploadCharacterAvatar(characterId, avatarFile.value)
       avatarUploading.value = false
+      if (!avatarResponse.success) {
+        error.value = avatarResponse.message || '头像上传失败'
+        return
+      }
+      if (avatarResponse.data) {
+        avatarUrl = avatarResponse.data.avatar
+      }
     }
 
-    const response = await updateCharacter(characterId, data)
+    const response = await updateCharacter(characterId, { ...data, avatar: avatarUrl })
     if (response.success) {
       navigateTo(`/characters/${characterId}`)
     } else {

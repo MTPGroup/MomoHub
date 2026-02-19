@@ -5,6 +5,7 @@ import type {
   PagedResponse,
   SubscribeKnowledgeBaseRequest,
   UpdateCharacterRequest,
+  UploadAvatarResponse,
 } from '@momohub/types'
 
 export const useCharacters = () => {
@@ -31,10 +32,7 @@ export const useCharacters = () => {
     })
   }
 
-  const listCharacters = async (params?: {
-    page?: number
-    limit?: number
-  }) => {
+  const listCharacters = async (params?: { page?: number; limit?: number }) => {
     return api<PagedResponse<CharacterResponse>>('/characters', { params })
   }
 
@@ -65,16 +63,13 @@ export const useCharacters = () => {
   const uploadCharacterAvatar = async (characterId: string, file: File) => {
     const formData = new FormData()
     formData.append('file', file)
-    return $fetch<CharacterResponse>(
-      `${config.public.apiBaseUrl}/characters/${characterId}/avatar`,
-      {
-        method: 'PUT',
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${accessToken.value}`,
-        },
+    return api<UploadAvatarResponse>(`/characters/${characterId}/avatar`, {
+      method: 'PUT',
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${accessToken.value}`,
       },
-    )
+    })
   }
 
   const listCharacterKnowledgeBases = async (characterId: string) => {

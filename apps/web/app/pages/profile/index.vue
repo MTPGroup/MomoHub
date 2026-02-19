@@ -55,7 +55,7 @@ const handleUpdateProfile = async () => {
   editProfileSuccess.value = ''
   editProfileLoading.value = true
   try {
-    // 如果选择了新头像，先上传
+    let avatarUrl = authStore.user?.avatar
     if (avatarFile.value) {
       avatarUploading.value = true
       const avatarResponse = await authStore.uploadAvatar(avatarFile.value)
@@ -64,10 +64,17 @@ const handleUpdateProfile = async () => {
         editProfileError.value = avatarResponse.message || '头像上传失败'
         return
       }
+      if (avatarResponse.data) {
+        avatarUrl = avatarResponse.data.avatar
+        if (authStore.user) {
+          authStore.user.avatar = avatarResponse.data.avatar
+        }
+      }
     }
 
     const response = await authStore.updateProfile({
       username: editForm.username,
+      avatar: avatarUrl,
     })
     if (response.success) {
       editProfileSuccess.value = '个人信息已更新'

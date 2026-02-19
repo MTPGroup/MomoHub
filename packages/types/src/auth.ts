@@ -59,6 +59,7 @@ export interface ChangePasswordRequest {
 
 export interface UpdateProfileRequest {
   username?: string
+  avatar?: string | null
 }
 
 export enum OtpType {
