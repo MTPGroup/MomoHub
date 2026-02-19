@@ -194,12 +194,14 @@ const openEditModal = () => {
           </template>
           <div class="space-y-3">
             <UButton
+              v-if="isOwner"
               block
-              color="primary"
-              icon="i-lucide-message-circle"
-              size="lg"
+              variant="outline"
+              color="warning"
+              icon="i-lucide-flask-conical"
+              :to="`/characters/test/${character.id}`"
             >
-              开始对话
+              测试角色
             </UButton>
             <UButton
               v-if="isOwner"
