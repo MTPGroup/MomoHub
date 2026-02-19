@@ -4,20 +4,47 @@ import { getApiErrorMessage } from '@momohub/types'
 
 const route = useRoute()
 const characterId = route.params.id as string
-const { getCharacter, deleteCharacter } = useCharacters()
+const { getCharacter, deleteCharacter, listCharacterKnowledgeBases } =
+  useCharacters()
+const { listKnowledgeBases } = useKnowledge()
 const authStore = useAuthStore()
 
 const character = ref<CharacterResponse | null>(null)
 const loading = ref(true)
 const error = ref('')
+const knowledgeBases = ref<{ id: string; name: string }[]>([])
 
 const fetchData = async () => {
   try {
-    const response = await getCharacter(characterId)
-    if (response.success && response.data) {
-      character.value = response.data
+    const [charResponse, kbResponse] = await Promise.all([
+      getCharacter(characterId),
+      listCharacterKnowledgeBases(characterId),
+    ])
+
+    if (charResponse.success && charResponse.data) {
+      character.value = charResponse.data
     } else {
       error.value = '角色不存在'
+      loading.value = false
+      return
+    }
+
+    // 获取知识库订阅信息
+    if (kbResponse.success && kbResponse.data) {
+      // 获取所有知识库信息来匹配名称
+      const allKbResponse = await listKnowledgeBases({ limit: 100 })
+      if (allKbResponse.success && allKbResponse.data) {
+        const allKbs = (
+          allKbResponse.data as { items: { id: string; name: string }[] }
+        ).items
+        knowledgeBases.value = kbResponse.data.map((sub) => {
+          const kb = allKbs.find((k) => k.id === sub.knowledgeBaseId)
+          return {
+            id: sub.knowledgeBaseId,
+            name: kb?.name || '未知知识库',
+          }
+        })
+      }
     }
   } catch (e) {
     error.value = getApiErrorMessage(e, '加载角色失败')
@@ -54,6 +81,17 @@ const handleDelete = async () => {
   } catch (e) {
     error.value = getApiErrorMessage(e, '删除失败')
   }
+}
+
+const showKnowledgeSubscription = ref(false)
+const showEditModal = ref(false)
+
+const openKnowledgeSubscription = () => {
+  showKnowledgeSubscription.value = true
+}
+
+const openEditModal = () => {
+  showEditModal.value = true
 }
 </script>
 
@@ -168,12 +206,22 @@ const handleDelete = async () => {
             </UButton>
             <UButton
               v-if="isOwner"
-              :to="`/characters/edit/${character.id}`"
               block
               variant="outline"
               icon="i-lucide-edit"
+              @click="openEditModal"
             >
               编辑
+            </UButton>
+            <UButton
+              v-if="isOwner"
+              block
+              variant="outline"
+              color="info"
+              icon="i-lucide-book-open"
+              @click="openKnowledgeSubscription"
+            >
+              管理知识库订阅
             </UButton>
             <UButton
               v-if="isOwner"
@@ -186,6 +234,32 @@ const handleDelete = async () => {
               删除
             </UButton>
           </div>
+        </UCard>
+
+        <!-- 已订阅的知识库 -->
+        <UCard>
+          <template #header>
+            <div class="flex items-center gap-2">
+              <UIcon name="i-lucide-book-open" />
+              <h3 class="text-lg font-semibold">已订阅的知识库</h3>
+            </div>
+          </template>
+          <div v-if="knowledgeBases.length > 0" class="space-y-2">
+            <div
+              v-for="kb in knowledgeBases"
+              :key="kb.id"
+              class="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"
+            >
+              <UIcon name="i-lucide-book-open" class="text-gray-400" />
+              <NuxtLink
+                :to="`/knowledge/${kb.id}`"
+                class="text-sm hover:text-primary transition-colors"
+              >
+                {{ kb.name }}
+              </NuxtLink>
+            </div>
+          </div>
+          <p v-else class="text-sm text-gray-500">尚未订阅任何知识库</p>
         </UCard>
 
         <UCard>
@@ -206,4 +280,23 @@ const handleDelete = async () => {
       </div>
     </div>
   </UContainer>
+
+  <!-- 知识库订阅 Modal -->
+  <CharactersKnowledgeSubscriptionModal
+    v-if="character"
+    v-model:open="showKnowledgeSubscription"
+    :character-id="characterId"
+    :character-name="character.name"
+    @subscribed="fetchData"
+    @unsubscribed="fetchData"
+  />
+
+  <!-- 编辑角色 Modal -->
+  <CharactersEditModal
+    v-if="character"
+    v-model:open="showEditModal"
+    :character-id="characterId"
+    :character-name="character.name"
+    @updated="fetchData"
+  />
 </template>

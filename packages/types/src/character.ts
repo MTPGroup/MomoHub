@@ -27,7 +27,7 @@ export interface UpdateCharacterRequest {
 }
 
 export interface KnowledgeSubscriptionResponse {
-  knowledgeBaseId: unknown
+  knowledgeBaseId: string
   priority: number
 }
 
