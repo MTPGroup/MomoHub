@@ -601,7 +601,7 @@ onMounted(loadData)
               placeholder="输入消息..."
               :rows="1"
               :max-rows="4"
-              class="flex-1 resize-none min-h-[40px]"
+              class="flex-1 resize-none min-h-10"
               @keydown="
                 (e: KeyboardEvent) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
