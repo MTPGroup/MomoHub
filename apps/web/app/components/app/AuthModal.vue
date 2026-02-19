@@ -8,9 +8,9 @@ const toast = useToast()
 
 const open = defineModel<boolean>({ default: false })
 
-const mode = ref<'login' | 'register' | 'verify' | 'forgot' | 'reset-password'>(
-  'login',
-)
+type AuthMode = 'login' | 'register' | 'verify' | 'forgot' | 'reset-password'
+
+const mode = ref<AuthMode>('login')
 
 // 监听登录状态变化，退出登录后自动清空表单
 watch(
@@ -48,7 +48,7 @@ const resetForm = () => {
   error.value = ''
 }
 
-const switchMode = (newMode: 'login' | 'register') => {
+const switchMode = (newMode: AuthMode) => {
   mode.value = newMode
   resetForm()
 }
@@ -156,6 +156,30 @@ const handleSubmit = async () => {
         error.value = response.message || '注册失败'
       }
     } else if (mode.value === 'verify') {
+      // 如果没有输入验证码，先发送验证码
+      if (!form.otp) {
+        try {
+          const response = await authStore.sendOtp({
+            email: form.email,
+            type: OtpType.VERIFY_EMAIL,
+          })
+          if (response.success) {
+            toast.add({
+              title: '验证码已发送至你的邮箱，请查收',
+              color: 'info',
+              icon: 'i-lucide-mail',
+            })
+          } else {
+            error.value = response.message || '发送验证码失败'
+          }
+        } catch (e) {
+          error.value = getApiErrorMessage(e, '发送验证码失败')
+        }
+        loading.value = false
+        return
+      }
+
+      // 验证 OTP
       const response = await authStore.verifyEmail({
         email: form.email,
         otp: form.otp,
@@ -250,7 +274,9 @@ const handleSubmit = async () => {
               {
                 login: '登录你的 MomoHub 账号',
                 register: '创建你的 MomoHub 账号',
-                verify: `验证码已发送至 ${form.email}`,
+                verify: form.email
+                  ? `验证码已发送至 ${form.email}`
+                  : '输入邮箱以接收验证码',
                 forgot: '输入注册邮箱以接收验证码',
                 'reset-password': `验证码已发送至 ${form.email}`,
               }[mode]
@@ -323,6 +349,18 @@ const handleSubmit = async () => {
 
           <!-- 邮箱验证码输入 -->
           <template v-if="mode === 'verify' || mode === 'reset-password'">
+            <!-- 验证邮箱模式：允许手动输入邮箱 -->
+            <UFormField v-if="mode === 'verify'" label="邮箱">
+              <UInput
+                v-model="form.email"
+                type="email"
+                placeholder="your@email.com"
+                icon="i-lucide-mail"
+                required
+                class="w-full"
+              />
+            </UFormField>
+
             <UFormField label="验证码">
               <UInput
                 v-model="form.otp"
@@ -372,13 +410,15 @@ const handleSubmit = async () => {
 
           <UButton type="submit" block size="lg" :loading="loading">
             {{
-              {
-                login: '登录',
-                register: '注册',
-                verify: '验证',
-                forgot: '发送验证码',
-                'reset-password': '重置密码',
-              }[mode]
+              mode === 'verify' && !form.otp
+                ? '发送验证码'
+                : {
+                    login: '登录',
+                    register: '注册',
+                    verify: '验证',
+                    forgot: '发送验证码',
+                    'reset-password': '重置密码',
+                  }[mode]
             }}
           </UButton>
         </form>
@@ -401,9 +441,18 @@ const handleSubmit = async () => {
                 variant="link"
                 size="xs"
                 class="p-0"
-                @click="() => { mode = 'forgot'; error = '' }"
+                @click="switchMode('forgot')"
               >
                 忘记密码？
+              </UButton>
+              <span class="mx-2 text-gray-300">|</span>
+              <UButton
+                variant="link"
+                size="xs"
+                class="p-0"
+                @click="switchMode('verify')"
+              >
+                验证邮箱
               </UButton>
             </p>
           </template>
