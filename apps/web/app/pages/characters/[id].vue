@@ -6,7 +6,7 @@ const route = useRoute()
 const characterId = route.params.id as string
 const { getCharacter, deleteCharacter, listCharacterKnowledgeBases } =
   useCharacters()
-const { listKnowledgeBases } = useKnowledge()
+const { listPublicKnowledgeBases } = useKnowledge()
 const authStore = useAuthStore()
 
 const character = ref<CharacterResponse | null>(null)
@@ -32,7 +32,7 @@ const fetchData = async () => {
     // 获取知识库订阅信息
     if (kbResponse.success && kbResponse.data) {
       // 获取所有知识库信息来匹配名称
-      const allKbResponse = await listKnowledgeBases({ limit: 100 })
+      const allKbResponse = await listPublicKnowledgeBases({ limit: 100 })
       if (allKbResponse.success && allKbResponse.data) {
         const allKbs = (
           allKbResponse.data as { items: { id: string; name: string }[] }
@@ -188,13 +188,12 @@ const openEditModal = () => {
 
       <!-- 右侧：操作面板 -->
       <div class="space-y-6">
-        <UCard>
+        <UCard v-if="isOwner">
           <template #header>
             <h3 class="text-lg font-semibold">操作</h3>
           </template>
           <div class="space-y-3">
             <UButton
-              v-if="isOwner"
               block
               variant="outline"
               color="warning"
