@@ -1,8 +1,14 @@
+export interface AuthorProfileResponse {
+  id: string
+  name: string
+  avatar: string | null
+}
+
 export interface KnowledgeBaseResponse {
   id: string
   name: string
   description: string | null
-  authorId: string
+  author: AuthorProfileResponse | null
   isPublic: boolean
   createdAt: string
   updatedAt: string

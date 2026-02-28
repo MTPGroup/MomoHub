@@ -39,7 +39,14 @@ const formatDate = (date: string) => {
           <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
             {{ knowledgeBase.description || '暂无描述' }}
           </p>
-          <div class="flex items-center gap-2 mt-3">
+        </div>
+      </div>
+
+      <!-- 底部信息栏 -->
+      <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+        <div class="flex items-center justify-between">
+          <!-- 左侧：状态标签 + 日期 -->
+          <div class="flex items-center gap-2">
             <UBadge
               v-if="knowledgeBase.isPublic"
               size="xs"
@@ -53,6 +60,21 @@ const formatDate = (date: string) => {
             </UBadge>
             <span class="text-xs text-gray-400 dark:text-gray-500">
               {{ formatDate(knowledgeBase.createdAt) }}
+            </span>
+          </div>
+
+          <!-- 右侧：作者信息 -->
+          <div
+            v-if="knowledgeBase.author"
+            class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400"
+          >
+            <UAvatar
+              :src="knowledgeBase.author.avatar || undefined"
+              :alt="knowledgeBase.author.name"
+              size="2xs"
+            />
+            <span class="text-xs max-w-20 truncate">
+              {{ knowledgeBase.author.name }}
             </span>
           </div>
         </div>

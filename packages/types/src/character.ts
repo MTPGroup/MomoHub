@@ -1,6 +1,12 @@
+export interface AuthorProfileResponse {
+  id: string
+  name: string
+  avatar: string | null
+}
+
 export interface CharacterResponse {
   id: string
-  authorId: string
+  author: AuthorProfileResponse | null
   name: string
   avatar: string | null
   bio: string | null
