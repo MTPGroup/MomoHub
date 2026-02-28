@@ -1,8 +1,4 @@
-export interface AuthorProfileResponse {
-  id: string
-  name: string
-  avatar: string | null
-}
+import type { AuthorProfileResponse } from './character'
 
 export interface KnowledgeBaseResponse {
   id: string

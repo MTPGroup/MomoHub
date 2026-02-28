@@ -44,7 +44,8 @@ const isOwner = computed(() => {
   return (
     authStore.user &&
     knowledgeBase.value &&
-    authStore.user.userId === knowledgeBase.value.authorId
+    knowledgeBase.value.author &&
+    authStore.user.userId === knowledgeBase.value.author.id
   )
 })
 

@@ -59,7 +59,7 @@ const isOwner = computed(() => {
   return (
     authStore.user &&
     character.value &&
-    authStore.user.userId === character.value.authorId
+    authStore.user.userId === character.value.author?.id
   )
 })
 
