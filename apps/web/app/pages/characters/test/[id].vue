@@ -35,7 +35,7 @@ const isStreaming = ref(false)
 const streamingContent = ref('')
 const loading = ref(true)
 const showSidebar = ref(false)
-const savingConfig = ref(false)
+const _savingConfig = ref(false)
 
 const uiMessages = computed(() => {
   return messages.value.map((m) => {
@@ -45,7 +45,7 @@ const uiMessages = computed(() => {
     } else if (Array.isArray(m.content)) {
       textContent = m.content.find((c) => c.type === 'text')?.content || ''
     } else if (typeof m.content === 'object' && m.content !== null) {
-      textContent = (m.content as any).text || (m.content as any).content || ''
+      textContent = (m.content as { text?: string; content?: string }).text || (m.content as { text?: string; content?: string }).content || ''
     }
 
     return {
@@ -111,9 +111,9 @@ const loadData = async () => {
         systemPrompt: chatConfig.systemPrompt,
       })
     }
-  } catch (e) {
+  } catch (_e) {
     toast.add({
-      title: getApiErrorMessage(e, '加载失败'),
+      title: getApiErrorMessage(_e, '加载失败'),
       color: 'error',
       icon: 'i-lucide-alert-circle',
     })
@@ -195,7 +195,7 @@ const handleSendMessage = async () => {
         messages.value.push(response.data)
       }
     }
-  } catch (e) {
+  } catch {
     if (aiMessagePushed) {
       messages.value.pop()
     }

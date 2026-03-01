@@ -10,7 +10,6 @@ import type {
 
 export const useCharacters = () => {
   const { api } = useAzusaApi()
-  const config = useRuntimeConfig()
   const accessToken = useCookie('auth_access_token')
 
   const listPublicCharacters = async (params?: {

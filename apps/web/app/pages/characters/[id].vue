@@ -96,7 +96,8 @@ const openEditModal = () => {
 </script>
 
 <template>
-  <UContainer class="py-8">
+  <div>
+    <UContainer class="py-8">
     <!-- 返回按钮 -->
     <UButton
       to="/characters"
@@ -297,4 +298,5 @@ const openEditModal = () => {
     :character-name="character.name"
     @updated="fetchData"
   />
+  </div>
 </template>
