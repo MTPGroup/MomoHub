@@ -35,7 +35,6 @@ const isStreaming = ref(false)
 const streamingContent = ref('')
 const loading = ref(true)
 const showSidebar = ref(false)
-const _savingConfig = ref(false)
 
 const uiMessages = computed(() => {
   return messages.value.map((m) => {
@@ -45,7 +44,10 @@ const uiMessages = computed(() => {
     } else if (Array.isArray(m.content)) {
       textContent = m.content.find((c) => c.type === 'text')?.content || ''
     } else if (typeof m.content === 'object' && m.content !== null) {
-      textContent = (m.content as { text?: string; content?: string }).text || (m.content as { text?: string; content?: string }).content || ''
+      textContent =
+        (m.content as { text?: string; content?: string }).text ||
+        (m.content as { text?: string; content?: string }).content ||
+        ''
     }
 
     return {
@@ -243,7 +245,7 @@ const resetConfig = () => {
     chatConfig.systemPrompt = character.value.originPrompt || ''
   }
   chatConfig.temperature = 0.7
-  chatConfig.maxTokens = 2048
+  chatConfig.maxTokens = 23768
   chatConfig.topP = 1
 }
 
@@ -277,24 +279,6 @@ const exportConversation = () => {
     icon: 'i-lucide-check-circle',
   })
 }
-
-// watch(
-//   () => messages.value,
-//   (newVal) => {
-//     console.log('=== messages 变化 ===', newVal.length, '条消息')
-//     newVal.forEach((m, i) => {
-//       console.log(
-//         `消息 ${i}:`,
-//         m.id,
-//         m.senderType,
-//         typeof m.content === 'object'
-//           ? (m.content as any).text?.substring(0, 30)
-//           : m.content,
-//       )
-//     })
-//   },
-//   { deep: true },
-// )
 
 onMounted(loadData)
 </script>
@@ -373,8 +357,8 @@ onMounted(loadData)
                     chatConfig.temperature
                   }}</span>
                 </div>
-                <URange
-                  v-model="chatConfig.temperature"
+                <USlider
+                  v-model="chatConfig.temperature!!"
                   :min="0"
                   :max="2"
                   :step="0.1"
@@ -388,10 +372,10 @@ onMounted(loadData)
                   <span>Max Tokens</span>
                   <span class="text-gray-500">{{ chatConfig.maxTokens }}</span>
                 </div>
-                <URange
-                  v-model="chatConfig.maxTokens"
+                <USlider
+                  v-model="chatConfig.maxTokens!!"
                   :min="256"
-                  :max="4096"
+                  :max="23768"
                   :step="256"
                   class="w-full"
                 />
