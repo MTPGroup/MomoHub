@@ -63,7 +63,7 @@ export const useCharacters = () => {
     const formData = new FormData()
     formData.append('file', file)
     return api<UploadAvatarResponse>(`/characters/${characterId}/avatar`, {
-      method: 'PUT',
+      method: 'POST',
       body: formData,
       headers: {
         Authorization: `Bearer ${accessToken.value}`,

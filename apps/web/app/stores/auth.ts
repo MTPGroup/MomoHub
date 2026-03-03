@@ -181,7 +181,7 @@ export const useAuthStore = defineStore('auth', () => {
     const response = await $fetch<ApiResponse<UploadAvatarResponse>>(
       `${baseURL}/auth/me/avatar`,
       {
-        method: 'PUT',
+        method: 'POST',
         headers: { Authorization: `Bearer ${accessToken.value}` },
         body: formData,
       },
