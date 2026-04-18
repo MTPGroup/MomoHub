@@ -9,6 +9,11 @@
       "!**/*.gen.ts"
     ]
   },
+  "assist": {
+    "actions": {
+      "recommended": true
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {

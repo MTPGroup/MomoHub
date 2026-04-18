@@ -13,8 +13,8 @@ export const env = createEnv({
   clientPrefix: 'VITE_',
 
   client: {
-    VITE_APP_TITLE: z.string().min(1).optional(),
-    VITE_API_BASE_URL: z.url().optional(),
+    VITE_APP_TITLE: z.string().min(1).default('MomoHub'),
+    VITE_API_BASE_URL: z.url().default('http://localhost:8000'),
   },
 
   /**
@@ -38,3 +38,11 @@ export const env = createEnv({
    */
   emptyStringAsUndefined: true,
 })
+
+export const siteConfig = {
+  name: env.VITE_APP_TITLE,
+  links: {
+    github: 'https://github.com/MTPGroup/MomoHub',
+    api: env.VITE_API_BASE_URL,
+  },
+}

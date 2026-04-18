@@ -1,6 +1,8 @@
-import { client } from '@/client/client.gen'
-import { env } from '@/env'
+import { client } from '#/client/client.gen'
+import { siteConfig } from '#/env'
+import { authStore } from '#/stores/auth'
 
 client.setConfig({
-  baseUrl: env.VITE_API_BASE_URL || 'http://localhost:8000',
+  baseUrl: siteConfig.links.api,
+  auth: () => authStore.state.accessToken,
 })
