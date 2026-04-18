@@ -101,7 +101,6 @@ export function AuthForm({ children }: Props) {
         avatar: loginData.user.avatar,
         status: loginData.user.status,
         accessToken: loginData.accessToken,
-        refreshToken: loginData.refreshToken,
       })
 
       setOpen(false)
@@ -466,7 +465,7 @@ export function AuthForm({ children }: Props) {
             type='submit'
             form='auth-form'
             disabled={isPending}
-            className='w-full bg-linear-to-r from-indigo-600 to-purple-600 font-semibold text-white shadow-md hover:from-indigo-700 hover:to-purple-700 hover:shadow-lg'
+            className='w-full border border-zinc-900 bg-zinc-900 font-semibold text-white shadow-sm hover:bg-zinc-800'
           >
             {isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             {isPending
