@@ -123,6 +123,11 @@ function CharactersPage() {
 
   const characterQuery = useQuery({
     ...getCharactersOptions({
+      headers: auth.accessToken
+        ? {
+            Authorization: `Bearer ${auth.accessToken}`,
+          }
+        : undefined,
       query: {
         page: 1,
         page_size: 30,

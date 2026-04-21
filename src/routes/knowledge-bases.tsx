@@ -110,13 +110,18 @@ function KnowledgeBasesPage() {
 
   const kbQuery = useQuery({
     ...listKbsOptions({
+      headers: auth.accessToken
+        ? {
+            Authorization: `Bearer ${auth.accessToken}`,
+          }
+        : undefined,
       query: {
         page: 1,
         page_size: 30,
         keyword: searchValue.trim() || undefined,
       },
     }),
-    enabled: Boolean(auth.accessToken && isListPage),
+    enabled: isListPage,
   })
 
   const uploadKbAvatar = useMutation({

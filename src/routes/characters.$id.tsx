@@ -8,8 +8,8 @@ import {
   deleteCharacterMutation,
   favoriteCharacterMutation,
   getCharactersQueryKey,
-  getPrivateCharacterOptions,
-  getPrivateCharacterQueryKey,
+  getPublicCharacterOptions,
+  getPublicCharacterQueryKey,
   updateCharacterMutation,
   uploadCharacterAvatarMutation,
 } from '#/client/@tanstack/react-query.gen'
@@ -118,10 +118,14 @@ function CharacterDetailPage() {
   }, [editAvatarPreviewUrl])
 
   const characterQuery = useQuery({
-    ...getPrivateCharacterOptions({
+    ...getPublicCharacterOptions({
+      headers: auth.accessToken
+        ? {
+            Authorization: `Bearer ${auth.accessToken}`,
+          }
+        : undefined,
       path: { id },
     }),
-    enabled: Boolean(auth.accessToken),
   })
 
   const updateCharacter = useMutation({
@@ -145,7 +149,14 @@ function CharacterDetailPage() {
       setEditingOpen(false)
       clearEditAvatarSelection()
       queryClient.invalidateQueries({
-        queryKey: getPrivateCharacterQueryKey({ path: { id } }),
+        queryKey: getPublicCharacterQueryKey({
+          headers: auth.accessToken
+            ? {
+                Authorization: `Bearer ${auth.accessToken}`,
+              }
+            : undefined,
+          path: { id },
+        }),
       })
       queryClient.invalidateQueries({ queryKey: getCharactersQueryKey() })
     },
@@ -174,7 +185,14 @@ function CharacterDetailPage() {
     onSuccess: () => {
       toast.success('收藏成功')
       queryClient.setQueryData(
-        getPrivateCharacterQueryKey({ path: { id } }),
+        getPublicCharacterQueryKey({
+          headers: auth.accessToken
+            ? {
+                Authorization: `Bearer ${auth.accessToken}`,
+              }
+            : undefined,
+          path: { id },
+        }),
         (previous: ApiResponseCharacterDetailOut | undefined) => {
           const detail = previous?.data
           if (!detail) return previous
@@ -200,7 +218,14 @@ function CharacterDetailPage() {
     onSuccess: () => {
       toast.success('已取消收藏')
       queryClient.setQueryData(
-        getPrivateCharacterQueryKey({ path: { id } }),
+        getPublicCharacterQueryKey({
+          headers: auth.accessToken
+            ? {
+                Authorization: `Bearer ${auth.accessToken}`,
+              }
+            : undefined,
+          path: { id },
+        }),
         (previous: ApiResponseCharacterDetailOut | undefined) => {
           const detail = previous?.data
           if (!detail) return previous

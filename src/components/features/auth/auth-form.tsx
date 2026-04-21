@@ -534,17 +534,17 @@ export function AuthForm({ children }: Props) {
                     立即注册
                   </button>
                 </span>
-                <span className='mx-1.5 text-muted-foreground/50'>|</span>
-                <button
-                  type='button'
-                  onClick={() => {
-                    setRegisteredEmail('')
-                    setMode('verify')
-                  }}
-                  className='font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400'
-                >
-                  验证邮箱
-                </button>
+                {/* <span className='mx-1.5 text-muted-foreground/50'>|</span> */}
+                {/* <button */}
+                {/*   type='button' */}
+                {/*   onClick={() => { */}
+                {/*     setRegisteredEmail('') */}
+                {/*     setMode('verify') */}
+                {/*   }} */}
+                {/*   className='font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400' */}
+                {/* > */}
+                {/*   验证邮箱 */}
+                {/* </button> */}
               </>
             )}
           </p>
