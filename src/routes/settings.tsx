@@ -78,8 +78,8 @@ interface AuditLogsData {
   items?: AuditLogItem[]
   total?: number
   page?: number
-  page_size?: number
-  total_pages?: number
+  pageSize?: number
+  totalPages?: number
 }
 
 function maskEmail(value: string) {
@@ -113,7 +113,10 @@ function sanitizePayload(value: unknown): unknown {
       result[key] = maskEmail(raw)
       continue
     }
-    if (normalizedKey === 'user_id' && typeof raw === 'string') {
+    if (
+      (normalizedKey === 'user_id' || normalizedKey === 'userid') &&
+      typeof raw === 'string'
+    ) {
       result[key] = maskId(raw)
       continue
     }
@@ -282,8 +285,8 @@ function SettingsPage() {
   const auditItems = auditData?.items ?? []
   const auditTotal = auditData?.total ?? auditItems.length
   const auditPage = auditData?.page ?? 1
-  const auditPageSize = auditData?.page_size ?? 20
-  const auditTotalPages = auditData?.total_pages ?? 1
+  const auditPageSize = auditData?.pageSize ?? 20
+  const auditTotalPages = auditData?.totalPages ?? 1
 
   const handleChangePassword = () => {
     if (!oldPassword || !newPassword) {

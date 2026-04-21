@@ -110,7 +110,7 @@ export function AuthForm({ children }: Props) {
       navigate({ to: '/' })
     },
     onError: (error, variables) => {
-      const isUnverified = error.error_code === 'EMAIL_NOT_VERIFIED'
+      const isUnverified = error.errorCode === 'EMAIL_NOT_VERIFIED'
       const email = variables.body.email
 
       if (isUnverified && email) {

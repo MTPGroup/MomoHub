@@ -361,10 +361,10 @@ export function CharactersPage({ mineOnly = false }: { mineOnly?: boolean }) {
               placeholder={`// 角色配置JSON（可选）
 {
   "temperature": 0.7,
-  "top_p": 1,
-  "max_tokens": 2000,
-  "presence_penalty": 0,
-  "frequency_penalty": 0
+  "topP": 1,
+  "maxTokens": 2000,
+  "presencePenalty": 0,
+  "frequencyPenalty": 0
 }`}
               className='font-mono text-xs'
             />
