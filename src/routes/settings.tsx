@@ -89,7 +89,9 @@ function SettingsPage() {
       setNewPassword('')
     },
     onError: (error) => {
-      toast.error('密码修改失败', { description: error.message || '请稍后重试' })
+      toast.error('密码修改失败', {
+        description: error.message || '请稍后重试',
+      })
     },
   })
 
@@ -122,7 +124,9 @@ function SettingsPage() {
       setOtpVerified(true)
     },
     onError: (error) => {
-      toast.error('OTP 验证失败', { description: error.message || '请稍后重试' })
+      toast.error('OTP 验证失败', {
+        description: error.message || '请稍后重试',
+      })
     },
   })
 
@@ -199,11 +203,12 @@ function SettingsPage() {
     },
   })
 
-  const sessions = (sessionsQuery.data as { data?: SessionItem[] | null } | undefined)
-    ?.data ?? []
-  const llmConfigs =
-    (llmConfigsQuery.data as { data?: LlmConfigOut[] | null } | undefined)?.data ??
+  const sessions =
+    (sessionsQuery.data as { data?: SessionItem[] | null } | undefined)?.data ??
     []
+  const llmConfigs =
+    (llmConfigsQuery.data as { data?: LlmConfigOut[] | null } | undefined)
+      ?.data ?? []
 
   const handleChangePassword = () => {
     if (!oldPassword || !newPassword) {
@@ -250,7 +255,9 @@ function SettingsPage() {
   return (
     <div className='mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8'>
       <section className='space-y-3'>
-        <h1 className='font-serif text-3xl font-bold tracking-tight'>账号设置</h1>
+        <h1 className='font-serif text-3xl font-bold tracking-tight'>
+          账号设置
+        </h1>
         <p className='max-w-3xl text-sm leading-6 text-muted-foreground'>
           覆盖安全和账号层面的关键能力：密码、设备会话、OTP、模型配置与账号注销。
         </p>
@@ -258,7 +265,7 @@ function SettingsPage() {
 
       <AuthRequired>
         <div className='grid gap-4 xl:grid-cols-2'>
-          <Card className='gap-4 border bg-card py-5'>
+          <Card className='gap-4 border border-border/80 bg-card/95 py-5 shadow-sm'>
             <CardHeader className='px-5'>
               <CardTitle className='flex items-center gap-2 text-base'>
                 <KeyRound className='size-4' />
@@ -278,20 +285,24 @@ function SettingsPage() {
                 onChange={(event) => setNewPassword(event.target.value)}
                 placeholder='新密码（至少 6 位）'
               />
-              <Button onClick={handleChangePassword} disabled={changePassword.isPending}>
+              <Button
+                onClick={handleChangePassword}
+                disabled={changePassword.isPending}
+              >
                 {changePassword.isPending ? '提交中...' : '更新密码'}
               </Button>
             </CardContent>
           </Card>
 
-          <Card className='gap-4 border bg-card py-5'>
+          <Card className='gap-4 border border-border/80 bg-card/95 py-5 shadow-sm'>
             <CardHeader className='px-5'>
               <CardTitle className='flex items-center gap-2 text-base'>
                 <Shield className='size-4' />
                 OTP 双因素认证
               </CardTitle>
               <CardDescription>
-                流程：初始化 → 输入验证码 → 验证 → 启用。验证码需在你的认证器 App 中获取。
+                流程：初始化 → 输入验证码 → 验证 → 启用。验证码需在你的认证器
+                App 中获取。
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-3 px-5'>
@@ -332,7 +343,10 @@ function SettingsPage() {
                 >
                   验证 OTP
                 </Button>
-                <Button disabled={!otpVerified} onClick={() => enableOtp.mutate({})}>
+                <Button
+                  disabled={!otpVerified}
+                  onClick={() => enableOtp.mutate({})}
+                >
                   启用 OTP
                 </Button>
                 <AlertDialog>
@@ -362,10 +376,12 @@ function SettingsPage() {
           </Card>
         </div>
 
-        <Card className='gap-4 border bg-card py-5'>
+        <Card className='gap-4 border border-border/80 bg-card/95 py-5 shadow-sm'>
           <CardHeader className='px-5'>
             <CardTitle className='text-base'>会话管理</CardTitle>
-            <CardDescription>可单独下线某设备，或一键清理除当前会话外的所有设备。</CardDescription>
+            <CardDescription>
+              可单独下线某设备，或一键清理除当前会话外的所有设备。
+            </CardDescription>
           </CardHeader>
           <CardContent className='space-y-4 px-5'>
             <div className='flex flex-wrap gap-2'>
@@ -394,12 +410,17 @@ function SettingsPage() {
             </div>
             <div className='grid gap-3 md:grid-cols-2'>
               {sessions.map((session) => (
-                <div key={session.sessionId} className='rounded-md border bg-background p-3'>
+                <div
+                  key={session.sessionId}
+                  className='rounded-md border border-border/80 bg-background/70 p-3'
+                >
                   <div className='flex items-center justify-between gap-2'>
                     <p className='text-sm font-medium'>
                       {session.isCurrent ? '当前设备' : '其他设备'}
                     </p>
-                    <Badge variant={session.isCurrent ? 'secondary' : 'outline'}>
+                    <Badge
+                      variant={session.isCurrent ? 'secondary' : 'outline'}
+                    >
                       {session.identityType}
                     </Badge>
                   </div>
@@ -412,7 +433,11 @@ function SettingsPage() {
                   {!session.isCurrent && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button size='sm' variant='destructive' className='mt-2'>
+                        <Button
+                          size='sm'
+                          variant='destructive'
+                          className='mt-2'
+                        >
                           <LogOut className='size-4' />
                           下线此设备
                         </Button>
@@ -446,7 +471,7 @@ function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className='gap-4 border bg-card py-5'>
+        <Card className='gap-4 border border-border/80 bg-card/95 py-5 shadow-sm'>
           <CardHeader className='px-5'>
             <CardTitle className='text-base'>LLM 配置管理</CardTitle>
             <CardDescription>
@@ -483,7 +508,10 @@ function SettingsPage() {
 
             <div className='grid gap-3 md:grid-cols-2'>
               {llmConfigs.map((item) => (
-                <div key={item.id} className='rounded-md border bg-background p-3'>
+                <div
+                  key={item.id}
+                  className='rounded-md border border-border/80 bg-background/70 p-3'
+                >
                   <div className='flex items-center justify-between gap-2'>
                     <p className='text-sm font-medium'>{item.name}</p>
                     <Badge variant={item.isActive ? 'secondary' : 'outline'}>
@@ -497,7 +525,9 @@ function SettingsPage() {
                     <Button
                       size='sm'
                       variant='outline'
-                      onClick={() => handleToggleLlmActive(item.id, item.isActive)}
+                      onClick={() =>
+                        handleToggleLlmActive(item.id, item.isActive)
+                      }
                     >
                       {item.isActive ? '设为非活跃' : '设为活跃'}
                     </Button>
@@ -522,9 +552,12 @@ function SettingsPage() {
                       </AlertDialogTrigger>
                       <AlertDialogContent size='sm'>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>确认删除模型配置？</AlertDialogTitle>
+                          <AlertDialogTitle>
+                            确认删除模型配置？
+                          </AlertDialogTitle>
                           <AlertDialogDescription>
-                            将删除配置「{item.name}」，已关联会话可能需要重新选择模型。
+                            将删除配置「{item.name}
+                            」，已关联会话可能需要重新选择模型。
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -548,8 +581,10 @@ function SettingsPage() {
             </div>
 
             {editingLlmId && (
-              <div className='rounded-md border border-dashed p-3'>
-                <p className='mb-3 text-sm font-medium'>编辑配置：{editingLlmId}</p>
+              <div className='rounded-md border border-dashed border-border/80 bg-background/40 p-3'>
+                <p className='mb-3 text-sm font-medium'>
+                  编辑配置：{editingLlmId}
+                </p>
                 <div className='grid gap-3 md:grid-cols-4'>
                   <Input
                     value={llmName}
@@ -597,13 +632,15 @@ function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className='gap-4 border bg-card py-5'>
+        <Card className='gap-4 border border-border/80 bg-card/95 py-5 shadow-sm'>
           <CardHeader className='px-5'>
             <CardTitle className='flex items-center gap-2 text-base'>
               <Eye className='size-4' />
               审计日志预览
             </CardTitle>
-            <CardDescription>用于快速查看接口返回结构，便于后续做更细粒度的日志 UI。</CardDescription>
+            <CardDescription>
+              用于快速查看接口返回结构，便于后续做更细粒度的日志 UI。
+            </CardDescription>
           </CardHeader>
           <CardContent className='px-5'>
             <Textarea
@@ -616,7 +653,9 @@ function SettingsPage() {
 
         <Card className='gap-4 border border-destructive/30 bg-card py-5'>
           <CardHeader className='px-5'>
-            <CardTitle className='text-base text-destructive'>危险操作</CardTitle>
+            <CardTitle className='text-base text-destructive'>
+              危险操作
+            </CardTitle>
             <CardDescription>
               注销后将立即清空当前登录态。若有重要数据，请先完成导出与备份。
             </CardDescription>

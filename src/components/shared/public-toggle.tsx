@@ -25,7 +25,7 @@ export function PublicToggle({
       className={cn(
         'inline-flex items-center gap-3 rounded-full border px-2 py-1 text-xs transition-colors',
         checked
-          ? 'border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900'
+          ? 'border-primary/40 bg-primary text-primary-foreground'
           : 'border-border bg-muted/40 text-foreground',
         className,
       )}
@@ -33,7 +33,7 @@ export function PublicToggle({
       <span
         className={cn(
           'flex size-6 items-center justify-center rounded-full',
-          checked ? 'bg-white/20' : 'bg-background',
+          checked ? 'bg-primary-foreground/20' : 'bg-background',
         )}
       >
         {checked ? (

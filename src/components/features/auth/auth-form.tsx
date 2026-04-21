@@ -82,6 +82,9 @@ interface Props {
   children: ReactElement
 }
 
+const INPUT_ICON_CLASS =
+  'pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground'
+
 export function AuthForm({ children }: Props) {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -295,10 +298,14 @@ export function AuthForm({ children }: Props) {
       }}
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className='max-w-100 gap-0 overflow-hidden border-none p-0 shadow-2xl'>
+      <DialogContent className='auth-form-theme max-w-100 gap-0 overflow-hidden rounded-3xl border border-(--auth-outline) bg-(--auth-panel) p-0 shadow-[0_24px_60px_rgba(15,23,42,0.16)]'>
         <div className='p-8'>
           {/* Header */}
           <div className='mb-8 flex flex-col items-center gap-3 text-center'>
+            <div className='inline-flex items-center gap-2 rounded-full border border-(--auth-outline) bg-(--auth-subtle) px-3 py-1 text-xs font-medium text-(--auth-accent)'>
+              <span className='size-1.5 rounded-full bg-(--auth-accent)' />
+              MomoHub 账号中心
+            </div>
             <div className='space-y-1'>
               <DialogTitle className='text-2xl font-bold tracking-tight text-foreground'>
                 {headerTitle}
@@ -328,12 +335,12 @@ export function AuthForm({ children }: Props) {
                   >
                     <FieldLabel
                       htmlFor={field.name}
-                      className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'
+                      className='text-sm font-medium text-foreground/90'
                     >
                       邮箱
                     </FieldLabel>
                     <div className='relative'>
-                      <Mail className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+                      <Mail className={INPUT_ICON_CLASS} />
                       <Input
                         id={field.name}
                         value={registeredEmail || field.state.value}
@@ -346,7 +353,7 @@ export function AuthForm({ children }: Props) {
                         placeholder='name@example.com'
                         autoComplete='email'
                         readOnly={isVerify && !!registeredEmail}
-                        className={`pl-10 ${isVerify && registeredEmail ? 'bg-muted text-muted-foreground' : ''}`}
+                        className={`rounded-xl border-(--auth-outline) bg-(--auth-input-bg) pl-10 shadow-none focus-visible:border-(--auth-accent) focus-visible:ring-(--auth-focus-ring) ${isVerify && registeredEmail ? 'bg-(--auth-subtle) text-muted-foreground' : ''}`}
                       />
                     </div>
                     <FieldError errors={field.state.meta.errors} />
@@ -360,13 +367,13 @@ export function AuthForm({ children }: Props) {
                     <Field>
                       <FieldLabel
                         htmlFor={field.name}
-                        className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'
+                        className='text-sm font-medium text-foreground/90'
                       >
                         密码
                       </FieldLabel>
                       <div className='relative'>
-                        <Lock className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
-                        <InputGroup>
+                        <Lock className={INPUT_ICON_CLASS} />
+                        <InputGroup className='rounded-xl border-(--auth-outline) bg-(--auth-input-bg) shadow-none focus-within:border-(--auth-accent) focus-within:ring-2 focus-within:ring-(--auth-focus-ring)'>
                           <InputGroupInput
                             id={field.name}
                             type={showPassword ? 'text' : 'password'}
@@ -379,16 +386,21 @@ export function AuthForm({ children }: Props) {
                             autoComplete={
                               isRegister ? 'new-password' : 'current-password'
                             }
-                            className='pl-10'
+                            className='bg-transparent pl-10 pr-2'
                           />
                           <InputGroupAddon align='inline-end'>
                             <Button
+                              type='button'
                               variant='ghost'
                               size='icon-sm'
-                              className='rounded-full'
+                              className='rounded-full text-muted-foreground hover:text-foreground'
                               onClick={() => setShowPassword(!showPassword)}
                             >
-                              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                              {showPassword ? (
+                                <EyeOffIcon className='text-current' />
+                              ) : (
+                                <EyeIcon className='text-current' />
+                              )}
                             </Button>
                           </InputGroupAddon>
                         </InputGroup>
@@ -405,12 +417,12 @@ export function AuthForm({ children }: Props) {
                     <Field>
                       <FieldLabel
                         htmlFor={field.name}
-                        className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'
+                        className='text-sm font-medium text-foreground/90'
                       >
                         确认密码
                       </FieldLabel>
                       <div className='relative'>
-                        <Lock className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+                        <Lock className={INPUT_ICON_CLASS} />
                         <Input
                           id={field.name}
                           type='password'
@@ -419,7 +431,7 @@ export function AuthForm({ children }: Props) {
                           onChange={(e) => field.handleChange(e.target.value)}
                           placeholder='再次输入密码'
                           autoComplete='new-password'
-                          className='pl-10'
+                          className='rounded-xl border-(--auth-outline) bg-(--auth-input-bg) pl-10 shadow-none focus-visible:ring-(--auth-focus-ring)'
                         />
                       </div>
                       <FieldError errors={field.state.meta.errors} />
@@ -434,12 +446,12 @@ export function AuthForm({ children }: Props) {
                     <Field>
                       <FieldLabel
                         htmlFor={field.name}
-                        className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'
+                        className='text-sm font-medium text-foreground/90'
                       >
                         验证码
                       </FieldLabel>
                       <div className='relative'>
-                        <MailCheck className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+                        <MailCheck className={INPUT_ICON_CLASS} />
                         <Input
                           id={field.name}
                           value={field.state.value}
@@ -447,7 +459,7 @@ export function AuthForm({ children }: Props) {
                           onChange={(e) => field.handleChange(e.target.value)}
                           placeholder='请输入6位验证码'
                           autoComplete='one-time-code'
-                          className='pl-10'
+                          className='rounded-xl border-(--auth-outline) bg-(--auth-input-bg) pl-10 shadow-none focus-visible:border-(--auth-accent) focus-visible:ring-(--auth-focus-ring)'
                         />
                       </div>
                       <FieldError errors={field.state.meta.errors} />
@@ -460,12 +472,12 @@ export function AuthForm({ children }: Props) {
         </div>
 
         {/* Footer */}
-        <div className='flex flex-col gap-4 border-t bg-muted/40 p-6'>
+        <div className='flex flex-col gap-4 border-t border-(--auth-outline) bg-(--auth-subtle)/50 p-6'>
           <Button
             type='submit'
             form='auth-form'
             disabled={isPending}
-            className='w-full border border-zinc-900 bg-zinc-900 font-semibold text-white shadow-sm hover:bg-zinc-800'
+            className='w-full rounded-xl border border-(--auth-accent) bg-(--auth-accent) font-semibold text-(--auth-accent-foreground) shadow-sm opacity-100 hover:opacity-90'
           >
             {isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             {isPending
@@ -506,7 +518,7 @@ export function AuthForm({ children }: Props) {
               <button
                 type='button'
                 onClick={() => switchMode('login')}
-                className='inline-flex items-center font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400'
+                className='inline-flex items-center font-medium text-(--auth-link) underline-offset-4 hover:underline'
               >
                 <ArrowLeft className='mr-1 h-3 w-3' />
                 返回登录
@@ -517,7 +529,7 @@ export function AuthForm({ children }: Props) {
                 <button
                   type='button'
                   onClick={() => switchMode('login')}
-                  className='ml-1 font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400'
+                  className='ml-1 font-medium text-(--auth-link) underline-offset-4 hover:underline'
                 >
                   去登录
                 </button>
@@ -529,7 +541,7 @@ export function AuthForm({ children }: Props) {
                   <button
                     type='button'
                     onClick={() => switchMode('register')}
-                    className='ml-1 font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400'
+                    className='ml-1 font-medium text-(--auth-link) underline-offset-4 hover:underline'
                   >
                     立即注册
                   </button>

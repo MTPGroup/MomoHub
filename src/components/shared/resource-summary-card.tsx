@@ -50,7 +50,7 @@ export function ResourceSummaryCard({
           onClick()
         }
       }}
-      className='group h-full cursor-pointer border bg-card py-5 transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-md'
+      className='group h-full cursor-pointer border border-border/80 bg-card/95 py-5 transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md hover:shadow-primary/10'
     >
       <CardHeader className='px-5'>
         <div className='grid grid-cols-[72px_minmax(0,1fr)] items-start gap-3'>
@@ -81,7 +81,7 @@ export function ResourceSummaryCard({
         </div>
       </CardHeader>
       <CardContent className='px-5 text-sm'>
-        <div className='flex items-center justify-between border-t pt-2 text-xs'>
+        <div className='flex items-center justify-between border-t border-border/80 pt-2 text-xs'>
           <Badge variant={visibilityVariant}>{visibilityText}</Badge>
           <div className='inline-flex items-center gap-2 text-muted-foreground'>
             <Avatar size='sm'>

@@ -324,12 +324,6 @@ function CharacterDetailPage() {
             <ArrowLeft className='size-4' />
             返回角色列表
           </Link>
-          <h1 className='font-serif text-3xl font-bold tracking-tight'>
-            {character?.name || '角色管理'}
-          </h1>
-          <p className='max-w-3xl text-sm text-muted-foreground'>
-            在此页面集中完成角色配置、标签维护和收藏管理。
-          </p>
         </section>
 
         {!character && characterQuery.isPending && (
@@ -477,7 +471,7 @@ function CharacterDetailPage() {
                     }}
                   >
                     <Heart
-                      className={`size-4 ${character.isFavorited ? 'fill-current text-red-500' : ''}`}
+                      className={`size-4 ${character.isFavorited ? 'fill-current text-primary' : ''}`}
                     />
                     {character.isFavorited ? '取消收藏' : '收藏角色'}
                   </Button>
@@ -555,8 +549,8 @@ function CharacterDetailPage() {
                       {getInitialChar(editName || character?.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className='absolute inset-0 flex items-center justify-center rounded-full bg-black/45 opacity-0 transition-opacity group-hover:opacity-100'>
-                    <Camera className='size-4 text-white' />
+                  <div className='absolute inset-0 flex items-center justify-center rounded-full bg-foreground/50 opacity-0 transition-opacity group-hover:opacity-100'>
+                    <Camera className='size-4 text-background' />
                   </div>
                 </button>
                 <div className='min-w-0 flex-1 space-y-1'>

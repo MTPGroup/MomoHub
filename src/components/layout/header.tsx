@@ -72,7 +72,7 @@ export function Header() {
           to='/'
           className='flex items-center gap-2 transition-opacity hover:opacity-80'
         >
-          <div className='flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-900 bg-zinc-900 text-sm font-bold text-white shadow-sm'>
+          <div className='flex h-8 w-8 items-center justify-center rounded-lg border border-primary/30 bg-primary text-sm font-bold text-primary-foreground shadow-sm'>
             M
           </div>
           <span className='hidden text-lg font-bold tracking-tight sm:inline-block'>
@@ -108,7 +108,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Avatar>
                     <AvatarImage src={auth.avatar} alt={auth.name} />
-                    <AvatarFallback className='border border-zinc-900 bg-zinc-900 text-white'>
+                    <AvatarFallback className='border border-primary/30 bg-primary text-primary-foreground'>
                       {auth.name?.substring(0, 2).toUpperCase() || 'AZ'}
                     </AvatarFallback>
                   </Avatar>
@@ -185,7 +185,7 @@ export function Header() {
 
                   {/* 危险操作区 */}
                   <DropdownMenuItem
-                    className='text-red-500 focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-950/30'
+                    className='text-destructive focus:bg-destructive/10 focus:text-destructive'
                     onSelect={(event) => {
                       event.preventDefault()
                       setLogoutConfirmOpen(true)

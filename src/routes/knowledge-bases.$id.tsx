@@ -414,12 +414,6 @@ function KnowledgeBaseDetailPage() {
             <ArrowLeft className='size-4' />
             返回知识库列表
           </Link>
-          <h1 className='font-serif text-3xl font-bold tracking-tight'>
-            {kb?.name || '知识库管理'}
-          </h1>
-          <p className='max-w-3xl text-sm text-muted-foreground'>
-            完成知识库配置、文档上传和文档处理队列管理。
-          </p>
         </section>
 
         {!kb && kbQuery.isPending && (
@@ -751,8 +745,8 @@ function KnowledgeBaseDetailPage() {
                       {getInitialChar(editName || kb?.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className='absolute inset-0 flex items-center justify-center rounded-full bg-black/45 opacity-0 transition-opacity group-hover:opacity-100'>
-                    <Camera className='size-4 text-white' />
+                  <div className='absolute inset-0 flex items-center justify-center rounded-full bg-foreground/50 opacity-0 transition-opacity group-hover:opacity-100'>
+                    <Camera className='size-4 text-background' />
                   </div>
                 </button>
                 <div className='min-w-0 flex-1 space-y-1'>

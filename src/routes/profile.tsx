@@ -141,13 +141,13 @@ function ProfilePage() {
           个人资料
         </h1>
         <p className='text-sm leading-6 text-muted-foreground'>
-          在这里维护你的公开头像与昵称。提交后，顶部头像下拉会实时同步。
+          在这里维护你的公开头像与昵称。
         </p>
       </section>
 
       <AuthRequired>
         <div className='grid gap-6 md:grid-cols-[320px_1fr]'>
-          <Card className='gap-4 border bg-card py-5'>
+          <Card className='gap-4 border border-border/80 bg-card/95 py-5 shadow-sm'>
             <CardHeader className='px-5'>
               <CardTitle className='text-base'>账号概览</CardTitle>
             </CardHeader>
@@ -175,7 +175,7 @@ function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className='gap-4 border bg-card py-5'>
+          <Card className='gap-4 border border-border/80 bg-card/95 py-5 shadow-sm'>
             <CardHeader className='px-5'>
               <CardTitle className='text-base'>编辑资料</CardTitle>
               <CardDescription>修改昵称，或上传新头像。</CardDescription>
@@ -188,7 +188,7 @@ function ProfilePage() {
                   onClick={() => avatarInputRef.current?.click()}
                   aria-label='选择用户头像'
                 >
-                  <Avatar className='size-16 border border-border'>
+                  <Avatar className='size-16 border border-border/80'>
                     <AvatarImage
                       src={avatarPreviewUrl || me?.avatar}
                       alt='用户头像预览'
@@ -197,8 +197,8 @@ function ProfilePage() {
                       {(name || me?.name || 'U').slice(0, 1).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <div className='absolute inset-0 flex items-center justify-center rounded-full bg-black/45 opacity-0 transition-opacity group-hover:opacity-100'>
-                    <Camera className='size-4 text-white' />
+                  <div className='absolute inset-0 flex items-center justify-center rounded-full bg-foreground/50 opacity-0 transition-opacity group-hover:opacity-100'>
+                    <Camera className='size-4 text-background' />
                   </div>
                 </button>
                 <div className='min-w-0 flex-1 space-y-1'>

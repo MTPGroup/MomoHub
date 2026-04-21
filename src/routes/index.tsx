@@ -57,7 +57,7 @@ function HomePage() {
 
   return (
     <div className='mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-10 sm:px-6 lg:px-8'>
-      <section className='grid gap-6 rounded-2xl border bg-card p-8 shadow-sm md:grid-cols-[1.4fr_1fr]'>
+      <section className='grid gap-6 rounded-2xl border border-border/80 bg-card/95 p-8 shadow-sm md:grid-cols-[1.4fr_1fr]'>
         <div className='space-y-5'>
           <p className='text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase'>
             Momohub Workbench
@@ -72,23 +72,33 @@ function HomePage() {
             <Button asChild>
               <Link to='/knowledge-bases'>进入知识库</Link>
             </Button>
-            <Button variant='outline' asChild>
+            <Button
+              variant='outline'
+              asChild
+              className='border-primary/35 hover:bg-primary/10'
+            >
               <Link to='/characters'>探索AI角色</Link>
             </Button>
             {auth.accessToken ? (
-              <Button variant='secondary' asChild>
+              <Button
+                variant='secondary'
+                asChild
+                className='border border-border/70'
+              >
                 <Link to='/settings'>账号设置</Link>
               </Button>
             ) : (
               <AuthForm>
-                <Button variant='secondary'>登录后继续</Button>
+                <Button variant='secondary' className='border border-border/70'>
+                  登录后继续
+                </Button>
               </AuthForm>
             )}
           </div>
         </div>
 
         <div className='grid gap-3 text-sm'>
-          <Card className='gap-3 border bg-background py-4'>
+          <Card className='gap-3 border border-border/80 bg-background/70 py-4'>
             <CardHeader className='px-4'>
               <CardDescription>知识库总量（当前页）</CardDescription>
               <CardTitle className='text-2xl'>
@@ -96,7 +106,7 @@ function HomePage() {
               </CardTitle>
             </CardHeader>
           </Card>
-          <Card className='gap-3 border bg-background py-4'>
+          <Card className='gap-3 border border-border/80 bg-background/70 py-4'>
             <CardHeader className='px-4'>
               <CardDescription>角色总量（当前页）</CardDescription>
               <CardTitle className='text-2xl'>
@@ -104,7 +114,7 @@ function HomePage() {
               </CardTitle>
             </CardHeader>
           </Card>
-          <Card className='gap-3 border bg-background py-4'>
+          <Card className='gap-3 border border-border/80 bg-background/70 py-4'>
             <CardHeader className='px-4'>
               <CardDescription>我的收藏角色</CardDescription>
               <CardTitle className='text-2xl'>
@@ -197,16 +207,20 @@ function QuickEntryCard({
   to: '/knowledge-bases' | '/characters' | '/settings'
 }) {
   return (
-    <Card className='gap-4 border bg-card py-5'>
+    <Card className='gap-4 border border-border/80 bg-card/95 py-5 shadow-sm'>
       <CardHeader className='px-5'>
-        <div className='mb-2 inline-flex size-9 items-center justify-center rounded-md border bg-background text-foreground'>
+        <div className='mb-2 inline-flex size-9 items-center justify-center rounded-md border border-primary/30 bg-primary/10 text-primary'>
           {icon}
         </div>
         <CardTitle className='text-base'>{title}</CardTitle>
         <CardDescription className='leading-6'>{description}</CardDescription>
       </CardHeader>
       <CardContent className='px-5'>
-        <Button variant='outline' asChild className='w-full'>
+        <Button
+          variant='outline'
+          asChild
+          className='w-full border-primary/30 hover:bg-primary/10'
+        >
           <Link to={to}>前往</Link>
         </Button>
       </CardContent>
@@ -226,7 +240,7 @@ function PreviewList({
   empty: string
 }) {
   return (
-    <Card className='gap-4 border bg-card py-5'>
+    <Card className='gap-4 border border-border/80 bg-card/95 py-5 shadow-sm'>
       <CardHeader className='px-5'>
         <CardTitle className='flex items-center gap-2 text-base'>
           {icon}
@@ -239,7 +253,10 @@ function PreviewList({
         ) : (
           <ul className='space-y-4'>
             {rows.map((row) => (
-              <li key={row.key} className='rounded-md border bg-background p-3'>
+              <li
+                key={row.key}
+                className='rounded-md border border-border/80 bg-background/70 p-3'
+              >
                 <div className='flex items-start justify-between gap-3'>
                   <p className='text-sm font-medium'>{row.name}</p>
                   <span className='shrink-0 text-xs text-muted-foreground'>

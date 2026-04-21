@@ -252,11 +252,11 @@ function CharactersPage() {
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
           placeholder='输入关键词过滤角色'
-          className='pl-10'
+          className='rounded-xl border-border/80 bg-card/70 pl-10 shadow-none'
         />
       </section>
 
-      <section className='flex items-center justify-between rounded-xl border bg-card p-5'>
+      <section className='flex items-center justify-between rounded-2xl border border-border/80 bg-card/95 p-5 shadow-sm'>
         <div className='space-y-1'>
           <p className='text-sm font-medium'>新建角色</p>
           <p className='text-xs text-muted-foreground'>
@@ -302,7 +302,7 @@ function CharactersPage() {
                 onClick={() => createAvatarInputRef.current?.click()}
                 aria-label='选择角色头像'
               >
-                <Avatar className='size-16 border border-border'>
+                <Avatar className='size-16 border border-border/80'>
                   <AvatarImage
                     src={createAvatarPreviewUrl}
                     alt='角色头像预览'
@@ -311,8 +311,8 @@ function CharactersPage() {
                     {getInitialChar(createName)}
                   </AvatarFallback>
                 </Avatar>
-                <div className='absolute inset-0 flex items-center justify-center rounded-full bg-black/45 opacity-0 transition-opacity group-hover:opacity-100'>
-                  <Camera className='size-4 text-white' />
+                <div className='absolute inset-0 flex items-center justify-center rounded-full bg-foreground/50 opacity-0 transition-opacity group-hover:opacity-100'>
+                  <Camera className='size-4 text-background' />
                 </div>
               </button>
               <div className='min-w-0 flex-1 space-y-1'>
