@@ -168,13 +168,13 @@ export function Header() {
                   {/* 业务功能组 */}
                   <DropdownMenuGroup title='我的应用'>
                     <DropdownMenuItem
-                      onClick={() => navigate({ to: '/characters' })}
+                      onClick={() => navigate({ to: '/my/characters' })}
                     >
                       <Sparkles className='mr-2 h-4 w-4 text-foreground' />
                       <span>我的角色</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => navigate({ to: '/knowledge-bases' })}
+                      onClick={() => navigate({ to: '/my/knowledge-bases' })}
                     >
                       <Book className='mr-2 h-4 w-4 text-foreground' />
                       <span>我的知识库</span>

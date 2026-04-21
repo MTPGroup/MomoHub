@@ -5,7 +5,7 @@ import {
   useNavigate,
   useRouterState,
 } from '@tanstack/react-router'
-import { Camera, Plus, Search } from 'lucide-react'
+import { Camera, Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
@@ -16,6 +16,7 @@ import {
 } from '#/client/@tanstack/react-query.gen'
 import { AuthForm } from '#/components/features/auth/auth-form'
 import { PublicToggle } from '#/components/shared/public-toggle'
+import { ResourceListLayout } from '#/components/shared/resource-list-layout'
 import { ResourceSummaryCard } from '#/components/shared/resource-summary-card'
 import { TagInput } from '#/components/shared/tag-input'
 import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar'
@@ -83,7 +84,7 @@ function parseBaseConfigFromText(raw: string) {
   }
 }
 
-function CharactersPage() {
+export function CharactersPage({ mineOnly = false }: { mineOnly?: boolean }) {
   const auth = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -91,7 +92,8 @@ function CharactersPage() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
-  const isListPage = pathname === '/characters'
+  const listPath = mineOnly ? '/my/characters' : '/characters'
+  const isListPage = pathname === listPath
 
   const [searchValue, setSearchValue] = useState('')
   const [createName, setCreateName] = useState('')
@@ -132,6 +134,7 @@ function CharactersPage() {
         page: 1,
         page_size: 30,
         keyword: searchValue.trim() || undefined,
+        mine: mineOnly,
       },
     }),
     enabled: isListPage,
@@ -236,35 +239,22 @@ function CharactersPage() {
   }
 
   return (
-    <div className='mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8'>
-      <section className='space-y-3'>
-        <h1 className='font-serif text-3xl font-bold tracking-tight'>
-          AI角色管理与探索
-        </h1>
-        <p className='max-w-3xl text-sm leading-6 text-muted-foreground'>
-          发现和探索社区创建的 AI 角色
-        </p>
-      </section>
-
-      <section className='relative'>
-        <Search className='pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground' />
-        <Input
-          value={searchValue}
-          onChange={(event) => setSearchValue(event.target.value)}
-          placeholder='输入关键词过滤角色'
-          className='rounded-xl border-border/80 bg-card/70 pl-10 shadow-none'
-        />
-      </section>
-
-      <section className='flex items-center justify-between rounded-2xl border border-border/80 bg-card/95 p-5 shadow-sm'>
-        <div className='space-y-1'>
-          <p className='text-sm font-medium'>新建角色</p>
-          <p className='text-xs text-muted-foreground'>
-            建议在简介中包含场景与边界，后续进入子页面管理角色配置。
-            {!auth.accessToken ? ' 当前为浏览模式，登录后可创建与管理。' : ''}
-          </p>
-        </div>
-        {auth.accessToken ? (
+    <ResourceListLayout
+      title={mineOnly ? '我的AI角色' : 'AI角色管理与探索'}
+      description={
+        mineOnly
+          ? '仅展示你创建的角色，便于集中管理与维护。'
+          : '发现和探索社区创建的 AI 角色'
+      }
+      searchValue={searchValue}
+      onSearchChange={setSearchValue}
+      searchPlaceholder='输入关键词过滤角色'
+      createTitle='新建角色'
+      createDescription={`建议在简介中包含场景与边界，后续进入子页面管理角色配置。${
+        !auth.accessToken ? ' 当前为浏览模式，登录后可创建与管理。' : ''
+      }`}
+      createAction={
+        auth.accessToken ? (
           <Button type='button' onClick={() => setCreateDialogOpen(true)}>
             <Plus className='size-4' />
             新建角色
@@ -275,9 +265,18 @@ function CharactersPage() {
               登录后新建
             </Button>
           </AuthForm>
-        )}
-      </section>
-
+        )
+      }
+      footer={
+        characters.length === 0 ? (
+          <Card className='gap-2 border-dashed py-10 text-center'>
+            <CardContent>
+              <p className='text-sm text-muted-foreground'>没有匹配的角色</p>
+            </CardContent>
+          </Card>
+        ) : null
+      }
+    >
       <Dialog
         open={createDialogOpen}
         onOpenChange={(open) => {
@@ -414,14 +413,6 @@ function CharactersPage() {
           />
         ))}
       </section>
-
-      {characters.length === 0 && (
-        <Card className='gap-2 border-dashed py-10 text-center'>
-          <CardContent>
-            <p className='text-sm text-muted-foreground'>没有匹配的角色</p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+    </ResourceListLayout>
   )
 }

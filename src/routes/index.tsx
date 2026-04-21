@@ -100,7 +100,7 @@ function HomePage() {
         <div className='grid gap-3 text-sm'>
           <Card className='gap-3 border border-border/80 bg-background/70 py-4'>
             <CardHeader className='px-4'>
-              <CardDescription>知识库总量（当前页）</CardDescription>
+              <CardDescription>知识库总量</CardDescription>
               <CardTitle className='text-2xl'>
                 {kbQuery.data?.data?.total ?? 0}
               </CardTitle>
@@ -108,7 +108,7 @@ function HomePage() {
           </Card>
           <Card className='gap-3 border border-border/80 bg-background/70 py-4'>
             <CardHeader className='px-4'>
-              <CardDescription>角色总量（当前页）</CardDescription>
+              <CardDescription>角色总量</CardDescription>
               <CardTitle className='text-2xl'>
                 {characterQuery.data?.data?.total ?? 0}
               </CardTitle>

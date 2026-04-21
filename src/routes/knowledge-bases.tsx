@@ -5,7 +5,7 @@ import {
   useNavigate,
   useRouterState,
 } from '@tanstack/react-router'
-import { Camera, Plus, Search } from 'lucide-react'
+import { Camera, Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
@@ -16,6 +16,7 @@ import {
 } from '#/client/@tanstack/react-query.gen'
 import { AuthForm } from '#/components/features/auth/auth-form'
 import { PublicToggle } from '#/components/shared/public-toggle'
+import { ResourceListLayout } from '#/components/shared/resource-list-layout'
 import { ResourceSummaryCard } from '#/components/shared/resource-summary-card'
 import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar'
 import { Button } from '#/components/ui/button'
@@ -68,7 +69,11 @@ function getInitialChar(value?: string | null) {
   return text ? text.slice(0, 1).toUpperCase() : 'K'
 }
 
-function KnowledgeBasesPage() {
+export function KnowledgeBasesPage({
+  mineOnly = false,
+}: {
+  mineOnly?: boolean
+}) {
   const auth = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -76,7 +81,8 @@ function KnowledgeBasesPage() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
-  const isListPage = pathname === '/knowledge-bases'
+  const listPath = mineOnly ? '/my/knowledge-bases' : '/knowledge-bases'
+  const isListPage = pathname === listPath
 
   const [searchValue, setSearchValue] = useState('')
 
@@ -119,6 +125,7 @@ function KnowledgeBasesPage() {
         page: 1,
         page_size: 30,
         keyword: searchValue.trim() || undefined,
+        mine: mineOnly,
       },
     }),
     enabled: isListPage,
@@ -214,35 +221,22 @@ function KnowledgeBasesPage() {
   }
 
   return (
-    <div className='mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8'>
-      <section className='space-y-3'>
-        <h1 className='font-serif text-3xl font-bold tracking-tight'>
-          知识库管理与探索
-        </h1>
-        <p className='max-w-3xl text-sm leading-6 text-muted-foreground'>
-          探索和管理知识库资源
-        </p>
-      </section>
-
-      <section className='relative'>
-        <Search className='pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground' />
-        <Input
-          value={searchValue}
-          onChange={(event) => setSearchValue(event.target.value)}
-          placeholder='输入关键词过滤知识库'
-          className='rounded-xl border-border/80 bg-card/70 pl-10 shadow-none'
-        />
-      </section>
-
-      <section className='flex items-center justify-between rounded-2xl border border-border/80 bg-card/95 p-5 shadow-sm'>
-        <div className='space-y-1'>
-          <p className='text-sm font-medium'>新建知识库</p>
-          <p className='text-xs text-muted-foreground'>
-            建议按拆分知识库，后续进入子页面管理文档队列。
-            {!auth.accessToken ? ' 当前为浏览模式，登录后可创建与管理。' : ''}
-          </p>
-        </div>
-        {auth.accessToken ? (
+    <ResourceListLayout
+      title={mineOnly ? '我的知识库' : '知识库管理与探索'}
+      description={
+        mineOnly
+          ? '仅展示你创建的知识库，便于集中管理文档与处理流程。'
+          : '探索和管理知识库资源'
+      }
+      searchValue={searchValue}
+      onSearchChange={setSearchValue}
+      searchPlaceholder='输入关键词过滤知识库'
+      createTitle='新建知识库'
+      createDescription={`建议按拆分知识库，后续进入子页面管理文档队列。${
+        !auth.accessToken ? ' 当前为浏览模式，登录后可创建与管理。' : ''
+      }`}
+      createAction={
+        auth.accessToken ? (
           <Button type='button' onClick={() => setCreateDialogOpen(true)}>
             <Plus className='size-4' />
             新建知识库
@@ -253,9 +247,28 @@ function KnowledgeBasesPage() {
               登录后新建
             </Button>
           </AuthForm>
-        )}
-      </section>
-
+        )
+      }
+      footer={
+        <>
+          {allItems.length === 0 && (
+            <Card className='gap-2 border-dashed py-10 text-center'>
+              <CardContent>
+                <p className='text-sm text-muted-foreground'>
+                  没有匹配的知识库
+                </p>
+              </CardContent>
+            </Card>
+          )}
+          {privateCount > 0 && (
+            <p className='text-xs text-muted-foreground'>
+              已检索到 {allItems.length} 个知识库，其中 {privateCount}{' '}
+              个为私有知识库。
+            </p>
+          )}
+        </>
+      }
+    >
       <Dialog
         open={createDialogOpen}
         onOpenChange={(open) => {
@@ -373,21 +386,6 @@ function KnowledgeBasesPage() {
           />
         ))}
       </section>
-
-      {allItems.length === 0 && (
-        <Card className='gap-2 border-dashed py-10 text-center'>
-          <CardContent>
-            <p className='text-sm text-muted-foreground'>没有匹配的知识库</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {privateCount > 0 && (
-        <p className='text-xs text-muted-foreground'>
-          已检索到 {allItems.length} 个知识库，其中 {privateCount}{' '}
-          个为私有知识库。
-        </p>
-      )}
-    </div>
+    </ResourceListLayout>
   )
 }
