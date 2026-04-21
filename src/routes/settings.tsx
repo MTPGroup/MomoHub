@@ -43,8 +43,14 @@ import {
   CardHeader,
   CardTitle,
 } from '#/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '#/components/ui/dialog'
 import { Input } from '#/components/ui/input'
-import { Textarea } from '#/components/ui/textarea'
 import { formatDateTime } from '#/lib/format'
 import { clearAuth, useAuth } from '#/stores/auth'
 
@@ -56,6 +62,64 @@ interface SessionItem {
   deviceFingerprint: string
   expiresAt: string
   isCurrent: boolean
+}
+
+interface AuditLogItem {
+  id: string
+  eventType: string
+  payload?: unknown
+  processed?: boolean
+  retryCount?: number
+  createdAt?: string
+  publishedAt?: string | null
+}
+
+interface AuditLogsData {
+  items?: AuditLogItem[]
+  total?: number
+  page?: number
+  page_size?: number
+  total_pages?: number
+}
+
+function maskEmail(value: string) {
+  const [local = '', domain = ''] = value.split('@')
+  if (!domain) {
+    return value
+  }
+  const prefix = local.length <= 2 ? local.slice(0, 1) : local.slice(0, 2)
+  return `${prefix}***@${domain}`
+}
+
+function maskId(value: string) {
+  if (value.length <= 8) {
+    return `${value.slice(0, 2)}***`
+  }
+  return `${value.slice(0, 4)}...${value.slice(-4)}`
+}
+
+function sanitizePayload(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizePayload(item))
+  }
+  if (!value || typeof value !== 'object') {
+    return value
+  }
+
+  const result: Record<string, unknown> = {}
+  for (const [key, raw] of Object.entries(value)) {
+    const normalizedKey = key.toLowerCase()
+    if (normalizedKey.includes('email') && typeof raw === 'string') {
+      result[key] = maskEmail(raw)
+      continue
+    }
+    if (normalizedKey === 'user_id' && typeof raw === 'string') {
+      result[key] = maskId(raw)
+      continue
+    }
+    result[key] = sanitizePayload(raw)
+  }
+  return result
 }
 
 function SettingsPage() {
@@ -76,6 +140,9 @@ function SettingsPage() {
   const [llmBaseUrl, setLlmBaseUrl] = useState('')
 
   const [editingLlmId, setEditingLlmId] = useState<string | null>(null)
+  const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLogItem | null>(
+    null,
+  )
 
   const sessionsQuery = useQuery(listSessionsOptions())
   const llmConfigsQuery = useQuery(listMyLlmConfigsOptions())
@@ -209,6 +276,14 @@ function SettingsPage() {
   const llmConfigs =
     (llmConfigsQuery.data as { data?: LlmConfigOut[] | null } | undefined)
       ?.data ?? []
+  const auditData =
+    (auditLogsQuery.data as { data?: AuditLogsData | null } | undefined)
+      ?.data ?? null
+  const auditItems = auditData?.items ?? []
+  const auditTotal = auditData?.total ?? auditItems.length
+  const auditPage = auditData?.page ?? 1
+  const auditPageSize = auditData?.page_size ?? 20
+  const auditTotalPages = auditData?.total_pages ?? 1
 
   const handleChangePassword = () => {
     if (!oldPassword || !newPassword) {
@@ -247,11 +322,6 @@ function SettingsPage() {
     })
   }
 
-  const auditPreview =
-    typeof auditLogsQuery.data === 'string'
-      ? auditLogsQuery.data
-      : JSON.stringify(auditLogsQuery.data ?? {}, null, 2)
-
   return (
     <div className='mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8'>
       <section className='space-y-3'>
@@ -259,7 +329,7 @@ function SettingsPage() {
           账号设置
         </h1>
         <p className='max-w-3xl text-sm leading-6 text-muted-foreground'>
-          覆盖安全和账号层面的关键能力：密码、设备会话、OTP、模型配置与账号注销。
+          设置您的密码、设备会话、OTP、模型配置与账号注销。
         </p>
       </section>
 
@@ -636,20 +706,77 @@ function SettingsPage() {
           <CardHeader className='px-5'>
             <CardTitle className='flex items-center gap-2 text-base'>
               <Eye className='size-4' />
-              审计日志预览
+              审计日志
             </CardTitle>
-            <CardDescription>
-              用于快速查看接口返回结构，便于后续做更细粒度的日志 UI。
-            </CardDescription>
           </CardHeader>
-          <CardContent className='px-5'>
-            <Textarea
-              readOnly
-              value={auditPreview.slice(0, 2400)}
-              className='min-h-56 font-mono text-xs'
-            />
+          <CardContent className='space-y-3 px-5'>
+            <p className='text-xs text-muted-foreground'>
+              共 {auditTotal} 条 · 第 {auditPage}/{auditTotalPages} 页 · 每页{' '}
+              {auditPageSize} 条
+            </p>
+            {auditLogsQuery.isPending ? (
+              <p className='text-sm text-muted-foreground'>审计日志加载中...</p>
+            ) : auditItems.length === 0 ? (
+              <p className='text-sm text-muted-foreground'>暂无审计日志</p>
+            ) : (
+              <div className='space-y-3'>
+                {auditItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className='rounded-md border border-border/80 bg-background/70 p-3'
+                  >
+                    <div className='flex items-center justify-between gap-2'>
+                      <p className='text-sm font-medium'>{item.eventType}</p>
+                      <Badge variant={item.processed ? 'secondary' : 'outline'}>
+                        {item.processed ? '已处理' : '待处理'}
+                      </Badge>
+                    </div>
+                    <div className='mt-1 space-y-1 text-xs text-muted-foreground'>
+                      <p>事件ID：{maskId(item.id)}</p>
+                      <p>重试次数：{item.retryCount ?? 0}</p>
+                      <p>创建时间：{formatDateTime(item.createdAt)}</p>
+                      <p>发布时间：{formatDateTime(item.publishedAt)}</p>
+                    </div>
+                    <Button
+                      type='button'
+                      size='sm'
+                      variant='outline'
+                      className='mt-2'
+                      onClick={() => setSelectedAuditLog(item)}
+                    >
+                      查看 payload
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        <Dialog
+          open={Boolean(selectedAuditLog)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedAuditLog(null)
+            }
+          }}
+        >
+          <DialogContent className='sm:max-w-2xl'>
+            <DialogHeader>
+              <DialogTitle>
+                {selectedAuditLog?.eventType || '审计日志 payload'}
+              </DialogTitle>
+              <DialogDescription>敏感字段已做基础脱敏展示。</DialogDescription>
+            </DialogHeader>
+            <pre className='max-h-[60vh] overflow-auto rounded-md border border-border/80 bg-background/70 p-3 text-xs leading-5'>
+              {JSON.stringify(
+                sanitizePayload(selectedAuditLog?.payload ?? {}),
+                null,
+                2,
+              )}
+            </pre>
+          </DialogContent>
+        </Dialog>
 
         <Card className='gap-4 border border-destructive/30 bg-card py-5'>
           <CardHeader className='px-5'>
