@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Camera, Save } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
   getCurrentUserOptions,
   getCurrentUserQueryKey,
   updateCurrentUserMutation,
+  uploadCurrentUserAvatarMutation,
 } from '#/client/@tanstack/react-query.gen'
 import { AuthRequired } from '#/components/shared/auth-required'
 import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar'
@@ -25,34 +26,28 @@ import { setAuth, useAuth } from '#/stores/auth'
 
 export const Route = createFileRoute('/profile')({ component: ProfilePage })
 
+function revokeObjectUrl(url: string) {
+  if (url.startsWith('blob:')) {
+    URL.revokeObjectURL(url)
+  }
+}
+
 function ProfilePage() {
   const auth = useAuth()
   const queryClient = useQueryClient()
+  const avatarInputRef = useRef<HTMLInputElement | null>(null)
 
   const [name, setName] = useState('')
-  const [avatar, setAvatar] = useState('')
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState('')
 
-  const meQuery = useQuery(
-    getCurrentUserOptions(),
-  )
+  const meQuery = useQuery(getCurrentUserOptions())
 
   const updateProfile = useMutation({
     ...updateCurrentUserMutation(),
-    onSuccess: (res) => {
-      const user = res.data
-      if (user) {
-        setAuth({
-          name: user.name,
-          avatar: user.avatar,
-          status: user.status,
-        })
-      }
-      toast.success('个人资料已更新')
-      queryClient.invalidateQueries({ queryKey: getCurrentUserQueryKey() })
-    },
-    onError: (error) => {
-      toast.error('更新失败', { description: error.message || '请稍后重试' })
-    },
+  })
+  const uploadCurrentUserAvatar = useMutation({
+    ...uploadCurrentUserAvatarMutation(),
   })
 
   const me = meQuery.data?.data
@@ -63,22 +58,88 @@ function ProfilePage() {
     }
 
     setName(me.name)
-    setAvatar(me.avatar || '')
   }, [me])
 
-  const handleSubmit = () => {
-    updateProfile.mutate({
-      body: {
-        name: name.trim() || null,
-        avatar: avatar.trim() || null,
-      },
+  useEffect(() => {
+    return () => {
+      revokeObjectUrl(avatarPreviewUrl)
+    }
+  }, [avatarPreviewUrl])
+
+  const clearAvatarSelection = () => {
+    setAvatarFile(null)
+    setAvatarPreviewUrl((previous) => {
+      revokeObjectUrl(previous)
+      return ''
     })
+    if (avatarInputRef.current) {
+      avatarInputRef.current.value = ''
+    }
+  }
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) {
+      return
+    }
+    if (!file.type.startsWith('image/')) {
+      toast.error('请选择图片文件')
+      event.target.value = ''
+      return
+    }
+    setAvatarFile(file)
+    setAvatarPreviewUrl((previous) => {
+      revokeObjectUrl(previous)
+      return URL.createObjectURL(file)
+    })
+  }
+
+  const handleSubmit = async () => {
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      toast.error('昵称不能为空')
+      return
+    }
+
+    try {
+      let latestUser = me
+      const updated = await updateProfile.mutateAsync({
+        body: {
+          name: trimmedName,
+        },
+      })
+      latestUser = updated.data ?? latestUser
+
+      if (avatarFile) {
+        const avatarUpdated = await uploadCurrentUserAvatar.mutateAsync({
+          body: { file: avatarFile },
+        })
+        latestUser = avatarUpdated.data ?? latestUser
+      }
+
+      if (latestUser) {
+        setAuth({
+          name: latestUser.name,
+          avatar: latestUser.avatar,
+          status: latestUser.status,
+        })
+      }
+      clearAvatarSelection()
+      toast.success('个人资料已更新')
+      queryClient.invalidateQueries({ queryKey: getCurrentUserQueryKey() })
+    } catch (error) {
+      toast.error('更新失败', {
+        description: error instanceof Error ? error.message : '请稍后重试',
+      })
+    }
   }
 
   return (
     <div className='mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8'>
       <section className='space-y-3'>
-        <h1 className='font-serif text-3xl font-bold tracking-tight'>个人资料</h1>
+        <h1 className='font-serif text-3xl font-bold tracking-tight'>
+          个人资料
+        </h1>
         <p className='text-sm leading-6 text-muted-foreground'>
           在这里维护你的公开头像与昵称。提交后，顶部头像下拉会实时同步。
         </p>
@@ -93,7 +154,10 @@ function ProfilePage() {
             <CardContent className='space-y-4 px-5'>
               <div className='flex items-center gap-4'>
                 <Avatar className='size-16'>
-                  <AvatarImage src={avatar || me?.avatar} alt={name || me?.name} />
+                  <AvatarImage
+                    src={avatarPreviewUrl || me?.avatar}
+                    alt={name || me?.name}
+                  />
                   <AvatarFallback className='text-lg'>
                     {(name || me?.name || 'U').slice(0, 1).toUpperCase()}
                   </AvatarFallback>
@@ -114,9 +178,53 @@ function ProfilePage() {
           <Card className='gap-4 border bg-card py-5'>
             <CardHeader className='px-5'>
               <CardTitle className='text-base'>编辑资料</CardTitle>
-              <CardDescription>建议头像使用稳定 URL，方便在多端一致展示。</CardDescription>
+              <CardDescription>修改昵称，或上传新头像。</CardDescription>
             </CardHeader>
             <CardContent className='space-y-4 px-5'>
+              <div className='flex items-center gap-4'>
+                <button
+                  type='button'
+                  className='group relative'
+                  onClick={() => avatarInputRef.current?.click()}
+                  aria-label='选择用户头像'
+                >
+                  <Avatar className='size-16 border border-border'>
+                    <AvatarImage
+                      src={avatarPreviewUrl || me?.avatar}
+                      alt='用户头像预览'
+                    />
+                    <AvatarFallback className='text-base'>
+                      {(name || me?.name || 'U').slice(0, 1).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className='absolute inset-0 flex items-center justify-center rounded-full bg-black/45 opacity-0 transition-opacity group-hover:opacity-100'>
+                    <Camera className='size-4 text-white' />
+                  </div>
+                </button>
+                <div className='min-w-0 flex-1 space-y-1'>
+                  <p className='text-sm font-medium'>头像</p>
+                  <p className='truncate text-xs text-muted-foreground'>
+                    {avatarFile ? avatarFile.name : '点击头像选择本地图片'}
+                  </p>
+                </div>
+                {avatarFile && (
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    size='sm'
+                    onClick={clearAvatarSelection}
+                  >
+                    清除
+                  </Button>
+                )}
+                <input
+                  ref={avatarInputRef}
+                  type='file'
+                  accept='image/*'
+                  className='hidden'
+                  onChange={handleAvatarChange}
+                />
+              </div>
               <div className='space-y-2'>
                 <p className='text-sm font-medium'>昵称</p>
                 <Input
@@ -125,22 +233,17 @@ function ProfilePage() {
                   placeholder='请输入昵称'
                 />
               </div>
-              <div className='space-y-2'>
-                <p className='text-sm font-medium'>头像 URL</p>
-                <Input
-                  value={avatar}
-                  onChange={(event) => setAvatar(event.target.value)}
-                  placeholder='https://example.com/avatar.png'
-                />
-              </div>
-              <Button onClick={handleSubmit} disabled={updateProfile.isPending}>
+              <Button
+                onClick={handleSubmit}
+                disabled={
+                  updateProfile.isPending || uploadCurrentUserAvatar.isPending
+                }
+              >
                 <Save className='size-4' />
-                {updateProfile.isPending ? '保存中...' : '保存资料'}
+                {updateProfile.isPending || uploadCurrentUserAvatar.isPending
+                  ? '保存中...'
+                  : '保存资料'}
               </Button>
-              <p className='flex items-center gap-2 text-xs text-muted-foreground'>
-                <Camera className='size-3.5' />
-                如果头像链接不可访问，将自动显示首字母占位图。
-              </p>
             </CardContent>
           </Card>
         </div>

@@ -1,39 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-import { FileUp, PencilLine, Plus, Search, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import {
+  createFileRoute,
+  Outlet,
+  useNavigate,
+  useRouterState,
+} from '@tanstack/react-router'
+import { Camera, Plus, Search } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
   createKbMutation,
-  deleteKbMutation,
   listKbsOptions,
   listKbsQueryKey,
-  updateKbMutation,
-  uploadDocumentMutation,
+  uploadKbAvatarMutation,
 } from '#/client/@tanstack/react-query.gen'
-import type { KnowledgeBaseOut } from '#/client/types.gen'
 import { AuthForm } from '#/components/features/auth/auth-form'
 import { PublicToggle } from '#/components/shared/public-toggle'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '#/components/ui/alert-dialog'
-import { Badge } from '#/components/ui/badge'
+import { ResourceSummaryCard } from '#/components/shared/resource-summary-card'
+import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar'
 import { Button } from '#/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '#/components/ui/card'
+import { Card, CardContent } from '#/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -51,75 +37,126 @@ export const Route = createFileRoute('/knowledge-bases')({
   component: KnowledgeBasesPage,
 })
 
+function getKbStatusBadgeClassName(status?: string | null) {
+  const normalized = status?.toLowerCase() ?? ''
+  if (
+    normalized.includes('ready') ||
+    normalized.includes('active') ||
+    normalized.includes('ok')
+  ) {
+    return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+  }
+  if (
+    normalized.includes('error') ||
+    normalized.includes('fail') ||
+    normalized.includes('rejected')
+  ) {
+    return 'border-red-200 bg-red-50 text-red-700'
+  }
+  if (
+    normalized.includes('building') ||
+    normalized.includes('processing') ||
+    normalized.includes('pending')
+  ) {
+    return 'border-blue-200 bg-blue-50 text-blue-700'
+  }
+  return 'border-slate-200 bg-slate-50 text-slate-700'
+}
+
+function getInitialChar(value?: string | null) {
+  const text = value?.trim()
+  return text ? text.slice(0, 1).toUpperCase() : 'K'
+}
+
 function KnowledgeBasesPage() {
   const auth = useAuth()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const avatarInputRef = useRef<HTMLInputElement | null>(null)
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+  const isListPage = pathname === '/knowledge-bases'
 
-  const [keyword, setKeyword] = useState('')
   const [searchValue, setSearchValue] = useState('')
 
   const [createName, setCreateName] = useState('')
   const [createDescription, setCreateDescription] = useState('')
   const [createPublic, setCreatePublic] = useState(false)
+  const [createAvatarFile, setCreateAvatarFile] = useState<File | null>(null)
+  const [createAvatarPreviewUrl, setCreateAvatarPreviewUrl] = useState('')
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
-  const [editingItem, setEditingItem] = useState<KnowledgeBaseOut | null>(null)
-  const [editName, setEditName] = useState('')
-  const [editDescription, setEditDescription] = useState('')
-  const [editPublic, setEditPublic] = useState(false)
+  const clearCreateAvatarSelection = () => {
+    setCreateAvatarFile(null)
+    setCreateAvatarPreviewUrl((previous) => {
+      if (previous) {
+        URL.revokeObjectURL(previous)
+      }
+      return ''
+    })
+    if (avatarInputRef.current) {
+      avatarInputRef.current.value = ''
+    }
+  }
 
-  const kbQuery = useQuery(
-    listKbsOptions({
-      query: { page: 1, page_size: 30, keyword: keyword || undefined },
+  useEffect(() => {
+    return () => {
+      if (createAvatarPreviewUrl) {
+        URL.revokeObjectURL(createAvatarPreviewUrl)
+      }
+    }
+  }, [createAvatarPreviewUrl])
+
+  const kbQuery = useQuery({
+    ...listKbsOptions({
+      query: {
+        page: 1,
+        page_size: 30,
+        keyword: searchValue.trim() || undefined,
+      },
     }),
-  )
+    enabled: Boolean(auth.accessToken && isListPage),
+  })
+
+  const uploadKbAvatar = useMutation({
+    ...uploadKbAvatarMutation(),
+  })
 
   const createKb = useMutation({
     ...createKbMutation(),
-    onSuccess: () => {
+    onSuccess: async (res) => {
+      const newKbId = res.data?.id
+      if (newKbId && createAvatarFile) {
+        try {
+          await uploadKbAvatar.mutateAsync({
+            path: { id: newKbId },
+            body: { file: createAvatarFile },
+          })
+          toast.success('知识库头像已上传')
+        } catch (error) {
+          toast.warning('知识库已创建，但头像上传失败', {
+            description:
+              error instanceof Error
+                ? error.message
+                : '请稍后在管理页重试上传头像',
+          })
+        }
+      }
+
       toast.success('知识库已创建')
       setCreateName('')
       setCreateDescription('')
       setCreatePublic(false)
+      clearCreateAvatarSelection()
       setCreateDialogOpen(false)
       queryClient.invalidateQueries({ queryKey: listKbsQueryKey() })
+      if (newKbId) {
+        void navigate({ to: '/knowledge-bases/$id', params: { id: newKbId } })
+      }
     },
     onError: (error) => {
       toast.error('创建失败', { description: error.message || '请稍后重试' })
-    },
-  })
-
-  const updateKb = useMutation({
-    ...updateKbMutation(),
-    onSuccess: () => {
-      toast.success('知识库已更新')
-      setEditingItem(null)
-      queryClient.invalidateQueries({ queryKey: listKbsQueryKey() })
-    },
-    onError: (error) => {
-      toast.error('更新失败', { description: error.message || '请稍后重试' })
-    },
-  })
-
-  const deleteKb = useMutation({
-    ...deleteKbMutation(),
-    onSuccess: () => {
-      toast.success('知识库已删除')
-      queryClient.invalidateQueries({ queryKey: listKbsQueryKey() })
-    },
-    onError: (error) => {
-      toast.error('删除失败', { description: error.message || '请稍后重试' })
-    },
-  })
-
-  const uploadDocument = useMutation({
-    ...uploadDocumentMutation(),
-    onSuccess: () => {
-      toast.success('文档上传成功')
-      queryClient.invalidateQueries({ queryKey: listKbsQueryKey() })
-    },
-    onError: (error) => {
-      toast.error('上传失败', { description: error.message || '请稍后重试' })
     },
   })
 
@@ -141,42 +178,34 @@ function KnowledgeBasesPage() {
     })
   }
 
-  const openEdit = (item: KnowledgeBaseOut) => {
-    setEditingItem(item)
-    setEditName(item.name)
-    setEditDescription(item.description || '')
-    setEditPublic(Boolean(item.isPublic))
+  const openKbDetail = (id: string) => {
+    void navigate({ to: '/knowledge-bases/$id', params: { id } })
   }
 
-  const handleUpdate = () => {
-    if (!editingItem) {
-      return
-    }
-
-    if (!editName.trim()) {
-      toast.error('请输入知识库名称')
-      return
-    }
-
-    updateKb.mutate({
-      path: { id: editingItem.id },
-      body: {
-        name: editName.trim(),
-        description: editDescription.trim() || null,
-        isPublic: editPublic,
-      },
-    })
-  }
-
-  const handleUpload = (knowledgeBaseId: string, file?: File | null) => {
+  const handleCreateAvatarChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0]
     if (!file) {
       return
     }
+    if (!file.type.startsWith('image/')) {
+      toast.error('请选择图片文件')
+      event.target.value = ''
+      return
+    }
 
-    uploadDocument.mutate({
-      path: { id: knowledgeBaseId },
-      body: { file },
+    setCreateAvatarFile(file)
+    setCreateAvatarPreviewUrl((previous) => {
+      if (previous) {
+        URL.revokeObjectURL(previous)
+      }
+      return URL.createObjectURL(file)
     })
+  }
+
+  if (!isListPage) {
+    return <Outlet />
   }
 
   return (
@@ -186,28 +215,25 @@ function KnowledgeBasesPage() {
           知识库管理与探索
         </h1>
         <p className='max-w-3xl text-sm leading-6 text-muted-foreground'>
-          支持关键词探索市场知识库，也支持你创建私有/公开知识库并上传文档。页面已覆盖核心管理动作：创建、编辑、删除、上传。
+          探索和管理知识库资源
         </p>
       </section>
 
-      <section className='grid gap-4 rounded-xl border bg-card p-5 lg:grid-cols-[1fr_auto]'>
-        <div className='relative'>
-          <Search className='pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground' />
-          <Input
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-            placeholder='输入关键词过滤知识库'
-            className='pl-10'
-          />
-        </div>
-        <Button onClick={() => setKeyword(searchValue.trim())}>搜索</Button>
+      <section className='relative'>
+        <Search className='pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground' />
+        <Input
+          value={searchValue}
+          onChange={(event) => setSearchValue(event.target.value)}
+          placeholder='输入关键词过滤知识库'
+          className='pl-10'
+        />
       </section>
 
       <section className='flex items-center justify-between rounded-xl border bg-card p-5'>
         <div className='space-y-1'>
           <p className='text-sm font-medium'>新建知识库</p>
           <p className='text-xs text-muted-foreground'>
-            建议为每个业务域维护独立知识库，便于角色复用。
+            建议按拆分知识库，后续进入子页面管理文档队列。
             {!auth.accessToken ? ' 当前为浏览模式，登录后可创建与管理。' : ''}
           </p>
         </div>
@@ -225,15 +251,69 @@ function KnowledgeBasesPage() {
         )}
       </section>
 
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+      <Dialog
+        open={createDialogOpen}
+        onOpenChange={(open) => {
+          setCreateDialogOpen(open)
+          if (!open) {
+            clearCreateAvatarSelection()
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>新建知识库</DialogTitle>
             <DialogDescription>
-              填写基本信息并设置公开性，创建后即可上传文档进行索引。
+              填写基本信息并设置公开性，创建后会自动跳转到管理页。
             </DialogDescription>
           </DialogHeader>
           <div className='space-y-3'>
+            <div className='flex items-center gap-4'>
+              <button
+                type='button'
+                className='group relative'
+                onClick={() => avatarInputRef.current?.click()}
+                aria-label='选择知识库头像'
+              >
+                <Avatar className='size-16 border border-border'>
+                  <AvatarImage
+                    src={createAvatarPreviewUrl}
+                    alt='知识库头像预览'
+                  />
+                  <AvatarFallback className='text-base'>
+                    {getInitialChar(createName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className='absolute inset-0 flex items-center justify-center rounded-full bg-black/45 opacity-0 transition-opacity group-hover:opacity-100'>
+                  <Camera className='size-4 text-white' />
+                </div>
+              </button>
+              <div className='min-w-0 flex-1 space-y-1'>
+                <p className='text-sm font-medium'>知识库头像</p>
+                <p className='truncate text-xs text-muted-foreground'>
+                  {createAvatarFile
+                    ? createAvatarFile.name
+                    : '点击头像选择本地图片'}
+                </p>
+              </div>
+              {createAvatarFile && (
+                <Button
+                  type='button'
+                  variant='ghost'
+                  size='sm'
+                  onClick={clearCreateAvatarSelection}
+                >
+                  清除
+                </Button>
+              )}
+              <input
+                ref={avatarInputRef}
+                type='file'
+                accept='image/*'
+                className='hidden'
+                onChange={handleCreateAvatarChange}
+              />
+            </div>
             <Input
               value={createName}
               onChange={(event) => setCreateName(event.target.value)}
@@ -266,93 +346,26 @@ function KnowledgeBasesPage() {
         </DialogContent>
       </Dialog>
 
-      <section className='grid gap-4 lg:grid-cols-2'>
+      <section className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
         {allItems.map((item) => (
-          <Card key={item.id} className='gap-4 border bg-card py-5'>
-            <CardHeader className='px-5'>
-              <div className='flex items-start justify-between gap-3'>
-                <div className='space-y-2'>
-                  <CardTitle className='text-base'>{item.name}</CardTitle>
-                  <CardDescription className='line-clamp-2 min-h-10'>
-                    {item.description || '暂无描述'}
-                  </CardDescription>
-                </div>
-                <Badge variant={item.isPublic ? 'secondary' : 'outline'}>
-                  {item.isPublic ? '公开' : '私有'}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className='space-y-3 px-5 text-sm text-muted-foreground'>
-              <p>
-                {item.documentCount} 文档 / {item.chunkCount} 片段 / 状态{' '}
-                {item.status}
-              </p>
-              <p>更新时间：{formatDateTime(item.updatedAt)}</p>
-              <div className='flex flex-wrap gap-2'>
-                <Button
-                  type='button'
-                  variant='outline'
-                  size='sm'
-                  onClick={() => openEdit(item)}
-                  disabled={!auth.accessToken}
-                >
-                  <PencilLine className='size-4' />
-                  编辑
-                </Button>
-                <label className='inline-flex'>
-                  <input
-                    type='file'
-                    className='hidden'
-                    disabled={!auth.accessToken}
-                    onChange={(event) => {
-                      handleUpload(item.id, event.target.files?.[0])
-                      event.currentTarget.value = ''
-                    }}
-                  />
-                  <Button type='button' variant='outline' size='sm' asChild>
-                    <span>
-                      <FileUp className='size-4' />
-                      上传文档
-                    </span>
-                  </Button>
-                </label>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      type='button'
-                      variant='destructive'
-                      size='sm'
-                      disabled={deleteKb.isPending || !auth.accessToken}
-                    >
-                      <Trash2 className='size-4' />
-                      删除
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent size='sm'>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>确认删除知识库？</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        删除后将无法恢复知识库及其文档索引：{item.name}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>取消</AlertDialogCancel>
-                      <AlertDialogAction
-                        variant='destructive'
-                        onClick={() =>
-                          deleteKb.mutate({
-                            path: { id: item.id },
-                          })
-                        }
-                      >
-                        确认删除
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </CardContent>
-          </Card>
+          <ResourceSummaryCard
+            key={item.id}
+            onClick={() => openKbDetail(item.id)}
+            title={item.name}
+            description={item.description || '暂无描述'}
+            avatarSrc={item.avatar || ''}
+            avatarFallback={getInitialChar(item.name)}
+            statusText={item.status}
+            statusClassName={getKbStatusBadgeClassName(item.status)}
+            visibilityText={item.isPublic ? '公开' : '私有'}
+            visibilityVariant={item.isPublic ? 'secondary' : 'outline'}
+            authorName={item.authorName || item.authorId}
+            authorAvatarSrc={item.authorAvatar || ''}
+            authorAvatarFallback={getInitialChar(
+              item.authorName || item.authorId,
+            )}
+            metaText={`更新于 ${formatDateTime(item.updatedAt)}`}
+          />
         ))}
       </section>
 
@@ -360,42 +373,6 @@ function KnowledgeBasesPage() {
         <Card className='gap-2 border-dashed py-10 text-center'>
           <CardContent>
             <p className='text-sm text-muted-foreground'>没有匹配的知识库</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {editingItem && (
-        <Card className='gap-4 border border-dashed bg-card py-5'>
-          <CardHeader className='px-5'>
-            <CardTitle className='text-base'>
-              编辑知识库：{editingItem.name}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-3 px-5'>
-            <Input
-              value={editName}
-              onChange={(event) => setEditName(event.target.value)}
-              placeholder='知识库名称'
-            />
-            <Textarea
-              value={editDescription}
-              onChange={(event) => setEditDescription(event.target.value)}
-              placeholder='知识库描述'
-            />
-            <div className='flex flex-wrap gap-2'>
-              <PublicToggle
-                checked={editPublic}
-                onCheckedChange={setEditPublic}
-                publicLabel='公开知识库'
-                privateLabel='私有知识库'
-              />
-              <Button onClick={handleUpdate} disabled={updateKb.isPending}>
-                {updateKb.isPending ? '保存中...' : '保存修改'}
-              </Button>
-              <Button variant='ghost' onClick={() => setEditingItem(null)}>
-                取消
-              </Button>
-            </div>
           </CardContent>
         </Card>
       )}

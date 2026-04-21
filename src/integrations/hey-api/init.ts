@@ -1,11 +1,11 @@
 import { client } from '#/client/client.gen'
 import { siteConfig } from '#/env'
-import { authStore, restoreAuthSession } from '#/stores/auth'
+import { getValidAccessToken, restoreAuthSession } from '#/stores/auth'
 
 client.setConfig({
   baseUrl: siteConfig.links.api,
   credentials: 'include',
-  auth: () => authStore.state.accessToken,
+  auth: async () => getValidAccessToken(),
 })
 
 if (typeof window !== 'undefined') {

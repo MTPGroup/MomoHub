@@ -1,6 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { BookOpen, Bot, Compass, LibraryBig, Sparkles, UserCog } from 'lucide-react'
+import {
+  Bookmark,
+  BookOpen,
+  Bot,
+  Compass,
+  LibraryBig,
+  Sparkles,
+  UserCog,
+} from 'lucide-react'
 import type { ReactNode } from 'react'
 import {
   getCharactersOptions,
@@ -101,7 +109,7 @@ function HomePage() {
               <CardDescription>我的收藏角色</CardDescription>
               <CardTitle className='text-2xl'>
                 {auth.accessToken
-                  ? favoritesQuery.data?.data?.total ?? 0
+                  ? (favoritesQuery.data?.data?.total ?? 0)
                   : '登录后可见'}
               </CardTitle>
             </CardHeader>
@@ -163,7 +171,7 @@ function HomePage() {
 
         <PreviewList
           title='我的收藏'
-          icon={<Sparkles className='size-4' />}
+          icon={<Bookmark className='size-4' />}
           empty={auth.accessToken ? '你还没有收藏角色' : '登录后展示收藏角色'}
           rows={favoriteCharacters.map((item) => ({
             key: item.id,
