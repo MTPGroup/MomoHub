@@ -8,10 +8,12 @@ import {
   Scripts,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+import { useEffect } from 'react'
 import { Toaster } from 'sonner'
 import { Footer } from '#/components/layout/footer'
 import { Header } from '#/components/layout/header'
 import { env } from '#/env'
+import { applyThemeToDOM, useTheme } from '#/stores/theme'
 import appCss from '#/styles.css?url'
 
 interface MomohubRouterContext {
@@ -64,6 +66,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className='font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)] flex min-h-screen flex-col'>
+        <ThemeDomSync />
         <Header />
         <main className='flex-1'>{children}</main>
         <Footer />
@@ -88,4 +91,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </body>
     </html>
   )
+}
+
+function ThemeDomSync() {
+  const theme = useTheme()
+
+  useEffect(() => {
+    applyThemeToDOM(theme)
+  }, [theme])
+
+  return null
 }

@@ -1,5 +1,9 @@
 import { applyThemeToDOM, themeStore } from './stores/theme'
 
+function syncThemeClassToDom() {
+  applyThemeToDOM(themeStore.state.theme)
+}
+
 window
   .matchMedia('(prefers-color-scheme: dark)')
   .addEventListener('change', () => {
@@ -10,4 +14,7 @@ window
   })
 
 // 首次加载立即应用一次，确保同步
-applyThemeToDOM(themeStore.state.theme)
+syncThemeClassToDom()
+
+// 在 hydration 后再次同步，避免 html class 在对齐阶段被覆盖。
+window.setTimeout(syncThemeClassToDom, 0)
