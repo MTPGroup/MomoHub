@@ -1,6 +1,7 @@
 import {
   Bolt,
   Download,
+  Link2,
   Loader2,
   RotateCcw,
   Send,
@@ -30,7 +31,7 @@ import {
   PromptInputActions,
   PromptInputTextarea,
 } from '#/components/ui/prompt-input'
-import { extractMessageText } from '#/utils/character-test'
+import { extractMessageText } from '#/utils/character'
 
 type ChatPanelMessage = {
   id: string
@@ -44,7 +45,7 @@ type CharacterBrief = {
 }
 
 type UserBrief = {
-  accessToken: string
+  isLoggedIn?: boolean
   avatar?: string | null
   name?: string | null
 }
@@ -60,6 +61,7 @@ type CharacterDetailTestChatPanelProps = {
   onStop: () => void
   onImportChat: () => void
   onExportChat: () => void
+  onOpenKnowledgeBinding: () => void
   onDeleteSession: () => void
   hasTempSession: boolean
   onResetSession: () => void
@@ -77,6 +79,7 @@ export function CharacterDetailTestChatPanel({
   onStop,
   onExportChat,
   onImportChat,
+  onOpenKnowledgeBinding,
   onDeleteSession,
   hasTempSession,
   onResetSession,
@@ -118,6 +121,16 @@ export function CharacterDetailTestChatPanel({
               aria-label='导入会话'
             >
               <Upload className='size-4' />
+            </Button>
+            <Button
+              type='button'
+              variant='outline'
+              size='icon'
+              onClick={onOpenKnowledgeBinding}
+              title='角色知识库关联'
+              aria-label='角色知识库关联'
+            >
+              <Link2 className='size-4' />
             </Button>
             <Button
               type='button'
@@ -211,7 +224,7 @@ export function CharacterDetailTestChatPanel({
           value={message}
           onValueChange={onMessageChange}
           isLoading={isStreaming}
-          disabled={!auth.accessToken}
+          disabled={!auth.isLoggedIn}
           onSubmit={() => {
             if (!isStreaming && message.trim()) {
               onSend()

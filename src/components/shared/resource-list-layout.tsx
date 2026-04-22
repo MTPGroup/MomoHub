@@ -1,6 +1,5 @@
-import { Search } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { Input } from '#/components/ui/input'
+import { SearchBar } from './search-bar'
 
 interface ResourceListLayoutProps {
   title: string
@@ -38,15 +37,12 @@ export function ResourceListLayout({
         </p>
       </section>
 
-      <section className='relative'>
-        <Search className='pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground' />
-        <Input
-          value={searchValue}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder={searchPlaceholder}
-          className='rounded-xl border-border/80 bg-card/70 pl-10 shadow-none'
-        />
-      </section>
+      <SearchBar
+        query={searchValue}
+        onQueryChange={onSearchChange}
+        placeholder={searchPlaceholder}
+        rounded='lg'
+      />
 
       <section className='flex items-center justify-between rounded-2xl border border-border/80 bg-card/95 p-5 shadow-sm'>
         <div className='space-y-1'>

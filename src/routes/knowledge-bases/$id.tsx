@@ -25,7 +25,7 @@ import {
 } from '#/client/@tanstack/react-query.gen'
 import type { KnowledgeDocumentOut } from '#/client/types.gen'
 import { AuthRequired } from '#/components/shared/auth-required'
-import { PublicToggle } from '#/components/shared/public-toggle'
+import { PublicField } from '#/components/shared/public-toggle'
 import { ResponsiveActionPanel } from '#/components/shared/responsive-action-panel'
 import {
   AlertDialog,
@@ -198,14 +198,14 @@ function KnowledgeBaseDetailPage() {
     ...getKbOptions({
       path: { id },
     }),
-    enabled: Boolean(auth.accessToken),
+    enabled: auth.isLoggedIn,
   })
 
   const documentsQuery = useQuery({
     ...listDocumentsOptions({
       path: { id },
     }),
-    enabled: Boolean(auth.accessToken),
+    enabled: auth.isLoggedIn,
     placeholderData: (previousData) => previousData,
     refetchInterval: (query) => {
       const docs =
@@ -785,15 +785,10 @@ function KnowledgeBaseDetailPage() {
                 onChange={(event) => setEditDescription(event.target.value)}
                 placeholder='知识库描述'
               />
-              <div className='flex items-center justify-between rounded-md border p-3'>
-                <p className='text-sm text-muted-foreground'>可见性</p>
-                <PublicToggle
-                  checked={editPublic}
-                  onCheckedChange={setEditPublic}
-                  publicLabel='公开知识库'
-                  privateLabel='私有知识库'
-                />
-              </div>
+              <PublicField
+                checked={editPublic}
+                onCheckedChange={setEditPublic}
+              />
             </div>
             <DialogFooter>
               <Button variant='ghost' onClick={() => setEditingOpen(false)}>

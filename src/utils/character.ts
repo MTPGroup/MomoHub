@@ -78,23 +78,17 @@ export function extractMessageText(parts: unknown[]) {
 }
 
 export function getChatRuntimeConfig(input: {
-  llmConfigId: string
   generationParams: Record<string, unknown>
 }) {
-  const normalizedLlmConfigId = input.llmConfigId.trim() || null
   const hasGenerationParams = Object.keys(input.generationParams).length > 0
   return {
-    llmConfigId: normalizedLlmConfigId,
     settings: {
       generationParams: hasGenerationParams ? input.generationParams : null,
     },
   }
 }
 
-export function getConfigSignature(config: {
-  llmConfigId: string | null
-  settings: { generationParams: Record<string, unknown> | null }
-}) {
+export function getConfigSignature(config: Record<string, unknown>) {
   return JSON.stringify(config)
 }
 
@@ -192,4 +186,31 @@ export function openAiSseToTextStream(
       }
     },
   })
+}
+
+export function getInitialChar(value?: string | null) {
+  const text = value?.trim()
+  return text ? text.slice(0, 1).toUpperCase() : 'C'
+}
+
+export function revokeObjectUrl(url: string) {
+  if (url.startsWith('blob:')) {
+    URL.revokeObjectURL(url)
+  }
+}
+
+export function parseBaseConfigFromText(raw: string) {
+  const text = raw.trim()
+  if (!text) {
+    return undefined
+  }
+  try {
+    const parsed = JSON.parse(text)
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return null
+    }
+    return parsed as Record<string, unknown>
+  } catch {
+    return null
+  }
 }

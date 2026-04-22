@@ -102,7 +102,7 @@ export function Header() {
         <div className='flex items-center gap-3'>
           <ThemeToggle />
           <Avatar>
-            {auth.accessToken ? (
+            {auth.isLoggedIn ? (
               /* --- 已登录，显示下拉菜单 --- */
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

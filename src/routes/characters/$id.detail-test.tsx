@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
+import { CharacterDetailTestChatPanel } from '#/components/features/character/chat-panel'
+import { CharacterKnowledgeBindingDialog } from '#/components/features/character/knowledge-binding-dialog'
+import { CharacterDetailTestTuningDialog } from '#/components/features/character/tuning-dialog'
 import { AuthRequired } from '#/components/shared/auth-required'
-import { CharacterDetailTestChatPanel } from '#/features/character/chat-panel'
-import { CharacterDetailTestTuningDialog } from '#/features/character/tuning-dialog'
-import { useCharacterDetailTest } from '#/hooks/use-character-detail-test'
+import { useCharacterDetailTest } from '#/hooks/character'
 
 export const Route = createFileRoute('/characters/$id/detail-test')({
   component: CharacterDetailTestPage,
@@ -48,6 +49,9 @@ function CharacterDetailTestPage() {
             onImportChat={() => {
               void state.importDetailTestChat()
             }}
+            onOpenKnowledgeBinding={() =>
+              state.setKnowledgeBindingDialogOpen(true)
+            }
             onDeleteSession={() => {
               void state.deleteTemporarySession()
             }}
@@ -61,8 +65,6 @@ function CharacterDetailTestPage() {
           open={state.tuningDialogOpen}
           onOpenChange={state.setTuningDialogOpen}
           character={state.character}
-          llmConfigId={state.llmConfigId}
-          onLlmConfigIdChange={state.setLlmConfigId}
           systemPromptDraft={state.systemPromptDraft}
           onSystemPromptDraftChange={state.setSystemPromptDraft}
           temperatureInput={state.temperatureInput}
@@ -82,6 +84,15 @@ function CharacterDetailTestPage() {
           appliedParams={state.appliedParams}
           isSavingTuning={state.isSavingTuning}
           onSaveTuning={state.handleSaveTuning}
+        />
+
+        <CharacterKnowledgeBindingDialog
+          open={state.knowledgeBindingDialogOpen}
+          onOpenChange={state.setKnowledgeBindingDialogOpen}
+          linkedKnowledgeBases={state.linkedKnowledgeBases}
+          availableKnowledgeBases={state.availableKnowledgeBases}
+          isMutating={state.isKnowledgeBindingMutating}
+          onToggleBinding={state.toggleKnowledgeBaseBinding}
         />
       </div>
     </AuthRequired>

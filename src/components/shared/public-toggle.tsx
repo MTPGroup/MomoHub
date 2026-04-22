@@ -1,7 +1,7 @@
-import { Globe, Lock } from 'lucide-react'
-import { cn } from '#/lib/utils'
+import { Field, FieldLabel } from '#/components/ui/field'
+import { Switch } from '#/components/ui/switch'
 
-interface PublicToggleProps {
+interface PublicFieldProps {
   checked: boolean
   onCheckedChange: (next: boolean) => void
   publicLabel?: string
@@ -9,42 +9,24 @@ interface PublicToggleProps {
   className?: string
 }
 
-export function PublicToggle({
+export function PublicField({
   checked,
   onCheckedChange,
   publicLabel = '公开',
   privateLabel = '私有',
   className,
-}: PublicToggleProps) {
+}: PublicFieldProps) {
   return (
-    <button
-      type='button'
-      role='switch'
-      aria-checked={checked}
-      onClick={() => onCheckedChange(!checked)}
-      className={cn(
-        'inline-flex items-center gap-3 rounded-full border px-2 py-1 text-xs transition-colors',
-        checked
-          ? 'border-primary/40 bg-primary text-primary-foreground'
-          : 'border-border bg-muted/40 text-foreground',
-        className,
-      )}
-    >
-      <span
-        className={cn(
-          'flex size-6 items-center justify-center rounded-full',
-          checked ? 'bg-primary-foreground/20' : 'bg-background',
-        )}
-      >
-        {checked ? (
-          <Globe className='size-3.5' />
-        ) : (
-          <Lock className='size-3.5' />
-        )}
-      </span>
-      <span className='min-w-14 text-left font-medium'>
+    <Field orientation='horizontal'>
+      <Switch
+        id='public-switch'
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        className={className}
+      />
+      <FieldLabel htmlFor='public-switch'>
         {checked ? publicLabel : privateLabel}
-      </span>
-    </button>
+      </FieldLabel>
+    </Field>
   )
 }

@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '#/components/ui/dialog'
-import { Input } from '#/components/ui/input'
 import { Slider } from '#/components/ui/slider'
 import { Textarea } from '#/components/ui/textarea'
 import { formatDateTime } from '#/lib/format'
@@ -21,8 +20,6 @@ type CharacterDetailTestTuningDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   character: CharacterBrief | null | undefined
-  llmConfigId: string
-  onLlmConfigIdChange: (value: string) => void
   systemPromptDraft: string
   onSystemPromptDraftChange: (value: string) => void
   temperatureInput: string
@@ -109,8 +106,6 @@ export function CharacterDetailTestTuningDialog({
   open,
   onOpenChange,
   character,
-  llmConfigId,
-  onLlmConfigIdChange,
   systemPromptDraft,
   onSystemPromptDraftChange,
   temperatureInput,
@@ -124,10 +119,6 @@ export function CharacterDetailTestTuningDialog({
   frequencyPenaltyInput,
   onFrequencyPenaltyInputChange,
   isStreaming,
-  isSyncingSessionParams,
-  hasPendingSessionParamChanges,
-  tempChatId,
-  appliedParams,
   isSavingTuning,
   onSaveTuning,
 }: CharacterDetailTestTuningDialogProps) {
@@ -149,14 +140,10 @@ export function CharacterDetailTestTuningDialog({
           </DialogDescription>
         </DialogHeader>
         <div className='space-y-3'>
-          <Input
-            value={llmConfigId}
-            onChange={(event) => {
-              onLlmConfigIdChange(event.target.value)
-            }}
-            placeholder='可选：指定 llmConfigId'
-            disabled={isStreaming}
-          />
+          <div className='rounded-md border border-dashed p-3 text-xs text-muted-foreground'>
+            模型配置采用自动策略：优先使用你的活跃 LLM
+            配置；若无活跃配置则使用官方配置。
+          </div>
           <Textarea
             value={systemPromptDraft}
             onChange={(event) => onSystemPromptDraftChange(event.target.value)}
@@ -218,24 +205,24 @@ export function CharacterDetailTestTuningDialog({
               }
             />
           </div>
-          {isSyncingSessionParams ? (
-            <p className='text-xs text-muted-foreground'>正在同步会话参数...</p>
-          ) : hasPendingSessionParamChanges ? (
-            <p className='text-xs text-muted-foreground'>
-              参数已修改，等待同步到当前测试会话。
-            </p>
-          ) : tempChatId ? (
-            <p className='text-xs text-muted-foreground'>
-              当前会话参数已应用。已落库参数：
-              {Object.keys(appliedParams).length > 0
-                ? ` ${JSON.stringify(appliedParams)}`
-                : ' 默认角色参数'}
-            </p>
-          ) : (
-            <p className='text-xs text-muted-foreground'>
-              参数将写入当前测试会话。
-            </p>
-          )}
+          {/* {isSyncingSessionParams ? ( */}
+          {/*   <p className='text-xs text-muted-foreground'>正在同步会话参数...</p> */}
+          {/* ) : hasPendingSessionParamChanges ? ( */}
+          {/*   <p className='text-xs text-muted-foreground'> */}
+          {/*     参数已修改，等待同步到当前测试会话。 */}
+          {/*   </p> */}
+          {/* ) : tempChatId ? ( */}
+          {/*   <p className='text-xs text-muted-foreground'> */}
+          {/*     当前会话参数已应用。已落库参数： */}
+          {/*     {Object.keys(appliedParams).length > 0 */}
+          {/*       ? ` ${JSON.stringify(appliedParams)}` */}
+          {/*       : ' 默认角色参数'} */}
+          {/*   </p> */}
+          {/* ) : ( */}
+          {/*   <p className='text-xs text-muted-foreground'> */}
+          {/*     参数将写入当前测试会话。 */}
+          {/*   </p> */}
+          {/* )} */}
           <Button
             type='button'
             variant='outline'

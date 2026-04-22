@@ -99,12 +99,19 @@ export function AuthForm({ children }: Props) {
       const loginData = res?.data
       if (!loginData) return
 
-      setAuth({
-        name: loginData.user.name,
-        avatar: loginData.user.avatar,
-        status: loginData.user.status,
-        accessToken: loginData.accessToken,
-      })
+      if ('user' in loginData) {
+        setAuth({
+          name: loginData.user.name,
+          avatar: loginData.user.avatar,
+          status: loginData.user.status,
+        })
+      } else {
+        setAuth({
+          name: loginData.name,
+          avatar: loginData.avatar,
+          status: loginData.status,
+        })
+      }
 
       setOpen(false)
       navigate({ to: '/' })

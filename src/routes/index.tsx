@@ -48,7 +48,7 @@ function HomePage() {
     ...getFavoriteCharactersOptions({
       query: { page: 1, page_size: 4 },
     }),
-    enabled: Boolean(auth.accessToken),
+    enabled: auth.isLoggedIn,
   })
 
   const knowledgeBases = kbQuery.data?.data?.items ?? []
@@ -79,7 +79,7 @@ function HomePage() {
             >
               <Link to='/characters'>探索AI角色</Link>
             </Button>
-            {auth.accessToken ? (
+            {auth.isLoggedIn ? (
               <Button
                 variant='secondary'
                 asChild
@@ -118,7 +118,7 @@ function HomePage() {
             <CardHeader className='px-4'>
               <CardDescription>我的收藏角色</CardDescription>
               <CardTitle className='text-2xl'>
-                {auth.accessToken
+                {auth.isLoggedIn
                   ? (favoritesQuery.data?.data?.total ?? 0)
                   : '登录后可见'}
               </CardTitle>
@@ -182,7 +182,7 @@ function HomePage() {
         <PreviewList
           title='我的收藏'
           icon={<Bookmark className='size-4' />}
-          empty={auth.accessToken ? '你还没有收藏角色' : '登录后展示收藏角色'}
+          empty={auth.isLoggedIn ? '你还没有收藏角色' : '登录后展示收藏角色'}
           rows={favoriteCharacters.map((item) => ({
             key: item.id,
             name: item.name,

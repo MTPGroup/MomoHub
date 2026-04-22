@@ -15,7 +15,7 @@ import {
   uploadKbAvatarMutation,
 } from '#/client/@tanstack/react-query.gen'
 import { AuthForm } from '#/components/features/auth/auth-form'
-import { PublicToggle } from '#/components/shared/public-toggle'
+import { PublicField } from '#/components/shared/public-toggle'
 import { ResourceListLayout } from '#/components/shared/resource-list-layout'
 import { ResourceSummaryCard } from '#/components/shared/resource-summary-card'
 import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar'
@@ -112,11 +112,6 @@ function KnowledgeBasesRoutePage({ mineOnly = false }: { mineOnly?: boolean }) {
 
   const kbQuery = useQuery({
     ...listKbsOptions({
-      headers: auth.accessToken
-        ? {
-            Authorization: `Bearer ${auth.accessToken}`,
-          }
-        : undefined,
       query: {
         page: 1,
         page_size: 30,
@@ -229,10 +224,10 @@ function KnowledgeBasesRoutePage({ mineOnly = false }: { mineOnly?: boolean }) {
       searchPlaceholder='输入关键词过滤知识库'
       createTitle='新建知识库'
       createDescription={`建议按拆分知识库，后续进入子页面管理文档队列。${
-        !auth.accessToken ? ' 当前为浏览模式，登录后可创建与管理。' : ''
+        !auth.isLoggedIn ? ' 当前为浏览模式，登录后可创建与管理。' : ''
       }`}
       createAction={
-        auth.accessToken ? (
+        auth.isLoggedIn ? (
           <Button type='button' onClick={() => setCreateDialogOpen(true)}>
             <Plus className='size-4' />
             新建知识库
@@ -338,15 +333,10 @@ function KnowledgeBasesRoutePage({ mineOnly = false }: { mineOnly?: boolean }) {
               onChange={(event) => setCreateDescription(event.target.value)}
               placeholder='知识库描述（可选）'
             />
-            <div className='flex items-center justify-between rounded-md border p-3'>
-              <p className='text-sm text-muted-foreground'>可见性</p>
-              <PublicToggle
-                checked={createPublic}
-                onCheckedChange={setCreatePublic}
-                publicLabel='公开知识库'
-                privateLabel='私有知识库'
-              />
-            </div>
+            <PublicField
+              checked={createPublic}
+              onCheckedChange={setCreatePublic}
+            />
           </div>
           <DialogFooter>
             <Button

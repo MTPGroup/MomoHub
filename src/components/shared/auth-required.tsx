@@ -17,7 +17,7 @@ export function AuthRequired({
 }: AuthRequiredProps) {
   const auth = useAuth()
 
-  if (auth.accessToken) {
+  if (auth.isLoggedIn) {
     return <>{children}</>
   }
 

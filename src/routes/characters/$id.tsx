@@ -6,7 +6,7 @@ import {
   useNavigate,
   useRouterState,
 } from '@tanstack/react-router'
-import { ArrowLeft, Bot, Camera, Heart, PencilLine, Trash2 } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
@@ -20,74 +20,23 @@ import {
   uploadCharacterAvatarMutation,
 } from '#/client/@tanstack/react-query.gen'
 import type { ApiResponseCharacterDetailOut } from '#/client/types.gen'
+import { CharacterDetailActionsPanel } from '#/components/features/character/detail-actions-panel'
+import { CharacterDetailSummaryCard } from '#/components/features/character/detail-summary-card'
+import { CharacterKnowledgeBindingDialog } from '#/components/features/character/knowledge-binding-dialog'
+import { CharacterUpsertDialog } from '#/components/features/character/upsert-dialog'
 import { AuthRequired } from '#/components/shared/auth-required'
-import { PublicToggle } from '#/components/shared/public-toggle'
-import { ResponsiveActionPanel } from '#/components/shared/responsive-action-panel'
-import { TagInput } from '#/components/shared/tag-input'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '#/components/ui/alert-dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar'
-import { Badge } from '#/components/ui/badge'
-import { Button } from '#/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '#/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '#/components/ui/dialog'
-import { Input } from '#/components/ui/input'
-import { Textarea } from '#/components/ui/textarea'
-import { formatDateTime } from '#/lib/format'
+import { Card, CardContent } from '#/components/ui/card'
+import { useCharacterKnowledgeBinding } from '#/hooks/character/use-knowledge-binding'
 import { useAuth } from '#/stores/auth'
+import {
+  getInitialChar,
+  parseBaseConfigFromText,
+  revokeObjectUrl,
+} from '#/utils/character'
 
 export const Route = createFileRoute('/characters/$id')({
   component: CharacterDetailPage,
 })
-
-function parseBaseConfigFromText(raw: string) {
-  const text = raw.trim()
-  if (!text) {
-    return undefined
-  }
-  try {
-    const parsed = JSON.parse(text)
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      return null
-    }
-    return parsed as Record<string, unknown>
-  } catch {
-    return null
-  }
-}
-
-function revokeObjectUrl(url: string) {
-  if (url.startsWith('blob:')) {
-    URL.revokeObjectURL(url)
-  }
-}
-
-function getInitialChar(value?: string | null) {
-  const text = value?.trim()
-  return text ? text.slice(0, 1).toUpperCase() : 'C'
-}
 
 function CharacterDetailPage() {
   const { id } = Route.useParams()
@@ -109,6 +58,8 @@ function CharacterDetailPage() {
   const [editPublic, setEditPublic] = useState(true)
   const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null)
   const [editAvatarPreviewUrl, setEditAvatarPreviewUrl] = useState('')
+  const [knowledgeBindingDialogOpen, setKnowledgeBindingDialogOpen] =
+    useState(false)
 
   const clearEditAvatarSelection = (nextPreview = '') => {
     setEditAvatarFile(null)
@@ -129,11 +80,6 @@ function CharacterDetailPage() {
 
   const characterQuery = useQuery({
     ...getPublicCharacterOptions({
-      headers: auth.accessToken
-        ? {
-            Authorization: `Bearer ${auth.accessToken}`,
-          }
-        : undefined,
       path: { id },
     }),
   })
@@ -160,11 +106,6 @@ function CharacterDetailPage() {
       clearEditAvatarSelection()
       queryClient.invalidateQueries({
         queryKey: getPublicCharacterQueryKey({
-          headers: auth.accessToken
-            ? {
-                Authorization: `Bearer ${auth.accessToken}`,
-              }
-            : undefined,
           path: { id },
         }),
       })
@@ -196,11 +137,6 @@ function CharacterDetailPage() {
       toast.success('收藏成功')
       queryClient.setQueryData(
         getPublicCharacterQueryKey({
-          headers: auth.accessToken
-            ? {
-                Authorization: `Bearer ${auth.accessToken}`,
-              }
-            : undefined,
           path: { id },
         }),
         (previous: ApiResponseCharacterDetailOut | undefined) => {
@@ -229,11 +165,6 @@ function CharacterDetailPage() {
       toast.success('已取消收藏')
       queryClient.setQueryData(
         getPublicCharacterQueryKey({
-          headers: auth.accessToken
-            ? {
-                Authorization: `Bearer ${auth.accessToken}`,
-              }
-            : undefined,
           path: { id },
         }),
         (previous: ApiResponseCharacterDetailOut | undefined) => {
@@ -257,8 +188,11 @@ function CharacterDetailPage() {
       })
     },
   })
-
   const character = characterQuery.data?.data
+  const knowledgeBinding = useCharacterKnowledgeBinding({
+    characterId: id,
+    isAuthenticated: auth.isLoggedIn,
+  })
 
   const openEditDialog = () => {
     if (!character) {
@@ -361,191 +295,44 @@ function CharacterDetailPage() {
         {character && (
           <div className='grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]'>
             <div className='space-y-6'>
-              <Card className='gap-4 border bg-card py-5'>
-                <CardHeader className='px-5'>
-                  <div className='flex items-start justify-between gap-3'>
-                    <div className='flex items-start gap-3'>
-                      <Avatar className='mt-0.5 size-12 border border-border'>
-                        <AvatarImage
-                          src={character.avatar || ''}
-                          alt={character.name}
-                        />
-                        <AvatarFallback className='text-base'>
-                          {getInitialChar(character.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className='text-base'>
-                          {character.name}
-                        </CardTitle>
-                        <CardDescription>
-                          {character.bio || '暂无角色简介'}
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <Badge
-                      variant={character.isPublic ? 'secondary' : 'outline'}
-                    >
-                      {character.isPublic ? '公开' : '私有'}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className='space-y-4 px-5'>
-                  <div className='flex items-center gap-2'>
-                    <Avatar className='size-6'>
-                      <AvatarImage
-                        src={character.authorAvatar || ''}
-                        alt={character.authorName || character.authorId}
-                      />
-                      <AvatarFallback className='text-xs'>
-                        {getInitialChar(
-                          character.authorName || character.authorId,
-                        )}
-                      </AvatarFallback>
-                    </Avatar>
-                    <p className='text-xs text-muted-foreground'>
-                      {character.authorName || character.authorId}
-                    </p>
-                  </div>
-                  <div className='grid gap-3 sm:grid-cols-3'>
-                    <div className='rounded-lg border bg-muted/20 p-3'>
-                      <p className='text-xs text-muted-foreground'>收藏总数</p>
-                      <p className='mt-1 text-2xl font-semibold'>
-                        {character.favoriteCount}
-                      </p>
-                    </div>
-                    <div className='rounded-lg border bg-muted/20 p-3'>
-                      <p className='text-xs text-muted-foreground'>对话总数</p>
-                      <p className='mt-1 text-2xl font-semibold'>
-                        {character.chatCount}
-                      </p>
-                    </div>
-                    <div className='rounded-lg border bg-muted/20 p-3'>
-                      <p className='text-xs text-muted-foreground'>状态</p>
-                      <p className='mt-1 text-sm font-semibold'>
-                        {character.status || 'unknown'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className='space-y-2'>
-                    <p className='text-xs text-muted-foreground'>
-                      创建于 {formatDateTime(character.createdAt)} · 更新于{' '}
-                      {formatDateTime(character.updatedAt)}
-                    </p>
-                    {character.tags && character.tags.length > 0 ? (
-                      <div className='flex flex-wrap gap-2'>
-                        {character.tags.map((tag) => (
-                          <Badge key={tag} variant='outline'>
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className='text-xs text-muted-foreground'>
-                        未设置标签
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <CharacterDetailSummaryCard character={character} />
             </div>
 
-            <ResponsiveActionPanel
-              title='操作面板'
-              description='常用角色管理操作集中在此。'
-              renderActions={(closeMobilePanel) => (
-                <>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    className='w-full justify-start'
-                    onClick={() => {
-                      openEditDialog()
-                      closeMobilePanel()
-                    }}
-                  >
-                    <PencilLine className='size-4' />
-                    编辑角色
-                  </Button>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    className='w-full justify-start'
-                    onClick={() => {
-                      void navigate({
-                        to: '/characters/$id/detail-test',
-                        params: { id: character.id },
-                      })
-                      closeMobilePanel()
-                    }}
-                  >
-                    <Bot className='size-4' />
-                    详情测试
-                  </Button>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    className='w-full justify-start'
-                    disabled={
-                      favoriteCharacter.isPending || cancelFavorite.isPending
-                    }
-                    onClick={() => {
-                      const action = character.isFavorited
-                        ? cancelFavorite
-                        : favoriteCharacter
-                      action.mutate({
-                        path: { id: character.id },
-                      })
-                      closeMobilePanel()
-                    }}
-                  >
-                    <Heart
-                      className={`size-4 ${character.isFavorited ? 'fill-current text-primary' : ''}`}
-                    />
-                    {character.isFavorited ? '取消收藏' : '收藏角色'}
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        type='button'
-                        variant='destructive'
-                        className='w-full justify-start'
-                        disabled={deleteCharacter.isPending}
-                        onClick={closeMobilePanel}
-                      >
-                        <Trash2 className='size-4' />
-                        删除角色
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent size='sm'>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>确认删除角色？</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          删除后将无法恢复角色设定及其关联会话：{character.name}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>取消</AlertDialogCancel>
-                        <AlertDialogAction
-                          variant='destructive'
-                          onClick={() =>
-                            deleteCharacter.mutate({
-                              path: { id: character.id },
-                            })
-                          }
-                        >
-                          确认删除
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </>
-              )}
+            <CharacterDetailActionsPanel
+              characterId={character.id}
+              characterName={character.name}
+              isFavorited={character.isFavorited}
+              canOpenKnowledgeBinding={auth.isLoggedIn}
+              favoritePending={
+                favoriteCharacter.isPending || cancelFavorite.isPending
+              }
+              deletePending={deleteCharacter.isPending}
+              onEdit={openEditDialog}
+              onOpenDetailTest={(characterId) => {
+                void navigate({
+                  to: '/characters/$id/detail-test',
+                  params: { id: characterId },
+                })
+              }}
+              onOpenKnowledgeBinding={() => setKnowledgeBindingDialogOpen(true)}
+              onToggleFavorite={() => {
+                const action = character.isFavorited
+                  ? cancelFavorite
+                  : favoriteCharacter
+                action.mutate({
+                  path: { id: character.id },
+                })
+              }}
+              onDelete={(characterId) =>
+                deleteCharacter.mutate({
+                  path: { id: characterId },
+                })
+              }
             />
           </div>
         )}
 
-        <Dialog
+        <CharacterUpsertDialog
           open={editingOpen}
           onOpenChange={(open) => {
             setEditingOpen(open)
@@ -553,112 +340,47 @@ function CharacterDetailPage() {
               clearEditAvatarSelection(character?.avatar || '')
             }
           }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>编辑角色</DialogTitle>
-              <DialogDescription>
-                修改角色名称、简介、标签和可见性，保存后立即生效。
-              </DialogDescription>
-            </DialogHeader>
-            <div className='space-y-3'>
-              <div className='flex items-center gap-4'>
-                <button
-                  type='button'
-                  className='group relative'
-                  onClick={() => editAvatarInputRef.current?.click()}
-                  aria-label='选择角色头像'
-                >
-                  <Avatar className='size-16 border border-border'>
-                    <AvatarImage
-                      src={editAvatarPreviewUrl}
-                      alt='角色头像预览'
-                    />
-                    <AvatarFallback className='text-base'>
-                      {getInitialChar(editName || character?.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className='absolute inset-0 flex items-center justify-center rounded-full bg-foreground/50 opacity-0 transition-opacity group-hover:opacity-100'>
-                    <Camera className='size-4 text-background' />
-                  </div>
-                </button>
-                <div className='min-w-0 flex-1 space-y-1'>
-                  <p className='text-sm font-medium'>角色头像</p>
-                  <p className='truncate text-xs text-muted-foreground'>
-                    {editAvatarFile
-                      ? editAvatarFile.name
-                      : '点击头像选择本地图片'}
-                  </p>
-                </div>
-                {editAvatarFile && (
-                  <Button
-                    type='button'
-                    variant='ghost'
-                    size='sm'
-                    onClick={() =>
-                      clearEditAvatarSelection(character?.avatar || '')
-                    }
-                  >
-                    清除
-                  </Button>
-                )}
-                <input
-                  ref={editAvatarInputRef}
-                  type='file'
-                  accept='image/*'
-                  className='hidden'
-                  onChange={handleEditAvatarChange}
-                />
-              </div>
-              <Input
-                value={editName}
-                onChange={(event) => setEditName(event.target.value)}
-                placeholder='角色名称'
-              />
-              <Textarea
-                value={editBio}
-                onChange={(event) => setEditBio(event.target.value)}
-                placeholder='角色简介'
-              />
-              <Textarea
-                value={editSystemPrompt}
-                onChange={(event) => setEditSystemPrompt(event.target.value)}
-                placeholder='系统提示词（systemPrompt，可选）'
-              />
-              <Textarea
-                value={editBaseConfig}
-                onChange={(event) => setEditBaseConfig(event.target.value)}
-                placeholder='LLM 参数 JSON（baseConfig，可选）'
-                className='font-mono text-xs'
-              />
-              <TagInput
-                value={editTags}
-                onChange={setEditTags}
-                placeholder='添加角色标签，按回车确认'
-              />
-              <div className='flex items-center justify-between rounded-md border p-3'>
-                <p className='text-sm text-muted-foreground'>可见性</p>
-                <PublicToggle
-                  checked={editPublic}
-                  onCheckedChange={setEditPublic}
-                  publicLabel='公开角色'
-                  privateLabel='私有角色'
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant='ghost' onClick={() => setEditingOpen(false)}>
-                取消
-              </Button>
-              <Button
-                onClick={handleUpdate}
-                disabled={updateCharacter.isPending}
-              >
-                {updateCharacter.isPending ? '保存中...' : '保存修改'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          title='编辑角色'
+          description='修改角色名称、简介、标签和可见性，保存后立即生效。'
+          submitText='保存修改'
+          submittingText='保存中...'
+          isSubmitting={updateCharacter.isPending}
+          onSubmit={handleUpdate}
+          showCancel
+          cancelText='取消'
+          onCancel={() => setEditingOpen(false)}
+          name={editName}
+          onNameChange={setEditName}
+          bio={editBio}
+          onBioChange={setEditBio}
+          bioPlaceholder='角色简介'
+          systemPrompt={editSystemPrompt}
+          onSystemPromptChange={setEditSystemPrompt}
+          systemPromptPlaceholder='系统提示词（systemPrompt，可选）'
+          baseConfig={editBaseConfig}
+          onBaseConfigChange={setEditBaseConfig}
+          baseConfigPlaceholder='LLM 参数 JSON（baseConfig，可选）'
+          tags={editTags}
+          onTagsChange={setEditTags}
+          isPublic={editPublic}
+          onPublicChange={setEditPublic}
+          avatarInputRef={editAvatarInputRef}
+          avatarPreviewUrl={editAvatarPreviewUrl}
+          avatarFallbackText={getInitialChar(editName || character?.name)}
+          avatarFileName={editAvatarFile?.name}
+          onAvatarFileChange={handleEditAvatarChange}
+          onAvatarClear={() =>
+            clearEditAvatarSelection(character?.avatar || '')
+          }
+        />
+        <CharacterKnowledgeBindingDialog
+          open={knowledgeBindingDialogOpen}
+          onOpenChange={setKnowledgeBindingDialogOpen}
+          linkedKnowledgeBases={knowledgeBinding.linkedKnowledgeBases}
+          availableKnowledgeBases={knowledgeBinding.availableKnowledgeBases}
+          isMutating={knowledgeBinding.isKnowledgeBindingMutating}
+          onToggleBinding={knowledgeBinding.toggleKnowledgeBaseBinding}
+        />
       </div>
     </AuthRequired>
   )

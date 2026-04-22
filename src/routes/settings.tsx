@@ -822,7 +822,7 @@ function SettingsPage() {
 
       <p className='text-xs text-muted-foreground'>
         当前账号：{auth.name || '未命名用户'}，访问令牌状态：
-        {auth.accessToken ? '已登录' : '未登录'}。
+        {auth.isLoggedIn ? '已登录' : '未登录'}。
       </p>
     </div>
   )

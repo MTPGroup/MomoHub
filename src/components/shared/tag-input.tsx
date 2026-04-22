@@ -96,7 +96,7 @@ export function TagInput({
           variant='secondary'
           className='h-7 gap-1 rounded-full px-2.5'
         >
-          <span className='max-w-[180px] truncate'>{tag}</span>
+          <span className='max-w-45 truncate'>{tag}</span>
           <button
             type='button'
             aria-label={`删除标签 ${tag}`}
@@ -116,7 +116,7 @@ export function TagInput({
         onBlur={onBlur}
         disabled={disabled || !canAddMore}
         placeholder={inputPlaceholder}
-        className='h-7 min-w-[120px] flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground'
+        className='h-7 min-w-30 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground'
       />
     </div>
   )

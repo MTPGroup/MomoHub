@@ -5,9 +5,10 @@ import {
   useNavigate,
   useRouterState,
 } from '@tanstack/react-router'
-import { Camera, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { useDebounceValue } from 'usehooks-ts'
 import {
   createCharacterMutation,
   getCharactersOptions,
@@ -15,34 +16,22 @@ import {
   uploadCharacterAvatarMutation,
 } from '#/client/@tanstack/react-query.gen'
 import { AuthForm } from '#/components/features/auth/auth-form'
-import { PublicToggle } from '#/components/shared/public-toggle'
+import { CharacterUpsertDialog } from '#/components/features/character/upsert-dialog'
 import { ResourceListLayout } from '#/components/shared/resource-list-layout'
 import { ResourceSummaryCard } from '#/components/shared/resource-summary-card'
-import { TagInput } from '#/components/shared/tag-input'
-import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent } from '#/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '#/components/ui/dialog'
-import { Input } from '#/components/ui/input'
-import { Textarea } from '#/components/ui/textarea'
 import { formatDateTime } from '#/lib/format'
 import { useAuth } from '#/stores/auth'
+import {
+  getInitialChar,
+  parseBaseConfigFromText,
+  revokeObjectUrl,
+} from '#/utils/character'
 
 export const Route = createFileRoute('/characters/')({
   component: CharactersRoutePage,
 })
-
-function getInitialChar(value?: string | null) {
-  const text = value?.trim()
-  return text ? text.slice(0, 1).toUpperCase() : 'C'
-}
 
 function getCharacterStatusBadgeClassName(status?: string) {
   const normalized = status?.toLowerCase() ?? ''
@@ -62,28 +51,6 @@ function getCharacterStatusBadgeClassName(status?: string) {
   return 'border-slate-200 bg-slate-50 text-slate-700'
 }
 
-function revokeObjectUrl(url: string) {
-  if (url.startsWith('blob:')) {
-    URL.revokeObjectURL(url)
-  }
-}
-
-function parseBaseConfigFromText(raw: string) {
-  const text = raw.trim()
-  if (!text) {
-    return undefined
-  }
-  try {
-    const parsed = JSON.parse(text)
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      return null
-    }
-    return parsed as Record<string, unknown>
-  } catch {
-    return null
-  }
-}
-
 function CharactersRoutePage({ mineOnly = false }: { mineOnly?: boolean }) {
   const auth = useAuth()
   const navigate = useNavigate()
@@ -95,7 +62,7 @@ function CharactersRoutePage({ mineOnly = false }: { mineOnly?: boolean }) {
   const listPath = mineOnly ? '/my/characters' : '/characters'
   const isListPage = pathname === listPath
 
-  const [searchValue, setSearchValue] = useState('')
+  const [query, setQuery] = useDebounceValue('', 500)
   const [createName, setCreateName] = useState('')
   const [createBio, setCreateBio] = useState('')
   const [createSystemPrompt, setCreateSystemPrompt] = useState('')
@@ -125,15 +92,10 @@ function CharactersRoutePage({ mineOnly = false }: { mineOnly?: boolean }) {
 
   const characterQuery = useQuery({
     ...getCharactersOptions({
-      headers: auth.accessToken
-        ? {
-            Authorization: `Bearer ${auth.accessToken}`,
-          }
-        : undefined,
       query: {
         page: 1,
         page_size: 30,
-        keyword: searchValue.trim() || undefined,
+        keyword: query.trim() || undefined,
         mine: mineOnly,
       },
     }),
@@ -246,15 +208,15 @@ function CharactersRoutePage({ mineOnly = false }: { mineOnly?: boolean }) {
           ? '仅展示你创建的角色，便于集中管理与维护。'
           : '发现和探索社区创建的 AI 角色'
       }
-      searchValue={searchValue}
-      onSearchChange={setSearchValue}
+      searchValue={query}
+      onSearchChange={setQuery}
       searchPlaceholder='输入关键词过滤角色'
       createTitle='新建角色'
       createDescription={`建议在简介中包含场景与边界，后续进入子页面管理角色配置。${
-        !auth.accessToken ? ' 当前为浏览模式，登录后可创建与管理。' : ''
+        !auth.isLoggedIn ? ' 当前为浏览模式，登录后可创建与管理。' : ''
       }`}
       createAction={
-        auth.accessToken ? (
+        auth.isLoggedIn ? (
           <Button type='button' onClick={() => setCreateDialogOpen(true)}>
             <Plus className='size-4' />
             新建角色
@@ -277,7 +239,7 @@ function CharactersRoutePage({ mineOnly = false }: { mineOnly?: boolean }) {
         ) : null
       }
     >
-      <Dialog
+      <CharacterUpsertDialog
         open={createDialogOpen}
         onOpenChange={(open) => {
           setCreateDialogOpen(open)
@@ -285,80 +247,21 @@ function CharactersRoutePage({ mineOnly = false }: { mineOnly?: boolean }) {
             clearCreateAvatarSelection()
           }
         }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>新建角色</DialogTitle>
-            <DialogDescription>
-              填写角色设定与标签，并设置公开性，创建后会自动跳转到管理页。
-            </DialogDescription>
-          </DialogHeader>
-          <div className='space-y-3'>
-            <div className='flex items-center gap-4'>
-              <button
-                type='button'
-                className='group relative'
-                onClick={() => createAvatarInputRef.current?.click()}
-                aria-label='选择角色头像'
-              >
-                <Avatar className='size-16 border border-border/80'>
-                  <AvatarImage
-                    src={createAvatarPreviewUrl}
-                    alt='角色头像预览'
-                  />
-                  <AvatarFallback className='text-base'>
-                    {getInitialChar(createName)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className='absolute inset-0 flex items-center justify-center rounded-full bg-foreground/50 opacity-0 transition-opacity group-hover:opacity-100'>
-                  <Camera className='size-4 text-background' />
-                </div>
-              </button>
-              <div className='min-w-0 flex-1 space-y-1'>
-                <p className='text-sm font-medium'>角色头像</p>
-                <p className='truncate text-xs text-muted-foreground'>
-                  {createAvatarFile
-                    ? createAvatarFile.name
-                    : '点击头像选择本地图片'}
-                </p>
-              </div>
-              {createAvatarFile && (
-                <Button
-                  type='button'
-                  variant='ghost'
-                  size='sm'
-                  onClick={clearCreateAvatarSelection}
-                >
-                  清除
-                </Button>
-              )}
-              <input
-                ref={createAvatarInputRef}
-                type='file'
-                accept='image/*'
-                className='hidden'
-                onChange={handleCreateAvatarChange}
-              />
-            </div>
-            <Input
-              value={createName}
-              onChange={(event) => setCreateName(event.target.value)}
-              placeholder='角色名称'
-            />
-            <Input
-              value={createBio}
-              onChange={(event) => setCreateBio(event.target.value)}
-              placeholder='角色简介（可选）'
-            />
-            <Textarea
-              value={createSystemPrompt}
-              onChange={(event) => setCreateSystemPrompt(event.target.value)}
-              placeholder='系统提示词（可选）'
-            />
-            <Textarea
-              value={createBaseConfig}
-              onChange={(event) => setCreateBaseConfig(event.target.value)}
-              placeholder={`// 角色配置JSON（可选）
+        title='新建角色'
+        description='填写角色设定与标签，并设置公开性，创建后会自动跳转到管理页。'
+        submitText='创建角色'
+        submittingText='创建中...'
+        isSubmitting={createCharacter.isPending}
+        onSubmit={handleCreate}
+        name={createName}
+        onNameChange={setCreateName}
+        bio={createBio}
+        onBioChange={setCreateBio}
+        systemPrompt={createSystemPrompt}
+        onSystemPromptChange={setCreateSystemPrompt}
+        baseConfig={createBaseConfig}
+        onBaseConfigChange={setCreateBaseConfig}
+        baseConfigPlaceholder={`// 角色配置JSON（可选）
 {
   "temperature": 0.7,
   "topP": 1,
@@ -366,30 +269,18 @@ function CharactersRoutePage({ mineOnly = false }: { mineOnly?: boolean }) {
   "presencePenalty": 0,
   "frequencyPenalty": 0
 }`}
-              className='font-mono text-xs'
-            />
-            <TagInput
-              value={createTags}
-              onChange={setCreateTags}
-              placeholder='添加角色标签，按回车确认'
-            />
-            <div className='flex items-center justify-between rounded-md border p-3'>
-              <p className='text-sm text-muted-foreground'>可见性</p>
-              <PublicToggle
-                checked={createPublic}
-                onCheckedChange={setCreatePublic}
-                publicLabel='公开角色'
-                privateLabel='私有角色'
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={handleCreate} disabled={createCharacter.isPending}>
-              {createCharacter.isPending ? '创建中...' : '创建角色'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        tags={createTags}
+        onTagsChange={setCreateTags}
+        isPublic={createPublic}
+        onPublicChange={setCreatePublic}
+        avatarInputRef={createAvatarInputRef}
+        avatarPreviewUrl={createAvatarPreviewUrl}
+        avatarFallbackText={getInitialChar(createName)}
+        avatarFileName={createAvatarFile?.name}
+        onAvatarFileChange={handleCreateAvatarChange}
+        onAvatarClear={clearCreateAvatarSelection}
+        avatarBorderClassName='border border-border/80'
+      />
 
       <section className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
         {characters.map((item) => (
