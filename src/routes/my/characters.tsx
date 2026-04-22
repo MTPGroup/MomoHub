@@ -1,12 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
+import type { ComponentType } from 'react'
 import { AuthRequired } from '#/components/shared/auth-required'
-import { CharactersPage } from './characters'
+import { Route as CharactersRoute } from '../characters'
 
 export const Route = createFileRoute('/my/characters')({
   component: MyCharactersPage,
 })
 
 function MyCharactersPage() {
+  const CharactersPage = CharactersRoute.options.component as ComponentType<{
+    mineOnly?: boolean
+  }>
+
   return (
     <AuthRequired
       title='需要登录后访问我的角色'

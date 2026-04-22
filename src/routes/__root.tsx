@@ -12,6 +12,7 @@ import { useEffect } from 'react'
 import { Toaster } from 'sonner'
 import { Footer } from '#/components/layout/footer'
 import { Header } from '#/components/layout/header'
+import { TooltipProvider } from '#/components/ui/tooltip'
 import { env } from '#/env'
 import { applyThemeToDOM, useTheme } from '#/stores/theme'
 import appCss from '#/styles.css?url'
@@ -68,7 +69,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className='font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)] flex min-h-screen flex-col'>
         <ThemeDomSync />
         <Header />
-        <main className='flex-1'>{children}</main>
+        <TooltipProvider>
+          <main className='flex-1'>{children}</main>
+        </TooltipProvider>
         <Footer />
         <Toaster />
         <TanStackDevtools

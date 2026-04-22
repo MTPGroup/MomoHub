@@ -11,13 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as KnowledgeBasesRouteImport } from './routes/knowledge-bases'
-import { Route as CharactersRouteImport } from './routes/characters'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as MyKnowledgeBasesRouteImport } from './routes/my.knowledge-bases'
-import { Route as MyCharactersRouteImport } from './routes/my.characters'
-import { Route as KnowledgeBasesIdRouteImport } from './routes/knowledge-bases.$id'
-import { Route as CharactersIdRouteImport } from './routes/characters.$id'
+import { Route as KnowledgeBasesIndexRouteImport } from './routes/knowledge-bases/index'
+import { Route as CharactersIndexRouteImport } from './routes/characters/index'
+import { Route as MyKnowledgeBasesRouteImport } from './routes/my/knowledge-bases'
+import { Route as MyCharactersRouteImport } from './routes/my/characters'
+import { Route as KnowledgeBasesIdRouteImport } from './routes/knowledge-bases/$id'
+import { Route as CharactersIdRouteImport } from './routes/characters/$id'
+import { Route as CharactersIdDetailTestRouteImport } from './routes/characters/$id.detail-test'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -29,19 +30,19 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
-const KnowledgeBasesRoute = KnowledgeBasesRouteImport.update({
-  id: '/knowledge-bases',
-  path: '/knowledge-bases',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CharactersRoute = CharactersRouteImport.update({
-  id: '/characters',
-  path: '/characters',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KnowledgeBasesIndexRoute = KnowledgeBasesIndexRouteImport.update({
+  id: '/knowledge-bases/',
+  path: '/knowledge-bases/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CharactersIndexRoute = CharactersIndexRouteImport.update({
+  id: '/characters/',
+  path: '/characters/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MyKnowledgeBasesRoute = MyKnowledgeBasesRouteImport.update({
@@ -55,94 +56,107 @@ const MyCharactersRoute = MyCharactersRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const KnowledgeBasesIdRoute = KnowledgeBasesIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => KnowledgeBasesRoute,
+  id: '/knowledge-bases/$id',
+  path: '/knowledge-bases/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CharactersIdRoute = CharactersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => CharactersRoute,
+  id: '/characters/$id',
+  path: '/characters/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CharactersIdDetailTestRoute = CharactersIdDetailTestRouteImport.update({
+  id: '/detail-test',
+  path: '/detail-test',
+  getParentRoute: () => CharactersIdRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/characters': typeof CharactersRouteWithChildren
-  '/knowledge-bases': typeof KnowledgeBasesRouteWithChildren
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
-  '/characters/$id': typeof CharactersIdRoute
+  '/characters/$id': typeof CharactersIdRouteWithChildren
   '/knowledge-bases/$id': typeof KnowledgeBasesIdRoute
   '/my/characters': typeof MyCharactersRoute
   '/my/knowledge-bases': typeof MyKnowledgeBasesRoute
+  '/characters/': typeof CharactersIndexRoute
+  '/knowledge-bases/': typeof KnowledgeBasesIndexRoute
+  '/characters/$id/detail-test': typeof CharactersIdDetailTestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/characters': typeof CharactersRouteWithChildren
-  '/knowledge-bases': typeof KnowledgeBasesRouteWithChildren
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
-  '/characters/$id': typeof CharactersIdRoute
+  '/characters/$id': typeof CharactersIdRouteWithChildren
   '/knowledge-bases/$id': typeof KnowledgeBasesIdRoute
   '/my/characters': typeof MyCharactersRoute
   '/my/knowledge-bases': typeof MyKnowledgeBasesRoute
+  '/characters': typeof CharactersIndexRoute
+  '/knowledge-bases': typeof KnowledgeBasesIndexRoute
+  '/characters/$id/detail-test': typeof CharactersIdDetailTestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/characters': typeof CharactersRouteWithChildren
-  '/knowledge-bases': typeof KnowledgeBasesRouteWithChildren
   '/profile': typeof ProfileRoute
   '/settings': typeof SettingsRoute
-  '/characters/$id': typeof CharactersIdRoute
+  '/characters/$id': typeof CharactersIdRouteWithChildren
   '/knowledge-bases/$id': typeof KnowledgeBasesIdRoute
   '/my/characters': typeof MyCharactersRoute
   '/my/knowledge-bases': typeof MyKnowledgeBasesRoute
+  '/characters/': typeof CharactersIndexRoute
+  '/knowledge-bases/': typeof KnowledgeBasesIndexRoute
+  '/characters/$id/detail-test': typeof CharactersIdDetailTestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/characters'
-    | '/knowledge-bases'
     | '/profile'
     | '/settings'
     | '/characters/$id'
     | '/knowledge-bases/$id'
     | '/my/characters'
     | '/my/knowledge-bases'
+    | '/characters/'
+    | '/knowledge-bases/'
+    | '/characters/$id/detail-test'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/characters'
-    | '/knowledge-bases'
     | '/profile'
     | '/settings'
     | '/characters/$id'
     | '/knowledge-bases/$id'
     | '/my/characters'
     | '/my/knowledge-bases'
+    | '/characters'
+    | '/knowledge-bases'
+    | '/characters/$id/detail-test'
   id:
     | '__root__'
     | '/'
-    | '/characters'
-    | '/knowledge-bases'
     | '/profile'
     | '/settings'
     | '/characters/$id'
     | '/knowledge-bases/$id'
     | '/my/characters'
     | '/my/knowledge-bases'
+    | '/characters/'
+    | '/knowledge-bases/'
+    | '/characters/$id/detail-test'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CharactersRoute: typeof CharactersRouteWithChildren
-  KnowledgeBasesRoute: typeof KnowledgeBasesRouteWithChildren
   ProfileRoute: typeof ProfileRoute
   SettingsRoute: typeof SettingsRoute
+  CharactersIdRoute: typeof CharactersIdRouteWithChildren
+  KnowledgeBasesIdRoute: typeof KnowledgeBasesIdRoute
   MyCharactersRoute: typeof MyCharactersRoute
   MyKnowledgeBasesRoute: typeof MyKnowledgeBasesRoute
+  CharactersIndexRoute: typeof CharactersIndexRoute
+  KnowledgeBasesIndexRoute: typeof KnowledgeBasesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -161,25 +175,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/knowledge-bases': {
-      id: '/knowledge-bases'
-      path: '/knowledge-bases'
-      fullPath: '/knowledge-bases'
-      preLoaderRoute: typeof KnowledgeBasesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/characters': {
-      id: '/characters'
-      path: '/characters'
-      fullPath: '/characters'
-      preLoaderRoute: typeof CharactersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/knowledge-bases/': {
+      id: '/knowledge-bases/'
+      path: '/knowledge-bases'
+      fullPath: '/knowledge-bases/'
+      preLoaderRoute: typeof KnowledgeBasesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/characters/': {
+      id: '/characters/'
+      path: '/characters'
+      fullPath: '/characters/'
+      preLoaderRoute: typeof CharactersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/my/knowledge-bases': {
@@ -198,53 +212,50 @@ declare module '@tanstack/react-router' {
     }
     '/knowledge-bases/$id': {
       id: '/knowledge-bases/$id'
-      path: '/$id'
+      path: '/knowledge-bases/$id'
       fullPath: '/knowledge-bases/$id'
       preLoaderRoute: typeof KnowledgeBasesIdRouteImport
-      parentRoute: typeof KnowledgeBasesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/characters/$id': {
       id: '/characters/$id'
-      path: '/$id'
+      path: '/characters/$id'
       fullPath: '/characters/$id'
       preLoaderRoute: typeof CharactersIdRouteImport
-      parentRoute: typeof CharactersRoute
+      parentRoute: typeof rootRouteImport
+    }
+    '/characters/$id/detail-test': {
+      id: '/characters/$id/detail-test'
+      path: '/detail-test'
+      fullPath: '/characters/$id/detail-test'
+      preLoaderRoute: typeof CharactersIdDetailTestRouteImport
+      parentRoute: typeof CharactersIdRoute
     }
   }
 }
 
-interface CharactersRouteChildren {
-  CharactersIdRoute: typeof CharactersIdRoute
+interface CharactersIdRouteChildren {
+  CharactersIdDetailTestRoute: typeof CharactersIdDetailTestRoute
 }
 
-const CharactersRouteChildren: CharactersRouteChildren = {
-  CharactersIdRoute: CharactersIdRoute,
+const CharactersIdRouteChildren: CharactersIdRouteChildren = {
+  CharactersIdDetailTestRoute: CharactersIdDetailTestRoute,
 }
 
-const CharactersRouteWithChildren = CharactersRoute._addFileChildren(
-  CharactersRouteChildren,
-)
-
-interface KnowledgeBasesRouteChildren {
-  KnowledgeBasesIdRoute: typeof KnowledgeBasesIdRoute
-}
-
-const KnowledgeBasesRouteChildren: KnowledgeBasesRouteChildren = {
-  KnowledgeBasesIdRoute: KnowledgeBasesIdRoute,
-}
-
-const KnowledgeBasesRouteWithChildren = KnowledgeBasesRoute._addFileChildren(
-  KnowledgeBasesRouteChildren,
+const CharactersIdRouteWithChildren = CharactersIdRoute._addFileChildren(
+  CharactersIdRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CharactersRoute: CharactersRouteWithChildren,
-  KnowledgeBasesRoute: KnowledgeBasesRouteWithChildren,
   ProfileRoute: ProfileRoute,
   SettingsRoute: SettingsRoute,
+  CharactersIdRoute: CharactersIdRouteWithChildren,
+  KnowledgeBasesIdRoute: KnowledgeBasesIdRoute,
   MyCharactersRoute: MyCharactersRoute,
   MyKnowledgeBasesRoute: MyKnowledgeBasesRoute,
+  CharactersIndexRoute: CharactersIndexRoute,
+  KnowledgeBasesIndexRoute: KnowledgeBasesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

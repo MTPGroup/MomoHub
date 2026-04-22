@@ -1,6 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Camera, Heart, PencilLine, Trash2 } from 'lucide-react'
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useNavigate,
+  useRouterState,
+} from '@tanstack/react-router'
+import { ArrowLeft, Bot, Camera, Heart, PencilLine, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
@@ -88,6 +94,10 @@ function CharacterDetailPage() {
   const auth = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+  const isDetailPage = pathname === `/characters/${id}`
   const editAvatarInputRef = useRef<HTMLInputElement | null>(null)
 
   const [editingOpen, setEditingOpen] = useState(false)
@@ -310,6 +320,10 @@ function CharacterDetailPage() {
     })
   }
 
+  if (!isDetailPage) {
+    return <Outlet />
+  }
+
   return (
     <AuthRequired
       title='角色管理需要登录'
@@ -390,7 +404,7 @@ function CharacterDetailPage() {
                       </AvatarFallback>
                     </Avatar>
                     <p className='text-xs text-muted-foreground'>
-                      作者：{character.authorName || character.authorId}
+                      {character.authorName || character.authorId}
                     </p>
                   </div>
                   <div className='grid gap-3 sm:grid-cols-3'>
@@ -452,6 +466,21 @@ function CharacterDetailPage() {
                   >
                     <PencilLine className='size-4' />
                     编辑角色
+                  </Button>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    className='w-full justify-start'
+                    onClick={() => {
+                      void navigate({
+                        to: '/characters/$id/detail-test',
+                        params: { id: character.id },
+                      })
+                      closeMobilePanel()
+                    }}
+                  >
+                    <Bot className='size-4' />
+                    详情测试
                   </Button>
                   <Button
                     type='button'

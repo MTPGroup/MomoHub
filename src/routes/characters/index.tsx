@@ -9,15 +9,16 @@ import { Camera, Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
-  createKbMutation,
-  listKbsOptions,
-  listKbsQueryKey,
-  uploadKbAvatarMutation,
+  createCharacterMutation,
+  getCharactersOptions,
+  getCharactersQueryKey,
+  uploadCharacterAvatarMutation,
 } from '#/client/@tanstack/react-query.gen'
 import { AuthForm } from '#/components/features/auth/auth-form'
 import { PublicToggle } from '#/components/shared/public-toggle'
 import { ResourceListLayout } from '#/components/shared/resource-list-layout'
 import { ResourceSummaryCard } from '#/components/shared/resource-summary-card'
+import { TagInput } from '#/components/shared/tag-input'
 import { Avatar, AvatarFallback, AvatarImage } from '#/components/ui/avatar'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent } from '#/components/ui/card'
@@ -34,61 +35,73 @@ import { Textarea } from '#/components/ui/textarea'
 import { formatDateTime } from '#/lib/format'
 import { useAuth } from '#/stores/auth'
 
-export const Route = createFileRoute('/knowledge-bases')({
-  component: KnowledgeBasesPage,
+export const Route = createFileRoute('/characters/')({
+  component: CharactersRoutePage,
 })
 
-function getKbStatusBadgeClassName(status?: string | null) {
+function getInitialChar(value?: string | null) {
+  const text = value?.trim()
+  return text ? text.slice(0, 1).toUpperCase() : 'C'
+}
+
+function getCharacterStatusBadgeClassName(status?: string) {
   const normalized = status?.toLowerCase() ?? ''
-  if (
-    normalized.includes('ready') ||
-    normalized.includes('active') ||
-    normalized.includes('ok')
-  ) {
+  if (normalized.includes('active')) {
     return 'border-emerald-200 bg-emerald-50 text-emerald-700'
   }
-  if (
-    normalized.includes('error') ||
-    normalized.includes('fail') ||
-    normalized.includes('rejected')
-  ) {
-    return 'border-red-200 bg-red-50 text-red-700'
+  if (normalized.includes('pending')) {
+    return 'border-blue-200 bg-blue-50 text-blue-700'
   }
   if (
-    normalized.includes('building') ||
-    normalized.includes('processing') ||
-    normalized.includes('pending')
+    normalized.includes('banned') ||
+    normalized.includes('deleted') ||
+    normalized.includes('draft')
   ) {
-    return 'border-blue-200 bg-blue-50 text-blue-700'
+    return 'border-red-200 bg-red-50 text-red-700'
   }
   return 'border-slate-200 bg-slate-50 text-slate-700'
 }
 
-function getInitialChar(value?: string | null) {
-  const text = value?.trim()
-  return text ? text.slice(0, 1).toUpperCase() : 'K'
+function revokeObjectUrl(url: string) {
+  if (url.startsWith('blob:')) {
+    URL.revokeObjectURL(url)
+  }
 }
 
-export function KnowledgeBasesPage({
-  mineOnly = false,
-}: {
-  mineOnly?: boolean
-}) {
+function parseBaseConfigFromText(raw: string) {
+  const text = raw.trim()
+  if (!text) {
+    return undefined
+  }
+  try {
+    const parsed = JSON.parse(text)
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return null
+    }
+    return parsed as Record<string, unknown>
+  } catch {
+    return null
+  }
+}
+
+function CharactersRoutePage({ mineOnly = false }: { mineOnly?: boolean }) {
   const auth = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const avatarInputRef = useRef<HTMLInputElement | null>(null)
+  const createAvatarInputRef = useRef<HTMLInputElement | null>(null)
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
-  const listPath = mineOnly ? '/my/knowledge-bases' : '/knowledge-bases'
+  const listPath = mineOnly ? '/my/characters' : '/characters'
   const isListPage = pathname === listPath
 
   const [searchValue, setSearchValue] = useState('')
-
   const [createName, setCreateName] = useState('')
-  const [createDescription, setCreateDescription] = useState('')
-  const [createPublic, setCreatePublic] = useState(false)
+  const [createBio, setCreateBio] = useState('')
+  const [createSystemPrompt, setCreateSystemPrompt] = useState('')
+  const [createBaseConfig, setCreateBaseConfig] = useState('')
+  const [createTags, setCreateTags] = useState<string[]>([])
+  const [createPublic, setCreatePublic] = useState(true)
   const [createAvatarFile, setCreateAvatarFile] = useState<File | null>(null)
   const [createAvatarPreviewUrl, setCreateAvatarPreviewUrl] = useState('')
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
@@ -96,26 +109,22 @@ export function KnowledgeBasesPage({
   const clearCreateAvatarSelection = () => {
     setCreateAvatarFile(null)
     setCreateAvatarPreviewUrl((previous) => {
-      if (previous) {
-        URL.revokeObjectURL(previous)
-      }
+      revokeObjectUrl(previous)
       return ''
     })
-    if (avatarInputRef.current) {
-      avatarInputRef.current.value = ''
+    if (createAvatarInputRef.current) {
+      createAvatarInputRef.current.value = ''
     }
   }
 
   useEffect(() => {
     return () => {
-      if (createAvatarPreviewUrl) {
-        URL.revokeObjectURL(createAvatarPreviewUrl)
-      }
+      revokeObjectUrl(createAvatarPreviewUrl)
     }
   }, [createAvatarPreviewUrl])
 
-  const kbQuery = useQuery({
-    ...listKbsOptions({
+  const characterQuery = useQuery({
+    ...getCharactersOptions({
       headers: auth.accessToken
         ? {
             Authorization: `Bearer ${auth.accessToken}`,
@@ -131,67 +140,78 @@ export function KnowledgeBasesPage({
     enabled: isListPage,
   })
 
-  const uploadKbAvatar = useMutation({
-    ...uploadKbAvatarMutation(),
-  })
-
-  const createKb = useMutation({
-    ...createKbMutation(),
+  const createCharacter = useMutation({
+    ...createCharacterMutation(),
     onSuccess: async (res) => {
-      const newKbId = res.data?.id
-      if (newKbId && createAvatarFile) {
+      const newCharacterId = res.data?.id
+      if (newCharacterId && createAvatarFile) {
         try {
-          await uploadKbAvatar.mutateAsync({
-            path: { id: newKbId },
+          await uploadCharacterAvatar.mutateAsync({
+            path: { id: newCharacterId },
             body: { file: createAvatarFile },
           })
-          toast.success('知识库头像已上传')
+          toast.success('角色头像已上传')
         } catch (error) {
-          toast.warning('知识库已创建，但头像上传失败', {
+          toast.warning('角色已创建，但头像上传失败', {
             description:
               error instanceof Error
                 ? error.message
-                : '请稍后在管理页重试上传头像',
+                : '请稍后在角色管理页重试上传头像',
           })
         }
       }
 
-      toast.success('知识库已创建')
+      toast.success('角色已创建')
       setCreateName('')
-      setCreateDescription('')
-      setCreatePublic(false)
+      setCreateBio('')
+      setCreateSystemPrompt('')
+      setCreateBaseConfig('')
+      setCreateTags([])
+      setCreatePublic(true)
       clearCreateAvatarSelection()
       setCreateDialogOpen(false)
-      queryClient.invalidateQueries({ queryKey: listKbsQueryKey() })
-      if (newKbId) {
-        void navigate({ to: '/knowledge-bases/$id', params: { id: newKbId } })
+      queryClient.invalidateQueries({ queryKey: getCharactersQueryKey() })
+      if (newCharacterId) {
+        void navigate({ to: '/characters/$id', params: { id: newCharacterId } })
       }
     },
     onError: (error) => {
       toast.error('创建失败', { description: error.message || '请稍后重试' })
     },
   })
+  const uploadCharacterAvatar = useMutation({
+    ...uploadCharacterAvatarMutation(),
+  })
 
-  const allItems = kbQuery.data?.data?.items ?? []
-  const privateCount = allItems.filter((item) => !item.isPublic).length
+  const characters = characterQuery.data?.data?.items ?? []
 
   const handleCreate = () => {
     if (!createName.trim()) {
-      toast.error('请输入知识库名称')
+      toast.error('请输入角色名称')
       return
     }
 
-    createKb.mutate({
+    const baseConfig = parseBaseConfigFromText(createBaseConfig)
+    if (baseConfig === null) {
+      toast.error('baseConfig 必须是合法 JSON 对象')
+      return
+    }
+
+    createCharacter.mutate({
       body: {
         name: createName.trim(),
-        description: createDescription.trim() || null,
+        bio: createBio.trim() || null,
+        systemPrompt: createSystemPrompt.trim() || undefined,
+        baseConfig,
+        tags: createTags,
         isPublic: createPublic,
+        status: 'active',
       },
     })
   }
 
-  const openKbDetail = (id: string) => {
-    void navigate({ to: '/knowledge-bases/$id', params: { id } })
+  const openCharacterDetail = (id: string) => {
+    void navigate({ to: '/characters/$id', params: { id } })
   }
 
   const handleCreateAvatarChange = (
@@ -209,9 +229,7 @@ export function KnowledgeBasesPage({
 
     setCreateAvatarFile(file)
     setCreateAvatarPreviewUrl((previous) => {
-      if (previous) {
-        URL.revokeObjectURL(previous)
-      }
+      revokeObjectUrl(previous)
       return URL.createObjectURL(file)
     })
   }
@@ -222,24 +240,24 @@ export function KnowledgeBasesPage({
 
   return (
     <ResourceListLayout
-      title={mineOnly ? '我的知识库' : '知识库管理与探索'}
+      title={mineOnly ? '我的AI角色' : 'AI角色管理与探索'}
       description={
         mineOnly
-          ? '仅展示你创建的知识库，便于集中管理文档与处理流程。'
-          : '探索和管理知识库资源'
+          ? '仅展示你创建的角色，便于集中管理与维护。'
+          : '发现和探索社区创建的 AI 角色'
       }
       searchValue={searchValue}
       onSearchChange={setSearchValue}
-      searchPlaceholder='输入关键词过滤知识库'
-      createTitle='新建知识库'
-      createDescription={`建议按拆分知识库，后续进入子页面管理文档队列。${
+      searchPlaceholder='输入关键词过滤角色'
+      createTitle='新建角色'
+      createDescription={`建议在简介中包含场景与边界，后续进入子页面管理角色配置。${
         !auth.accessToken ? ' 当前为浏览模式，登录后可创建与管理。' : ''
       }`}
       createAction={
         auth.accessToken ? (
           <Button type='button' onClick={() => setCreateDialogOpen(true)}>
             <Plus className='size-4' />
-            新建知识库
+            新建角色
           </Button>
         ) : (
           <AuthForm>
@@ -250,23 +268,13 @@ export function KnowledgeBasesPage({
         )
       }
       footer={
-        <>
-          {allItems.length === 0 && (
-            <Card className='gap-2 border-dashed py-10 text-center'>
-              <CardContent>
-                <p className='text-sm text-muted-foreground'>
-                  没有匹配的知识库
-                </p>
-              </CardContent>
-            </Card>
-          )}
-          {privateCount > 0 && (
-            <p className='text-xs text-muted-foreground'>
-              已检索到 {allItems.length} 个知识库，其中 {privateCount}{' '}
-              个为私有知识库。
-            </p>
-          )}
-        </>
+        characters.length === 0 ? (
+          <Card className='gap-2 border-dashed py-10 text-center'>
+            <CardContent>
+              <p className='text-sm text-muted-foreground'>没有匹配的角色</p>
+            </CardContent>
+          </Card>
+        ) : null
       }
     >
       <Dialog
@@ -280,9 +288,9 @@ export function KnowledgeBasesPage({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>新建知识库</DialogTitle>
+            <DialogTitle>新建角色</DialogTitle>
             <DialogDescription>
-              填写基本信息并设置公开性，创建后会自动跳转到管理页。
+              填写角色设定与标签，并设置公开性，创建后会自动跳转到管理页。
             </DialogDescription>
           </DialogHeader>
           <div className='space-y-3'>
@@ -290,13 +298,13 @@ export function KnowledgeBasesPage({
               <button
                 type='button'
                 className='group relative'
-                onClick={() => avatarInputRef.current?.click()}
-                aria-label='选择知识库头像'
+                onClick={() => createAvatarInputRef.current?.click()}
+                aria-label='选择角色头像'
               >
                 <Avatar className='size-16 border border-border/80'>
                   <AvatarImage
                     src={createAvatarPreviewUrl}
-                    alt='知识库头像预览'
+                    alt='角色头像预览'
                   />
                   <AvatarFallback className='text-base'>
                     {getInitialChar(createName)}
@@ -307,7 +315,7 @@ export function KnowledgeBasesPage({
                 </div>
               </button>
               <div className='min-w-0 flex-1 space-y-1'>
-                <p className='text-sm font-medium'>知识库头像</p>
+                <p className='text-sm font-medium'>角色头像</p>
                 <p className='truncate text-xs text-muted-foreground'>
                   {createAvatarFile
                     ? createAvatarFile.name
@@ -325,7 +333,7 @@ export function KnowledgeBasesPage({
                 </Button>
               )}
               <input
-                ref={avatarInputRef}
+                ref={createAvatarInputRef}
                 type='file'
                 accept='image/*'
                 className='hidden'
@@ -335,46 +343,65 @@ export function KnowledgeBasesPage({
             <Input
               value={createName}
               onChange={(event) => setCreateName(event.target.value)}
-              placeholder='知识库名称'
+              placeholder='角色名称'
+            />
+            <Input
+              value={createBio}
+              onChange={(event) => setCreateBio(event.target.value)}
+              placeholder='角色简介（可选）'
             />
             <Textarea
-              value={createDescription}
-              onChange={(event) => setCreateDescription(event.target.value)}
-              placeholder='知识库描述（可选）'
+              value={createSystemPrompt}
+              onChange={(event) => setCreateSystemPrompt(event.target.value)}
+              placeholder='系统提示词（可选）'
+            />
+            <Textarea
+              value={createBaseConfig}
+              onChange={(event) => setCreateBaseConfig(event.target.value)}
+              placeholder={`// 角色配置JSON（可选）
+{
+  "temperature": 0.7,
+  "topP": 1,
+  "maxTokens": 2000,
+  "presencePenalty": 0,
+  "frequencyPenalty": 0
+}`}
+              className='font-mono text-xs'
+            />
+            <TagInput
+              value={createTags}
+              onChange={setCreateTags}
+              placeholder='添加角色标签，按回车确认'
             />
             <div className='flex items-center justify-between rounded-md border p-3'>
               <p className='text-sm text-muted-foreground'>可见性</p>
               <PublicToggle
                 checked={createPublic}
                 onCheckedChange={setCreatePublic}
-                publicLabel='公开知识库'
-                privateLabel='私有知识库'
+                publicLabel='公开角色'
+                privateLabel='私有角色'
               />
             </div>
           </div>
           <DialogFooter>
-            <Button
-              type='button'
-              onClick={handleCreate}
-              disabled={createKb.isPending}
-            >
-              {createKb.isPending ? '创建中...' : '创建知识库'}
+            <Button onClick={handleCreate} disabled={createCharacter.isPending}>
+              {createCharacter.isPending ? '创建中...' : '创建角色'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <section className='grid gap-4 sm:grid-cols-2 xl:grid-cols-3'>
-        {allItems.map((item) => (
+        {characters.map((item) => (
           <ResourceSummaryCard
             key={item.id}
-            onClick={() => openKbDetail(item.id)}
+            onClick={() => openCharacterDetail(item.id)}
             title={item.name}
-            description={item.description || '暂无描述'}
+            description={item.bio || '暂无角色简介'}
             avatarSrc={item.avatar || ''}
             avatarFallback={getInitialChar(item.name)}
-            statusText={item.status}
-            statusClassName={getKbStatusBadgeClassName(item.status)}
+            statusText={item.status || 'unknown'}
+            statusClassName={getCharacterStatusBadgeClassName(item.status)}
             visibilityText={item.isPublic ? '公开' : '私有'}
             visibilityVariant={item.isPublic ? 'secondary' : 'outline'}
             authorName={item.authorName || item.authorId}
@@ -382,7 +409,7 @@ export function KnowledgeBasesPage({
             authorAvatarFallback={getInitialChar(
               item.authorName || item.authorId,
             )}
-            metaText={`更新于 ${formatDateTime(item.updatedAt)}`}
+            metaText={`创建于 ${formatDateTime(item.createdAt)}`}
           />
         ))}
       </section>
