@@ -101,15 +101,19 @@ export function AuthForm({ children }: Props) {
 
       if ('user' in loginData) {
         setAuth({
-          name: loginData.user.name,
-          avatar: loginData.user.avatar,
-          status: loginData.user.status,
+          user: {
+            name: loginData.user.name,
+            avatar: loginData.user.avatar,
+            status: loginData.user.status,
+          },
         })
       } else {
         setAuth({
-          name: loginData.name,
-          avatar: loginData.avatar,
-          status: loginData.status,
+          user: {
+            name: loginData.name,
+            avatar: loginData.avatar,
+            status: loginData.status,
+          },
         })
       }
 

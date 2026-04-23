@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { getCurrentAuthUser, refresh } from '#/client/sdk.gen'
 
 export interface User {
   name: string
@@ -17,16 +18,13 @@ export interface AuthState {
 
 export type SetAuthPayload = {
   user?: User | null
-  name?: string
-  avatar?: string
-  status?: User['status']
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      hydrated: true,
+      hydrated: false,
       setAuth: (user) => {
         set((state) => ({
           user: user ?? state.user,
@@ -52,7 +50,7 @@ export const getAuth = useAuthStore.getState
 
 export function useAuth() {
   const state = useAuthStore()
-  const user = state.user
+  const user = state.hydrated ? state.user : null
   const isLoggedIn = Boolean(user)
 
   return {
@@ -71,16 +69,6 @@ export function setAuth(payload: SetAuthPayload) {
 
     if ('user' in payload) {
       nextUser = payload.user ?? null
-    } else if (
-      payload.name !== undefined ||
-      payload.avatar !== undefined ||
-      payload.status !== undefined
-    ) {
-      nextUser = {
-        name: payload.name ?? state.user?.name ?? '',
-        avatar: payload.avatar ?? state.user?.avatar ?? '',
-        status: payload.status ?? state.user?.status ?? 'unknown',
-      }
     }
 
     return {
@@ -96,4 +84,44 @@ export function clearAuth() {
     ...state,
     user: null,
   }))
+}
+
+let refreshPromise: Promise<boolean | null> | null = null
+
+export async function refreshToken() {
+  if (refreshPromise) return refreshPromise
+
+  refreshPromise = (async () => {
+    try {
+      await refresh({
+        body: null,
+        throwOnError: true,
+      })
+
+      const res = await getCurrentAuthUser({
+        throwOnError: true,
+        headers: { 'X-Retry': 'true' },
+      })
+
+      const userData = res.data?.data
+
+      if (userData) {
+        setAuth({
+          user: {
+            name: userData?.name,
+            avatar: userData?.avatar,
+            status: userData?.status,
+          },
+        })
+      }
+      return true
+    } catch {
+      useAuthStore.getState().logout()
+      return false
+    } finally {
+      refreshPromise = null
+    }
+  })()
+
+  return refreshPromise
 }
