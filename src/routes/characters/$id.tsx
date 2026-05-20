@@ -27,7 +27,7 @@ import { CharacterUpsertDialog } from '#/components/features/character/upsert-di
 import { AuthRequired } from '#/components/shared/auth-required'
 import { Card, CardContent } from '#/components/ui/card'
 import { useCharacterKnowledgeBinding } from '#/hooks/character/use-knowledge-binding'
-import { useAuth } from '#/stores/auth'
+import { useAuth } from '#/hooks/use-auth'
 import {
   getInitialChar,
   parseBaseConfigFromText,

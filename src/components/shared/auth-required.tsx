@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { AuthForm } from '#/components/features/auth/auth-form'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
-import { useAuth } from '#/stores/auth'
+import { useAuth } from '#/hooks/use-auth'
 
 interface AuthRequiredProps {
   children: ReactNode

@@ -14,6 +14,7 @@ import { Footer } from '#/components/layout/footer'
 import { Header } from '#/components/layout/header'
 import { TooltipProvider } from '#/components/ui/tooltip'
 import { env } from '#/env'
+import { useSessionBootstrap } from '#/hooks/use-session-bootstrap'
 import { applyThemeToDOM, useTheme } from '#/stores/theme'
 import appCss from '#/styles.css?url'
 
@@ -68,6 +69,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className='font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)] flex min-h-screen flex-col'>
         <ThemeDomSync />
+        <SessionBootstrap />
         <Header />
         <TooltipProvider>
           <main className='flex-1'>{children}</main>
@@ -94,6 +96,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </body>
     </html>
   )
+}
+
+function SessionBootstrap() {
+  useSessionBootstrap()
+  return null
 }
 
 function ThemeDomSync() {

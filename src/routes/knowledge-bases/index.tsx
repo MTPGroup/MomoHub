@@ -32,7 +32,7 @@ import {
 import { Input } from '#/components/ui/input'
 import { Textarea } from '#/components/ui/textarea'
 import { formatDateTime } from '#/lib/format'
-import { useAuth } from '#/stores/auth'
+import { useAuth } from '#/hooks/use-auth'
 
 export const Route = createFileRoute('/knowledge-bases/')({
   component: KnowledgeBasesRoutePage,

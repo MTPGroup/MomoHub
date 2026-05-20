@@ -20,7 +20,6 @@ client.interceptors.response.use(async (response, request, options) => {
     if (isRefreshRequest || isRetry) {
       if (isRefreshRequest) {
         clearAuth()
-        if (typeof window !== 'undefined') window.location.href = '/'
       }
       return response
     }
@@ -47,7 +46,6 @@ client.interceptors.response.use(async (response, request, options) => {
     }
 
     clearAuth()
-    if (typeof window !== 'undefined') window.location.href = '/'
   }
 
   return response

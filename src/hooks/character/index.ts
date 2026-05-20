@@ -11,7 +11,7 @@ import {
 } from '#/client/sdk.gen'
 import { siteConfig } from '#/env'
 import { useCharacterKnowledgeBinding } from '#/hooks/character/use-knowledge-binding' // 注意路径
-import { useAuth } from '#/stores/auth'
+import { useAuth } from '#/hooks/use-auth'
 import {
   extractLatestUserText,
   getChatRuntimeConfig,

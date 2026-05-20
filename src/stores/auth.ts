@@ -11,7 +11,7 @@ export interface User {
 export interface AuthState {
   user: User | null
   hydrated: boolean
-  setAuth: (user?: User) => void
+  setAuth: (user?: SetAuthPayload) => void
   logout: () => void
   setHydrated: (value: boolean) => void
 }
@@ -25,9 +25,9 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       hydrated: false,
-      setAuth: (user) => {
+      setAuth: (payload) => {
         set((state) => ({
-          user: user ?? state.user,
+          user: payload && 'user' in payload ? payload.user : state.user,
           hydrated: true,
         }))
       },
@@ -47,21 +47,6 @@ export const useAuthStore = create<AuthState>()(
 )
 
 export const getAuth = useAuthStore.getState
-
-export function useAuth() {
-  const state = useAuthStore()
-  const user = state.hydrated ? state.user : null
-  const isLoggedIn = Boolean(user)
-
-  return {
-    ...state,
-    user,
-    isLoggedIn,
-    name: user?.name || '',
-    avatar: user?.avatar || '',
-    status: user?.status || 'unknown',
-  }
-}
 
 export function setAuth(payload: SetAuthPayload) {
   useAuthStore.setState((state) => {

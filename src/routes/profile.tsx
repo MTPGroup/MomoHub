@@ -21,8 +21,9 @@ import {
   CardTitle,
 } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
+import { useAuth } from '#/hooks/use-auth'
 import { formatDateTime } from '#/lib/format'
-import { setAuth, useAuth } from '#/stores/auth'
+import { setAuth } from '#/stores/auth'
 
 export const Route = createFileRoute('/profile')({ component: ProfilePage })
 
@@ -41,7 +42,10 @@ function ProfilePage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState('')
 
-  const meQuery = useQuery(getCurrentUserOptions())
+  const meQuery = useQuery({
+    ...getCurrentUserOptions(),
+    enabled: auth.isLoggedIn,
+  })
 
   const updateProfile = useMutation({
     ...updateCurrentUserMutation(),
@@ -119,9 +123,11 @@ function ProfilePage() {
 
       if (latestUser) {
         setAuth({
-          name: latestUser.name,
-          avatar: latestUser.avatar,
-          status: latestUser.status,
+          user: {
+            name: latestUser.name,
+            avatar: latestUser.avatar,
+            status: latestUser.status,
+          },
         })
       }
       clearAvatarSelection()

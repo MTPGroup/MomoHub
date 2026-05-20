@@ -51,8 +51,9 @@ import {
   DialogTitle,
 } from '#/components/ui/dialog'
 import { Input } from '#/components/ui/input'
+import { useAuth } from '#/hooks/use-auth'
 import { formatDateTime } from '#/lib/format'
-import { clearAuth, useAuth } from '#/stores/auth'
+import { clearAuth } from '#/stores/auth'
 
 export const Route = createFileRoute('/settings')({ component: SettingsPage })
 
@@ -147,9 +148,18 @@ function SettingsPage() {
     null,
   )
 
-  const sessionsQuery = useQuery(listSessionsOptions())
-  const llmConfigsQuery = useQuery(listMyLlmConfigsOptions())
-  const auditLogsQuery = useQuery(getAuditLogsOptions())
+  const sessionsQuery = useQuery({
+    ...listSessionsOptions(),
+    enabled: auth.isLoggedIn,
+  })
+  const llmConfigsQuery = useQuery({
+    ...listMyLlmConfigsOptions(),
+    enabled: auth.isLoggedIn,
+  })
+  const auditLogsQuery = useQuery({
+    ...getAuditLogsOptions(),
+    enabled: auth.isLoggedIn,
+  })
 
   const changePassword = useMutation({
     ...changePasswordMutation(),

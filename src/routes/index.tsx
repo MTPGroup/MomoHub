@@ -25,7 +25,7 @@ import {
   CardTitle,
 } from '#/components/ui/card'
 import { formatDateTime } from '#/lib/format'
-import { useAuth } from '#/stores/auth'
+import { useAuth } from '#/hooks/use-auth'
 
 export const Route = createFileRoute('/')({ component: HomePage })
 

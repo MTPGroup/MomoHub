@@ -44,7 +44,8 @@ import {
 } from '#/components/ui/navigation-menu'
 import { siteConfig } from '#/env'
 import { navLinks } from '#/lib/nav-links'
-import { clearAuth, useAuth } from '#/stores/auth'
+import { useAuth } from '#/hooks/use-auth'
+import { clearAuth } from '#/stores/auth'
 import { MobileNav } from './moblie-nav'
 
 export function Header() {
