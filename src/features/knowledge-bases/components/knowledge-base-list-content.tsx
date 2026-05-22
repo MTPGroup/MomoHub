@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react'
-import { AuthForm } from '#/components/features/auth/auth-form'
+import { AuthForm } from '#/features/auth/components/auth-form'
 import { ResourceListLayout } from '#/components/shared/resource-list-layout'
 import { ResourceSummaryCard } from '#/components/shared/resource-summary-card'
 import { Button } from '#/components/ui/button'

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
-import { AuthRequired } from '#/components/shared/auth-required'
+import { AuthRequired } from '#/features/auth/components/auth-required'
 import { Card, CardContent } from '#/components/ui/card'
 import { DocumentsCard } from '#/features/knowledge-bases/components/documents-card'
 import { KnowledgeBaseActionsPanel } from '#/features/knowledge-bases/components/knowledge-base-actions-panel'

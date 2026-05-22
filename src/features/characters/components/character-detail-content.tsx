@@ -4,7 +4,7 @@ import { CharacterDetailActionsPanel } from '#/features/characters/components/de
 import { CharacterDetailSummaryCard } from '#/features/characters/components/detail-summary-card'
 import { CharacterKnowledgeBindingDialog } from '#/features/characters/components/knowledge-binding-dialog'
 import { CharacterUpsertDialog } from '#/features/characters/components/upsert-dialog'
-import { AuthRequired } from '#/components/shared/auth-required'
+import { AuthRequired } from '#/features/auth/components/auth-required'
 import { Card, CardContent } from '#/components/ui/card'
 import type { useCharacterKnowledgeBinding } from '#/features/characters/hooks/use-character-knowledge-binding'
 import type { useAuth } from '#/hooks/use-auth'

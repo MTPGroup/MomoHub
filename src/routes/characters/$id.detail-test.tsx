@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
-import { AuthRequired } from '#/components/shared/auth-required'
+import { AuthRequired } from '#/features/auth/components/auth-required'
 import { CharacterDetailTestChatPanel } from '#/features/characters/components/chat-panel'
 import { CharacterKnowledgeBindingDialog } from '#/features/characters/components/knowledge-binding-dialog'
 import { CharacterDetailTestTuningDialog } from '#/features/characters/components/tuning-dialog'

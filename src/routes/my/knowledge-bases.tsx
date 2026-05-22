@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import type { ComponentType } from 'react'
-import { AuthRequired } from '#/components/shared/auth-required'
+import { AuthRequired } from '#/features/auth/components/auth-required'
 import { Route as KnowledgeBasesRoute } from '../knowledge-bases'
 
 export const Route = createFileRoute('/my/knowledge-bases')({

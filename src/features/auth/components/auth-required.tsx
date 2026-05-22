@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { AuthForm } from '#/components/features/auth/auth-form'
+import { AuthForm } from '#/features/auth/components/auth-form'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import { useAuth } from '#/hooks/use-auth'

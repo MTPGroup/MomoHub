@@ -12,7 +12,7 @@ import {
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { logoutMutation } from '#/client/@tanstack/react-query.gen'
-import { AuthForm } from '#/components/features/auth/auth-form'
+import { AuthForm } from '#/features/auth/components/auth-form'
 import { ThemeToggle } from '#/components/shared/theme-toggle'
 import {
   AlertDialog,

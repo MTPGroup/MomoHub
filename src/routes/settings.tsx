@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { AuthRequired } from '#/components/shared/auth-required'
+import { AuthRequired } from '#/features/auth/components/auth-required'
 import { AuditLogPayloadDialog } from '#/features/settings/components/audit-log-payload-dialog'
 import { AuditLogsCard } from '#/features/settings/components/audit-logs-card'
 import { DangerZoneCard } from '#/features/settings/components/danger-zone-card'

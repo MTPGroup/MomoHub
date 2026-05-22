@@ -15,7 +15,6 @@ import {
   getFavoriteCharactersOptions,
   listKbsOptions,
 } from '#/client/@tanstack/react-query.gen'
-import { AuthForm } from '#/components/features/auth/auth-form'
 import { Button } from '#/components/ui/button'
 import {
   Card,
@@ -24,8 +23,9 @@ import {
   CardHeader,
   CardTitle,
 } from '#/components/ui/card'
-import { formatDateTime } from '#/lib/format'
+import { AuthForm } from '#/features/auth/components/auth-form'
 import { useAuth } from '#/hooks/use-auth'
+import { formatDateTime } from '#/lib/format'
 
 export const Route = createFileRoute('/')({ component: HomePage })
 
