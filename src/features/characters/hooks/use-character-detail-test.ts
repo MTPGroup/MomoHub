@@ -10,7 +10,7 @@ import {
   listMessages,
 } from '#/client/sdk.gen'
 import { siteConfig } from '#/env'
-import { useCharacterKnowledgeBinding } from '#/hooks/character/use-knowledge-binding' // 注意路径
+import { useCharacterKnowledgeBinding } from '#/features/characters/hooks/use-character-knowledge-binding'
 import { useAuth } from '#/hooks/use-auth'
 import {
   extractLatestUserText,

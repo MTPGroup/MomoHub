@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
-import { CharacterDetailTestChatPanel } from '#/components/features/character/chat-panel'
-import { CharacterKnowledgeBindingDialog } from '#/components/features/character/knowledge-binding-dialog'
-import { CharacterDetailTestTuningDialog } from '#/components/features/character/tuning-dialog'
 import { AuthRequired } from '#/components/shared/auth-required'
-import { useCharacterDetailTest } from '#/hooks/character'
+import { CharacterDetailTestChatPanel } from '#/features/characters/components/chat-panel'
+import { CharacterKnowledgeBindingDialog } from '#/features/characters/components/knowledge-binding-dialog'
+import { CharacterDetailTestTuningDialog } from '#/features/characters/components/tuning-dialog'
+import { useCharacterDetailTest } from '#/features/characters/hooks/use-character-detail-test'
 
 export const Route = createFileRoute('/characters/$id/detail-test')({
   component: CharacterDetailTestPage,
