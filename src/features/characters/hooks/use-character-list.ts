@@ -21,7 +21,8 @@ export function useCharacterList({ mineOnly }: { mineOnly: boolean }) {
   const listPath = mineOnly ? '/my/characters' : '/characters'
   const isListPage = pathname === listPath
 
-  const [query, setQuery] = useDebounceValue('', 500)
+  const [searchValue, setSearchValue] = useState('')
+  const [debouncedSearchValue] = useDebounceValue(searchValue, 500)
   const [createName, setCreateName] = useState('')
   const [createBio, setCreateBio] = useState('')
   const [createSystemPrompt, setCreateSystemPrompt] = useState('')
@@ -54,7 +55,7 @@ export function useCharacterList({ mineOnly }: { mineOnly: boolean }) {
       query: {
         page: 1,
         page_size: 30,
-        keyword: query.trim() || undefined,
+        keyword: debouncedSearchValue.trim() || undefined,
         mine: mineOnly,
       },
     }),
@@ -176,7 +177,7 @@ export function useCharacterList({ mineOnly }: { mineOnly: boolean }) {
     },
     state: {
       isListPage,
-      query,
+      searchValue,
       createDialogOpen,
       isCreating: createCharacter.isPending,
     },
@@ -184,7 +185,7 @@ export function useCharacterList({ mineOnly }: { mineOnly: boolean }) {
       createAvatarInputRef,
     },
     actions: {
-      setQuery,
+      setSearchValue,
       setCreateDialogOpen,
       clearCreateAvatarSelection,
       changeCreateAvatar: handleCreateAvatarChange,

@@ -55,7 +55,7 @@ export function useSessionParamSync({
   }, [generationParams, chatId, debouncedSync])
 
   const flushSync = useCallback(async () => {
-    debouncedSync.flush()
+    return debouncedSync.flush()
   }, [debouncedSync])
 
   const markPending = useCallback(() => setHasPendingChanges(true), [])

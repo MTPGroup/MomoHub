@@ -30,8 +30,8 @@ export function CharacterListContent({
           ? '仅展示你创建的角色，便于集中管理与维护。'
           : '发现和探索社区创建的 AI 角色'
       }
-      searchValue={list.state.query}
-      onSearchChange={list.actions.setQuery}
+      searchValue={list.state.searchValue}
+      onSearchChange={list.actions.setSearchValue}
       searchPlaceholder='输入关键词过滤角色'
       createTitle='新建角色'
       createDescription={`建议在简介中包含场景与边界，后续进入子页面管理角色配置。${

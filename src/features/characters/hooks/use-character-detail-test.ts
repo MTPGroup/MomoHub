@@ -85,7 +85,10 @@ export function useCharacterDetailTest(id: string) {
             : input instanceof URL
               ? input.toString()
               : input.url
-        const response = await fetch(input, init)
+        const response = await fetch(input, {
+          ...init,
+          credentials: 'include',
+        })
         const contentType = response.headers.get('content-type')?.toLowerCase()
         if (contentType?.includes('text/html'))
           throw new Error(`详情测试接口返回了 HTML：${requestUrl}`)
