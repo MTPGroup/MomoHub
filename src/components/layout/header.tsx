@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import {
   BadgeAlert,
   BadgeCheck,
@@ -43,7 +43,8 @@ import {
   navigationMenuTriggerStyle,
 } from '#/components/ui/navigation-menu'
 import { siteConfig } from '#/env'
-import { navLinks } from '#/lib/nav-links'
+import { isNavLinkActive, navLinks } from '#/lib/nav-links'
+import { cn } from '#/lib/utils'
 import { useAuth } from '#/hooks/use-auth'
 import { clearAuth } from '#/stores/auth'
 import { MobileNav } from './moblie-nav'
@@ -51,6 +52,9 @@ import { MobileNav } from './moblie-nav'
 export function Header() {
   const auth = useAuth()
   const navigate = useNavigate()
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false)
 
   const logout = useMutation({
@@ -85,16 +89,24 @@ export function Header() {
         <div className='hidden md:flex md:items-center md:gap-8'>
           <NavigationMenu>
             <NavigationMenuList className='gap-1'>
-              {navLinks.map((link) => (
-                <NavigationMenuItem key={link.to}>
-                  <NavigationMenuLink
-                    asChild
-                    className={navigationMenuTriggerStyle()}
-                  >
-                    <Link to={link.to}>{link.label}</Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
+              {navLinks.map((link) => {
+                const active = isNavLinkActive(pathname, link.to)
+
+                return (
+                  <NavigationMenuItem key={link.to}>
+                    <NavigationMenuLink
+                      asChild
+                      active={active}
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        active && 'bg-accent/50 text-accent-foreground',
+                      )}
+                    >
+                      <Link to={link.to}>{link.label}</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                )
+              })}
             </NavigationMenuList>
           </NavigationMenu>
         </div>

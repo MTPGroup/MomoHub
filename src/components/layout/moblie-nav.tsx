@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { Menu } from 'lucide-react'
 import * as React from 'react'
 
@@ -10,10 +10,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '#/components/ui/sheet'
-import { navLinks } from '#/lib/nav-links'
+import { isNavLinkActive, navLinks } from '#/lib/nav-links'
+import { cn } from '#/lib/utils'
 
 export function MobileNav() {
   const [open, setOpen] = React.useState(false)
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -28,16 +32,23 @@ export function MobileNav() {
           <SheetTitle>Menu</SheetTitle>
         </SheetHeader>
         <nav className='mt-6 flex flex-col gap-2 px-1'>
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              onClick={() => setOpen(false)}
-              className='flex items-center rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground'
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const active = isNavLinkActive(pathname, link.to)
+
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  'flex items-center rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground',
+                  active && 'bg-accent/50 text-accent-foreground',
+                )}
+              >
+                {link.label}
+              </Link>
+            )
+          })}
         </nav>
       </SheetContent>
     </Sheet>
