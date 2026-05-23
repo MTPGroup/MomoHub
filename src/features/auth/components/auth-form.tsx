@@ -80,12 +80,13 @@ const verifySchema = baseSchema.extend({
 
 interface Props {
   children: ReactElement
+  redirectTo?: string | false
 }
 
 const INPUT_ICON_CLASS =
   'pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground'
 
-export function AuthForm({ children }: Props) {
+export function AuthForm({ children, redirectTo = '/' }: Props) {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState<Mode>('login')
@@ -102,6 +103,7 @@ export function AuthForm({ children }: Props) {
       if ('user' in loginData) {
         setAuth({
           user: {
+            id: loginData.user.id,
             name: loginData.user.name,
             avatar: loginData.user.avatar,
             status: loginData.user.status,
@@ -110,6 +112,7 @@ export function AuthForm({ children }: Props) {
       } else {
         setAuth({
           user: {
+            id: loginData.id,
             name: loginData.name,
             avatar: loginData.avatar,
             status: loginData.status,
@@ -118,7 +121,9 @@ export function AuthForm({ children }: Props) {
       }
 
       setOpen(false)
-      navigate({ to: '/' })
+      if (redirectTo) {
+        navigate({ to: redirectTo })
+      }
     },
     onError: (error, variables) => {
       const isUnverified = error.errorCode === 'EMAIL_NOT_VERIFIED'

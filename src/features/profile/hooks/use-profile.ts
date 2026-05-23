@@ -102,6 +102,7 @@ export function useProfile() {
       if (latestUser) {
         setAuth({
           user: {
+            id: latestUser.id,
             name: latestUser.name,
             avatar: latestUser.avatar,
             status: latestUser.status,

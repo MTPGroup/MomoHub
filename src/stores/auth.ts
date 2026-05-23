@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import { getCurrentAuthUser, refresh } from '#/client/sdk.gen'
 
 export interface User {
+  id: string
   name: string
   avatar: string
   status: 'inactive' | 'active' | 'banned' | 'unknown'
@@ -93,6 +94,7 @@ export async function refreshToken() {
       if (userData) {
         setAuth({
           user: {
+            id: userData.id,
             name: userData?.name,
             avatar: userData?.avatar,
             status: userData?.status,
