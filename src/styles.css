@@ -123,6 +123,25 @@
   body {
     @apply bg-background text-foreground;
     @apply selection:bg-[oklch(0.78_0.1_350/_0.32)] selection:text-foreground;
+    background-image:
+      linear-gradient(
+        oklch(0.985 0.012 355 / 0.9),
+        oklch(0.985 0.012 355 / 0.9)
+      ),
+      url("/background.jpg");
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .dark body {
+    background-image:
+      linear-gradient(
+        oklch(0.22 0.03 332 / 0.86),
+        oklch(0.22 0.03 332 / 0.86)
+      ),
+      url("/background.jpg");
   }
 }
 
